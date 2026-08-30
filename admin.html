@@ -6,6 +6,7 @@
   <title>Beks Game — Boshqaruv paneli</title>
   <link rel="stylesheet" href="game.css">
   <link rel="stylesheet" href="admin.css">
+  <script src="i18n.js"></script>
 </head>
 <body>
 
@@ -18,14 +19,14 @@
         <img src="logo.svg" alt="Beks Game">
       </div>
       <div class="brandText">
-        <div class="brand-main">Boshqaruv paneli</div>
-        <div class="brand-sub">Foydalanuvchi <span class="brand-f">R</span>uxsatlari</div>
+        <div class="brand-main" data-i18n="admin.title">Boshqaruv paneli</div>
+        <div class="brand-sub" data-i18n-html="brand.tagline.admin">Foydalanuvchi <span class="brand-f">R</span>uxsatlari</div>
       </div>
     </div>
 
     <div class="headerActions">
-      <button class="topBtn" onclick="location.href='game.html'">← O'yinga qaytish</button>
-      <button class="topBtn dangerBtn" id="adminLogoutBtn">↪ Chiqish</button>
+      <button class="topBtn" onclick="location.href='game.html'" data-i18n="header.backToGame">← O'yinga qaytish</button>
+      <button class="topBtn dangerBtn" id="adminLogoutBtn" data-i18n="header.logout">↪ Chiqish</button>
     </div>
   </header>
 
@@ -36,9 +37,9 @@
     ========================== -->
     <div id="deniedScreen" class="deniedCard hidden">
       <div class="deniedEmoji">🔒</div>
-      <h2>Bu sahifa faqat administratorlar uchun</h2>
-      <p>Sizning hisobingizda boshqaruv paneliga kirish huquqi yo'q. Agar bu xato deb hisoblasangiz, tizim egasi bilan bog'laning.</p>
-      <button class="bigBtn primaryBtn" onclick="location.href='game.html'">O'yinga qaytish</button>
+      <h2 data-i18n="admin.denied.title">Bu sahifa faqat administratorlar uchun</h2>
+      <p data-i18n="admin.denied.text">Sizning hisobingizda boshqaruv paneliga kirish huquqi yo'q. Agar bu xato deb hisoblasangiz, tizim egasi bilan bog'laning.</p>
+      <button class="bigBtn primaryBtn" onclick="location.href='game.html'" data-i18n="admin.denied.back">O'yinga qaytish</button>
     </div>
 
     <!-- =========================
@@ -46,13 +47,53 @@
     ========================== -->
     <div id="adminPanel" class="hidden">
 
+      <!-- =========================
+           LIMITLAR (bepul foydalanish chegaralari)
+      ========================== -->
+      <div class="adminSettingsCard" id="adminLimitsCard">
+        <div class="adminSettingsHeader">
+          <span class="eyebrow" data-i18n="admin.limits.eyebrow">LIMITLAR</span>
+          <h3 data-i18n="admin.limits.title">Bepul foydalanish limitlari</h3>
+        </div>
+
+        <div class="adminSettingsGrid">
+          <label class="settingsField">
+            <span data-i18n="admin.settings.topicLimit">Bepul mavzu/savol limiti</span>
+            <input type="number" id="topicLimitInput" min="1" step="1" placeholder="10">
+          </label>
+
+          <label class="settingsField">
+            <span data-i18n="admin.settings.participantLimit">Bepul ishtirokchi limiti</span>
+            <input type="number" id="participantLimitInput" min="1" step="1" placeholder="10">
+          </label>
+        </div>
+
+        <div class="adminSettingsActions">
+          <button type="button" class="bigBtn primaryBtn" id="saveSettingsBtn" data-i18n="admin.settings.save">💾 Sozlamalarni saqlash</button>
+        </div>
+      </div>
+
+      <!-- =========================
+           MUROJAATLAR (foydalanuvchi xabarlari)
+      ========================== -->
+      <div class="adminSettingsCard" id="adminMessagesCard">
+        <div class="adminSettingsHeader">
+          <span class="eyebrow" data-i18n="admin.messages.eyebrow">MUROJAATLAR</span>
+          <h3 data-i18n="admin.messages.title">Foydalanuvchilar murojaatlari</h3>
+        </div>
+
+        <div id="adminMessagesList" class="adminMessagesList">
+          <div class="usersLoading" data-i18n="contact.loading">Yuklanmoqda...</div>
+        </div>
+      </div>
+
       <div class="adminTopRow">
         <div>
-          <span class="eyebrow">ADMIN</span>
-          <h2 style="margin:2px 0 0;font-size:20px;font-weight:900;">Foydalanuvchilar</h2>
+          <span class="eyebrow" data-i18n="admin.eyebrow">ADMIN</span>
+          <h2 style="margin:2px 0 0;font-size:20px;font-weight:900;" data-i18n="admin.users.title">Foydalanuvchilar</h2>
         </div>
         <div class="boardSearch">
-          <input type="text" id="userSearchInput" placeholder="Ism, email yoki UID bo'yicha qidirish...">
+          <input type="text" id="userSearchInput" placeholder="Ism, email yoki UID bo'yicha qidirish..." data-i18n-placeholder="admin.search.ph">
         </div>
       </div>
 

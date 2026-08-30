@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Beks Game</title>
   <link rel="stylesheet" href="game.css">
+  <script src="i18n.js"></script>
 </head>
 
 <body>
@@ -19,18 +20,27 @@
       </div>
       <div class="brandText">
         <div class="brand-main">Beks Game</div>
-        <div class="brand-sub">Top <span class="brand-f">F</span>ast Education</div>
+        <div class="brand-sub" data-i18n-html="brand.tagline.game">Top <span class="brand-f">F</span>ast Education</div>
       </div>
     </div>
 
     <div class="headerActions">
-      <button class="topBtn hidden" id="adminPanelBtn" onclick="location.href='admin.html'" title="Foydalanuvchi ruxsatlarini boshqarish">🛠 Boshqaruv paneli</button>
-      <button class="topBtn" id="quickRoomBtn" title="Mavzu ro'yxatidan tanlab xona ochish">📱 Xona ochish</button>
+      <button class="topBtn hidden" id="adminPanelBtn" onclick="location.href='admin.html'" title="Foydalanuvchi ruxsatlarini boshqarish" data-i18n-title="header.adminPanel" data-i18n="header.adminPanel">🛠 Boshqaruv paneli</button>
+      <button class="topBtn" id="contactAdminBtn" onclick="openContactModal()" data-i18n="header.contact">💬 Murojaat</button>
       <button class="topBtn" id="teacherLockBtn" title="Boshqaruvni qulflash/ochish">🔒</button>
-      <button class="topBtn" id="accountBtn">👤 Profil</button>
-      <button class="topBtn dangerBtn" id="logoutBtn">↪ Chiqish</button>
+      <button class="topBtn" id="accountBtn" data-i18n="header.profile">👤 Profil</button>
+      <button class="topBtn dangerBtn" id="logoutBtn" data-i18n="header.logout">↪ Chiqish</button>
     </div>
   </header>
+
+  <!-- =========================
+       ADMIN JAVOBI HAQIDA OGOHLANTIRISH
+       Foydalanuvchi murojaatiga admin javob bersa,
+       shu joyda (header ostida) sariq chiziq bilan
+       o'ralgan bildirishnoma ko'rinadi. X tugmasi
+       bilan yopiladi (dismissedByUser = true).
+  ========================== -->
+  <div id="adminReplyBanners" class="adminReplyBanners hidden"></div>
 
   <!-- =========================
        ACCOUNT MODAL
@@ -70,6 +80,43 @@
       <div class="modalActions">
         <button class="bigBtn secondaryBtn" onclick="closeAccountModal()">Yopish</button>
         <button class="bigBtn primaryBtn" id="saveProfileBtn">Saqlash</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       ALOQA / MUROJAAT MODALI
+       Barcha foydalanuvchilar uchun — matnli murojaat
+       yozib qoldirish va admin javobini shu yerdan
+       kuzatish mumkin. Aloqa ma'lumotlari (telefon/
+       telegram) endi ishlatilmaydi — o'rniga to'g'ridan-
+       to'g'ri yozishma (support-ticket) tizimi ishlaydi.
+  ========================== -->
+  <div class="modal" id="contactModal">
+    <div class="modal-box contactBox">
+      <div class="modalHeader">
+        <div>
+          <span class="eyebrow">MUROJAAT</span>
+          <h2 data-i18n="contact.title">Administrator bilan bog'lanish</h2>
+        </div>
+        <button class="iconBtn" onclick="closeContactModal()">×</button>
+      </div>
+
+      <div class="contactComposeWrap">
+        <label for="contactMessageInput" data-i18n="contact.composeLabel">Xabaringizni yozing</label>
+        <textarea id="contactMessageInput" rows="3" maxlength="1000" data-i18n-placeholder="contact.composePh" placeholder="Savol, taklif yoki muammoingizni shu yerga yozing..."></textarea>
+        <button type="button" class="bigBtn primaryBtn wideBtn" id="contactSendBtn" onclick="submitContactMessage()" data-i18n="contact.send">Yuborish</button>
+        <div class="contactSendStatus" id="contactSendStatus"></div>
+      </div>
+
+      <div class="contactHistoryDivider" data-i18n="contact.historyTitle">Sizning murojaatlaringiz</div>
+
+      <div id="contactModalBody" class="contactBody">
+        <div class="usersLoading" data-i18n="contact.loading">Yuklanmoqda...</div>
+      </div>
+
+      <div class="modalActions">
+        <button class="bigBtn secondaryBtn" onclick="closeContactModal()" data-i18n="common.close">Yopish</button>
       </div>
     </div>
   </div>

@@ -42,6 +42,220 @@
   line-height:1.5;
 }
 
+/* ---------- SOZLAMALAR (LIMITLAR VA ALOQA) ---------- */
+
+.adminSettingsCard{
+  margin-bottom:22px;
+  padding:20px 22px;
+  border:1px solid var(--line2);
+  border-radius:var(--radius);
+  background:rgba(8,18,33,.5);
+  box-shadow:var(--shadowSmall);
+}
+
+.adminSettingsHeader{
+  margin-bottom:16px;
+}
+
+.adminSettingsHeader h3{
+  margin:2px 0 0;
+  font-size:17px;
+  font-weight:900;
+}
+
+.adminSettingsGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px 18px;
+}
+
+.settingsField{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.settingsField span{
+  color:var(--muted);
+  font-size:11.5px;
+  font-weight:800;
+}
+
+.settingsField input,
+.settingsField textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:11px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:#f1f6fb;
+  font-size:13.5px;
+  font-family:inherit;
+  resize:vertical;
+}
+
+.settingsField input:focus,
+.settingsField textarea:focus{
+  outline:none;
+  border-color:rgba(32,217,255,.5);
+  background:rgba(32,217,255,.06);
+}
+
+.settingsFieldWide{
+  grid-column:1 / -1;
+}
+
+.adminSettingsActions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:16px;
+}
+
+/* ---------- MUROJAATLAR (FOYDALANUVCHI XABARLARI) ---------- */
+
+.adminMessagesList{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.messageRow{
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+}
+
+.messageRow.isPending{
+  border-color:rgba(255,200,87,.4);
+}
+
+.messageRow.isAnswered{
+  border-color:rgba(32,211,122,.3);
+}
+
+.messageTop{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:8px;
+}
+
+.messageFrom{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.messageEmail{
+  color:#f1f6fb;
+  font-size:13.5px;
+  font-weight:850;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.messageDate{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
+.messageDeleteBtn{
+  flex:0 0 auto;
+  width:32px;
+  height:32px;
+  border-radius:9px;
+  border:1px solid rgba(255,83,100,.35);
+  background:rgba(255,83,100,.1);
+  color:#ff8a95;
+  font-size:14px;
+  cursor:pointer;
+}
+
+.messageDeleteBtn:hover{
+  background:rgba(255,83,100,.2);
+}
+
+.messageText{
+  color:#dbe6f2;
+  font-size:13.5px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-word;
+  margin-bottom:10px;
+}
+
+.messageReplyBlock{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.messageStatusPending{
+  color:#ffe4a8;
+  font-size:12px;
+  font-weight:800;
+}
+
+.messageExistingReply{
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid rgba(32,211,122,.3);
+  background:rgba(32,211,122,.08);
+  color:#c9ffe0;
+  font-size:12.5px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.messageReplyInput{
+  width:100%;
+  padding:9px 11px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:#f1f6fb;
+  font-size:13px;
+  font-family:inherit;
+  resize:vertical;
+  min-height:52px;
+}
+
+.messageReplyInput:focus{
+  outline:none;
+  border-color:rgba(32,217,255,.5);
+  background:rgba(32,217,255,.06);
+}
+
+.messageReplyBtn{
+  align-self:flex-end;
+  min-height:36px;
+  padding:8px 16px;
+  border-radius:10px;
+  border:1px solid rgba(32,217,255,.4);
+  background:rgba(32,217,255,.12);
+  color:#bdf3ff;
+  font-size:12.5px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.messageReplyBtn:hover{
+  background:rgba(32,217,255,.2);
+}
+
+.messageReplyBtn:disabled{
+  opacity:.5;
+  cursor:default;
+}
+
 /* ---------- SARLAVHA / STATISTIKA ---------- */
 
 .adminTopRow{

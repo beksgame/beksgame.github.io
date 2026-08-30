@@ -59,7 +59,7 @@
     "header.profile": { uz: "👤 Profil", en: "👤 Profile", ru: "👤 Профиль" },
     "header.logout": { uz: "↪ Chiqish", en: "↪ Log out", ru: "↪ Выйти" },
     "header.backToGame": { uz: "← O‘yinga qaytish", en: "← Back to game", ru: "← Назад к игре" },
-    "header.contact": { uz: "📞 Bog‘lanish", en: "📞 Contact", ru: "📞 Связаться" },
+    "header.contact": { uz: "💬 Murojaat", en: "💬 Contact", ru: "💬 Обращение" },
 
     /* ---------- index.html: kirish sahifasi ---------- */
     "games.title": { uz: "🎮 O‘yin rejimlari", en: "🎮 Game modes", ru: "🎮 Режимы игры" },
@@ -114,11 +114,11 @@
     },
     "admin.denied.back": { uz: "O‘yinga qaytish", en: "Back to game", ru: "Назад к игре" },
 
-    "admin.settings.eyebrow": { uz: "SOZLAMALAR", en: "SETTINGS", ru: "НАСТРОЙКИ" },
-    "admin.settings.title": {
-      uz: "Limitlar va aloqa ma’lumotlari",
-      en: "Limits and contact info",
-      ru: "Лимиты и контактная информация"
+    "admin.limits.eyebrow": { uz: "LIMITLAR", en: "LIMITS", ru: "ЛИМИТЫ" },
+    "admin.limits.title": {
+      uz: "Bepul foydalanish limitlari",
+      en: "Free usage limits",
+      ru: "Лимиты бесплатного использования"
     },
     "admin.settings.topicLimit": {
       uz: "Bepul mavzu/savol limiti",
@@ -130,31 +130,41 @@
       en: "Free participant limit",
       ru: "Бесплатный лимит участников"
     },
-    "admin.settings.telegram": { uz: "Telegram (masalan @username)", en: "Telegram (e.g. @username)", ru: "Telegram (например @username)" },
-    "admin.settings.phone": { uz: "Telefon raqam", en: "Phone number", ru: "Номер телефона" },
-    "admin.settings.note": {
-      uz: "Foydalanuvchilarga ko‘rinadigan xabar",
-      en: "Message shown to users",
-      ru: "Сообщение для пользователей"
-    },
-    "admin.settings.note.ph": {
-      uz: "Masalan: Savol yoki takliflaringiz bo‘lsa, quyidagi orqali bog‘laning",
-      en: "E.g.: If you have questions or suggestions, reach us below",
-      ru: "Например: если у вас есть вопросы, свяжитесь с нами ниже"
-    },
     "admin.settings.save": { uz: "💾 Sozlamalarni saqlash", en: "💾 Save settings", ru: "💾 Сохранить настройки" },
 
-    /* ---------- Aloqa oynasi (barcha userlar) ---------- */
+    "admin.messages.eyebrow": { uz: "MUROJAATLAR", en: "REQUESTS", ru: "ОБРАЩЕНИЯ" },
+    "admin.messages.title": {
+      uz: "Foydalanuvchilar murojaatlari",
+      en: "User requests",
+      ru: "Обращения пользователей"
+    },
+
+    /* ---------- Aloqa / murojaat oynasi (barcha userlar) ---------- */
     "contact.title": { uz: "Administrator bilan bog‘lanish", en: "Contact the administrator", ru: "Связаться с администратором" },
     "contact.loading": { uz: "Yuklanmoqda...", en: "Loading...", ru: "Загрузка..." },
-    "contact.empty": {
-      uz: "Administrator hozircha aloqa ma’lumotini kiritmagan.",
-      en: "The administrator hasn't added contact info yet.",
-      ru: "Администратор пока не добавил контактную информацию."
+    "contact.composeLabel": { uz: "Xabaringizni yozing", en: "Write your message", ru: "Напишите ваше сообщение" },
+    "contact.composePh": {
+      uz: "Savol, taklif yoki muammoingizni shu yerga yozing...",
+      en: "Write your question, suggestion, or issue here...",
+      ru: "Напишите здесь ваш вопрос, предложение или проблему..."
     },
-    "contact.telegram": { uz: "Telegram", en: "Telegram", ru: "Telegram" },
-    "contact.phone": { uz: "Telefon", en: "Phone", ru: "Телефон" },
-    "contact.open": { uz: "Ochish", en: "Open", ru: "Открыть" }
+    "contact.send": { uz: "Yuborish", en: "Send", ru: "Отправить" },
+    "contact.sent": { uz: "Xabaringiz yuborildi!", en: "Your message was sent!", ru: "Ваше сообщение отправлено!" },
+    "contact.emptyWarning": { uz: "Iltimos, xabar matnini kiriting.", en: "Please enter your message.", ru: "Пожалуйста, введите текст сообщения." },
+    "contact.guestOnly": {
+      uz: "Murojaat yuborish uchun ro‘yxatdan o‘tgan hisobingiz bilan tizimga kiring.",
+      en: "Please log in with a registered account to send a request.",
+      ru: "Войдите в систему с зарегистрированным аккаунтом, чтобы отправить обращение."
+    },
+    "contact.historyTitle": { uz: "Sizning murojaatlaringiz", en: "Your requests", ru: "Ваши обращения" },
+    "contact.empty": {
+      uz: "Hali murojaat yubormagansiz.",
+      en: "You haven't sent any requests yet.",
+      ru: "Вы ещё не отправляли обращений."
+    },
+    "contact.pending": { uz: "Javob kutilmoqda", en: "Awaiting reply", ru: "Ожидается ответ" },
+    "contact.answered": { uz: "Javob berildi", en: "Replied", ru: "Отвечено" },
+    "contact.adminReplyLabel": { uz: "Administrator javobi", en: "Administrator's reply", ru: "Ответ администратора" }
   };
 
   /* ================= YORDAMCHI FUNKSIYALAR ================= */

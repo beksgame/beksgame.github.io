@@ -999,6 +999,189 @@ select option{background:#101c31;color:#fff}
   margin-top:18px;
 }
 
+/* ---------- ALOQA / MUROJAAT MODALI ---------- */
+
+.contactBox{
+  width:min(480px,92vw);
+}
+
+.contactBody{
+  text-align:left;
+}
+
+.contactComposeWrap{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:18px;
+  text-align:left;
+}
+
+.contactComposeWrap label{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.contactComposeWrap textarea{
+  width:100%;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:#f1f6fb;
+  font-size:13.5px;
+  font-family:inherit;
+  resize:vertical;
+}
+
+.contactComposeWrap textarea:focus{
+  outline:none;
+  border-color:rgba(32,217,255,.5);
+  background:rgba(32,217,255,.06);
+}
+
+.contactSendStatus{
+  min-height:16px;
+  color:#7CFFB2;
+  font-size:12px;
+  font-weight:800;
+}
+
+.contactHistoryDivider{
+  margin:4px 0 12px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.09);
+  color:#67e8f9;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  text-align:left;
+}
+
+.contactHistoryItem{
+  padding:12px 14px;
+  margin-bottom:10px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.04);
+}
+
+.contactHistoryMeta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:6px;
+}
+
+.contactHistoryDate{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:700;
+}
+
+.contactStatusBadge{
+  flex:0 0 auto;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+}
+
+.contactStatusBadge.pending{
+  color:#ffe4a8;
+  background:rgba(255,200,87,.16);
+}
+
+.contactStatusBadge.answered{
+  color:#8affbc;
+  background:rgba(32,211,122,.16);
+}
+
+.contactHistoryMsg{
+  color:#dbe6f2;
+  font-size:13.5px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.contactHistoryReply{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,200,87,.35);
+  background:rgba(255,200,87,.08);
+  color:#ffe9bd;
+  font-size:13px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+/* ---------- ADMIN JAVOBI HAQIDA BILDIRISHNOMA (HEADER OSTIDA) ---------- */
+
+.adminReplyBanners{
+  width:min(1480px,calc(100% - 32px));
+  margin:0 auto 20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.adminReplyBanner{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:14px 16px;
+  border-radius:16px;
+  border:1px solid rgba(255,200,87,.5);
+  border-left:4px solid #ffc857;
+  background:rgba(255,200,87,.1);
+  box-shadow:var(--shadowSmall);
+}
+
+.adminReplyIcon{
+  flex:0 0 auto;
+  font-size:18px;
+  line-height:1;
+}
+
+.adminReplyText{
+  flex:1 1 auto;
+  min-width:0;
+  color:#fff3d9;
+  font-size:13.5px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.adminReplyText strong{
+  color:#ffd166;
+}
+
+.adminReplyCloseBtn{
+  flex:0 0 auto;
+  width:28px;
+  height:28px;
+  border-radius:9px;
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.08);
+  color:#fff3d9;
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+}
+
+.adminReplyCloseBtn:hover{
+  background:rgba(255,255,255,.16);
+}
+
 .questionBox{width:min(980px,94vw)}
 
 .introBox{width:min(720px,94vw)}
@@ -4969,6 +5152,14 @@ select option{background:#101c31;color:#fff}
 }
 
 body.guestMode #teacherLockBtn{
+  display:none !important;
+}
+
+body.guestMode #contactAdminBtn{
+  display:none !important;
+}
+
+body.guestMode .adminReplyBanners{
   display:none !important;
 }
 

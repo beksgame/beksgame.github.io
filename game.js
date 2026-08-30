@@ -229,13 +229,13 @@ async function fetchUserDocOnce() {
  * Har bir foydalanuvchi standart holatda (admin
  * cheklamaguncha) TO'RTALA imkoniyatga ham ega:
  *  - canAddQuestions        → yangi mavzu qo'shish
- *                              (4 tadan ko'p bo'lsa,
+ *                              (limitdan ko'p bo'lsa,
  *                              bu HAM kerak)
  *  - canEditTopics          → mavzuni tahrirlash
  *                              (nomini o'zgartirish,
  *                              savollarni aralashtirish)
  *  - canAddParticipants     → ishtirokchi qo'shish
- *                              (4 tadan ko'p bo'lsa,
+ *                              (limitdan ko'p bo'lsa,
  *                              bu HAM kerak)
  *  - canSetParticipantImage → ishtirokchiga rasm
  *                              o'rnatish
@@ -244,11 +244,60 @@ async function fetchUserDocOnce() {
  * hujjatlar) — standart TRUE deb hisoblanadi,
  * faqat ANIQ false qo'yilgan bo'lsa cheklangan
  * hisoblanadi. Bundan tashqari, mavzu va
- * ishtirokchi soni uchun HAMMAGA (admin
- * bundan mustasno) 4 tagacha bepul limit bor.
+ * ishtirokchi soni uchun HAMMAGA (admin bundan
+ * mustasno) bepul limit bor. Bu limit ENDI QATTIQ
+ * KODLANMAGAN — administrator uni "settings/app"
+ * hujjatida istalgan songa o'zgartira oladi (admin
+ * panelidagi "Sozlamalar" bo'limi orqali). Hech
+ * qanday sozlama topilmasa, DEFAULT_* qiymatlar
+ * ishlatiladi.
  */
-const FREE_TOPIC_LIMIT = 4;
-const FREE_PARTICIPANT_LIMIT = 4;
+const DEFAULT_TOPIC_LIMIT = 10;
+const DEFAULT_PARTICIPANT_LIMIT = 10;
+
+/*
+ * UMUMIY SOZLAMALAR (settings/app):
+ * bir marta o'qiladi va sessiya davomida keshlanadi
+ * (fetchUserDocOnce bilan bir xil mantiq).
+ */
+let _appSettingsFetchPromise = null;
+
+function resetAppSettingsCache() {
+  _appSettingsFetchPromise = null;
+}
+
+async function fetchAppSettingsOnce() {
+  if (!_appSettingsFetchPromise) {
+    _appSettingsFetchPromise = (async () => {
+      try {
+        const snap = await getDoc(doc(db, "settings", "app"));
+        return snap.exists() ? snap.data() : null;
+      } catch (e) {
+        console.warn("fetchAppSettingsOnce:", e);
+        return null;
+      }
+    })();
+  }
+
+  return _appSettingsFetchPromise;
+}
+
+function toPositiveInt(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+}
+
+async function getAppLimits() {
+  const s = await fetchAppSettingsOnce();
+
+  return {
+    topicLimit: toPositiveInt(s?.topicLimit, DEFAULT_TOPIC_LIMIT),
+    participantLimit: toPositiveInt(
+      s?.participantLimit,
+      DEFAULT_PARTICIPANT_LIMIT
+    )
+  };
+}
 
 async function getMyPermissions() {
   try {
@@ -636,9 +685,11 @@ async function addParticipant() {
       );
     }
 
-    if (participants.length >= FREE_PARTICIPANT_LIMIT) {
+    const { participantLimit } = await getAppLimits();
+
+    if (participants.length >= participantLimit) {
       return showLimitWarning(
-        `Siz maksimal ${FREE_PARTICIPANT_LIMIT} tagacha ishtirokchi qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`
+        `Siz maksimal ${participantLimit} tagacha ishtirokchi qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`
       );
     }
   }
@@ -1949,9 +2000,11 @@ async function addUserTopic() {
       );
     }
 
-    if (userTopics.length >= FREE_TOPIC_LIMIT) {
+    const { topicLimit } = await getAppLimits();
+
+    if (userTopics.length >= topicLimit) {
       return showLimitWarning(
-        `Siz maksimal ${FREE_TOPIC_LIMIT} tagacha mavzu qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`
+        `Siz maksimal ${topicLimit} tagacha mavzu qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`
       );
     }
   }
@@ -8885,6 +8938,282 @@ window.closeAccountModal =
   };
 
 /* =========================================================
+   MUROJAATLAR (SUPPORT MESSAGES)
+   ---------------------------------------------------------
+   Oddiy, ammo to'liq ishlaydigan yozishma tizimi:
+   - Foydalanuvchi "Bog'lanish" oynasida xabar yozadi →
+     Firestore'dagi "supportMessages" kolleksiyasiga
+     addDoc qilinadi (uid, email, matn, sana).
+   - Admin panelida ("Murojaatlar" bo'limi) BARCHA xabarlar
+     real vaqtda ko'rinadi, admin har biriga javob yozib
+     yuboradi (updateDoc: adminReply, repliedAt) yoki
+     kerak bo'lmasa butunlay o'chirib tashlaydi (deleteDoc)
+     — shu bilan ro'yxat cheksiz to'lib ketmaydi.
+   - Foydalanuvchiga javob kelganda, header ostida sariq
+     chiziq bilan o'ralgan bildirishnoma chiqadi (real
+     vaqtda, onSnapshot orqali). "×" tugmasi bosilsa,
+     faqat "dismissedByUser" maydoni true qilinadi — xabar
+     o'zi Firestore'da qoladi (admin panelida tarix sifatida
+     ko'rinishda davom etadi, admin xohlasa keyin o'chiradi).
+   - Foydalanuvchi shu oynada o'zining oldingi barcha
+     murojaatlari va ularga berilgan javoblarni ham ko'radi
+     (oddiy support-ticket tizimlaridagi kabi).
+========================================================= */
+
+const SUPPORT_COLLECTION = "supportMessages";
+
+const contactModal = $("contactModal");
+const contactModalBody = $("contactModalBody");
+const contactMessageInput = $("contactMessageInput");
+const contactSendBtn = $("contactSendBtn");
+const contactSendStatus = $("contactSendStatus");
+const adminReplyBannersEl = $("adminReplyBanners");
+
+let myMessages = [];
+let myMessagesUnsub = null;
+
+function tt(key, fallback) {
+  return typeof t === "function" ? t(key, fallback) : fallback;
+}
+
+function formatSupportDate(ts) {
+  try {
+    const d = ts?.toDate ? ts.toDate() : null;
+    if (!d) return "";
+
+    const localeMap = { uz: "uz-UZ", en: "en-GB", ru: "ru-RU" };
+    const lang =
+      typeof getAppLang === "function" ? getAppLang() : "uz";
+
+    return d.toLocaleString(localeMap[lang] || "uz-UZ", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  } catch (e) {
+    return "";
+  }
+}
+
+function renderMyMessages() {
+  if (!contactModalBody) return;
+
+  if (!myMessages.length) {
+    const emptyText = tt(
+      "contact.empty",
+      "Hali murojaat yubormagansiz."
+    );
+
+    contactModalBody.innerHTML = `<div class="usersEmpty">${escapeHtml(
+      emptyText
+    )}</div>`;
+    return;
+  }
+
+  contactModalBody.innerHTML = myMessages
+    .map(m => {
+      const answered = !!m.adminReply;
+
+      const badge = answered
+        ? `<span class="contactStatusBadge answered">✅ ${escapeHtml(
+            tt("contact.answered", "Javob berildi")
+          )}</span>`
+        : `<span class="contactStatusBadge pending">⏳ ${escapeHtml(
+            tt("contact.pending", "Javob kutilmoqda")
+          )}</span>`;
+
+      const replyBlock = answered
+        ? `<div class="contactHistoryReply"><strong>${escapeHtml(
+            tt("contact.adminReplyLabel", "Administrator javobi")
+          )}:</strong> ${escapeHtml(m.adminReply)}</div>`
+        : "";
+
+      return `
+        <div class="contactHistoryItem">
+          <div class="contactHistoryMeta">
+            <span class="contactHistoryDate">${escapeHtml(
+              formatSupportDate(m.createdAt)
+            )}</span>
+            ${badge}
+          </div>
+          <div class="contactHistoryMsg">${escapeHtml(m.message)}</div>
+          ${replyBlock}
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderReplyBanners() {
+  if (!adminReplyBannersEl) return;
+
+  const unseen = myMessages.filter(
+    m => m.adminReply && !m.dismissedByUser
+  );
+
+  if (!unseen.length) {
+    adminReplyBannersEl.innerHTML = "";
+    adminReplyBannersEl.classList.add("hidden");
+    return;
+  }
+
+  adminReplyBannersEl.classList.remove("hidden");
+
+  adminReplyBannersEl.innerHTML = unseen
+    .map(
+      m => `
+        <div class="adminReplyBanner">
+          <span class="adminReplyIcon">❗</span>
+          <div class="adminReplyText">
+            <strong>${escapeHtml(
+              tt("contact.adminReplyLabel", "Administrator javobi")
+            )}:</strong> ${escapeHtml(m.adminReply)}
+          </div>
+          <button
+            type="button"
+            class="adminReplyCloseBtn"
+            data-action="dismissReply"
+            data-id="${escapeHtml(m.id)}"
+          >×</button>
+        </div>
+      `
+    )
+    .join("");
+}
+
+document.addEventListener("click", async e => {
+  const btn = e.target.closest(
+    "button[data-action='dismissReply']"
+  );
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+  if (!id) return;
+
+  btn.disabled = true;
+
+  try {
+    await updateDoc(doc(db, SUPPORT_COLLECTION, id), {
+      dismissedByUser: true
+    });
+  } catch (err) {
+    console.warn("dismissReply:", err);
+    btn.disabled = false;
+  }
+});
+
+function startMyMessagesListener() {
+  if (myMessagesUnsub) {
+    myMessagesUnsub();
+    myMessagesUnsub = null;
+  }
+
+  if (!currentUserUid || isGuestUser) return;
+
+  try {
+    const q = query(
+      collection(db, SUPPORT_COLLECTION),
+      where("uid", "==", currentUserUid),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+
+    myMessagesUnsub = onSnapshot(
+      q,
+      snap => {
+        myMessages = snap.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        }));
+
+        renderMyMessages();
+        renderReplyBanners();
+      },
+      err => {
+        console.warn("startMyMessagesListener:", err);
+      }
+    );
+  } catch (e) {
+    console.warn("startMyMessagesListener:", e);
+  }
+}
+
+async function submitContactMessage() {
+  const text = contactMessageInput?.value?.trim();
+
+  if (!text) {
+    return alert(
+      "🔒 " +
+        tt("contact.emptyWarning", "Iltimos, xabar matnini kiriting.")
+    );
+  }
+
+  if (!currentUserUid || isGuestUser) {
+    return alert(
+      "🔒 " +
+        tt(
+          "contact.guestOnly",
+          "Murojaat yuborish uchun ro'yxatdan o'tgan hisobingiz bilan tizimga kiring."
+        )
+    );
+  }
+
+  if (contactSendBtn) contactSendBtn.disabled = true;
+
+  try {
+    await addDoc(collection(db, SUPPORT_COLLECTION), {
+      uid: currentUserUid,
+      email: auth.currentUser?.email || "",
+      displayName: auth.currentUser?.displayName || "",
+      message: text,
+      createdAt: serverTimestamp(),
+      adminReply: "",
+      repliedAt: null,
+      dismissedByUser: false
+    });
+
+    if (contactMessageInput) contactMessageInput.value = "";
+
+    if (contactSendStatus) {
+      contactSendStatus.textContent =
+        "✅ " + tt("contact.sent", "Xabaringiz yuborildi!");
+
+      clearTimeout(submitContactMessage._t);
+      submitContactMessage._t = setTimeout(() => {
+        if (contactSendStatus) contactSendStatus.textContent = "";
+      }, 3000);
+    }
+  } catch (e) {
+    console.error("submitContactMessage:", e);
+    alert("❌ Xabarni yuborib bo'lmadi: " + e.message);
+  } finally {
+    if (contactSendBtn) contactSendBtn.disabled = false;
+  }
+}
+
+window.submitContactMessage = submitContactMessage;
+
+function openContactModal() {
+  if (!contactModal) return;
+  contactModal.style.display = "flex";
+  renderMyMessages();
+}
+
+function closeContactModal() {
+  if (!contactModal) return;
+  contactModal.style.display = "none";
+}
+
+window.openContactModal = openContactModal;
+window.closeContactModal = closeContactModal;
+
+document.addEventListener("beks:langchange", () => {
+  renderMyMessages();
+  renderReplyBanners();
+});
+
+/* =========================================================
    O'QITUVCHI QULFI (TEACHER LOCK)
    O'quvchilar mavzu/ishtirokchini bilmasdan
    o'chirib yubormasligi uchun — boshqaruv
@@ -9349,6 +9678,14 @@ onAuthStateChanged(
       "uid",
       currentUserUid
     );
+
+    /*
+     * Murojaatlar (support messages) tinglovchisini
+     * ishga tushiramiz — real vaqtda o'z xabarlari va
+     * ularga berilgan admin javoblarini kuzatib boradi
+     * (mehmon foydalanuvchilar uchun ishlamaydi).
+     */
+    startMyMessagesListener();
 
     /*
      * Har yangi kirishda (login)

@@ -6,9 +6,15 @@ import {
 import {
   doc,
   getDoc,
+  setDoc,
   updateDoc,
+  deleteDoc,
   collection,
-  getDocs
+  getDocs,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const $ = id => document.getElementById(id);
@@ -20,8 +26,19 @@ const statsRow = $("adminStatsRow");
 const searchInput = $("userSearchInput");
 const toastEl = $("adminToast");
 
+const topicLimitInput = $("topicLimitInput");
+const participantLimitInput = $("participantLimitInput");
+const saveSettingsBtn = $("saveSettingsBtn");
+const adminMessagesList = $("adminMessagesList");
+
+const DEFAULT_TOPIC_LIMIT = 10;
+const DEFAULT_PARTICIPANT_LIMIT = 10;
+const SUPPORT_COLLECTION = "supportMessages";
+
 let allUsers = [];
 let currentUid = null;
+let supportMessages = [];
+let messagesUnsub = null;
 
 /*
  * 4 TA MUSTAQIL RUXSAT.
@@ -82,7 +99,8 @@ onAuthStateChanged(auth, async user => {
   deniedScreen.classList.add("hidden");
   adminPanel.classList.remove("hidden");
 
-  await loadUsers();
+  await Promise.all([loadUsers(), loadAppSettings()]);
+  startMessagesListener();
 });
 
 $("adminLogoutBtn")?.addEventListener("click", async () => {
@@ -294,4 +312,254 @@ function applySearch(term) {
 
 searchInput?.addEventListener("input", () => {
   renderUsers(applySearch(searchInput.value));
+});
+
+/* ================= SOZLAMALAR: LIMITLAR =================
+ *
+ * settings/app { topicLimit, participantLimit } — game.js
+ * shu qiymatlarni o'qib, oddiy foydalanuvchilar uchun bepul
+ * limit sifatida qo'llaydi (hech narsa kiritilmasa — 10
+ * ishlatiladi).
+ *
+ * MUHIM: bu hujjat barcha login qilgan foydalanuvchilar
+ * tomonidan O'QILISHI, lekin FAQAT admin tomonidan
+ * YOZILISHI kerak — buni Firestore xavfsizlik qoidalarida
+ * (security rules) alohida belgilash zarur, bu yerdagi kod
+ * uni ta'minlay olmaydi.
+ */
+
+function toPositiveInt(value, fallback) {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+async function loadAppSettings() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "app"));
+    const data = snap.exists() ? snap.data() : {};
+
+    if (topicLimitInput) {
+      topicLimitInput.value = toPositiveInt(
+        data.topicLimit,
+        DEFAULT_TOPIC_LIMIT
+      );
+    }
+
+    if (participantLimitInput) {
+      participantLimitInput.value = toPositiveInt(
+        data.participantLimit,
+        DEFAULT_PARTICIPANT_LIMIT
+      );
+    }
+  } catch (e) {
+    console.error("Sozlamalarni yuklashda xatolik:", e);
+    showToast(
+      "❌ Sozlamalarni yuklab bo'lmadi: " + e.message,
+      true
+    );
+  }
+}
+
+saveSettingsBtn?.addEventListener("click", async () => {
+  const topicLimit = toPositiveInt(
+    topicLimitInput?.value,
+    DEFAULT_TOPIC_LIMIT
+  );
+
+  const participantLimit = toPositiveInt(
+    participantLimitInput?.value,
+    DEFAULT_PARTICIPANT_LIMIT
+  );
+
+  saveSettingsBtn.disabled = true;
+
+  try {
+    await setDoc(
+      doc(db, "settings", "app"),
+      { topicLimit, participantLimit },
+      { merge: true }
+    );
+
+    // Amalda ishlatilgan (tozalangan) qiymatlarni inputlarga qaytaramiz
+    if (topicLimitInput) topicLimitInput.value = topicLimit;
+    if (participantLimitInput) {
+      participantLimitInput.value = participantLimit;
+    }
+
+    showToast("✅ Sozlamalar saqlandi");
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Xatolik: " + err.message, true);
+  } finally {
+    saveSettingsBtn.disabled = false;
+  }
+});
+
+/* ================= MUROJAATLAR (FOYDALANUVCHI XABARLARI) =================
+ *
+ * supportMessages/{id} {
+ *   uid, email, displayName, message, createdAt,
+ *   adminReply, repliedAt, dismissedByUser
+ * }
+ *
+ * Boshqa platformalardagi kabi oddiy "ticket" mantig'i:
+ * foydalanuvchi yozadi → admin bu yerda BARCHA murojaatlarni
+ * (eng yangisi tepada) real vaqtda ko'radi, har biriga javob
+ * yozib yuborishi (updateDoc) yoki butunlay o'chirib
+ * tashlashi (deleteDoc) mumkin — shu bilan ro'yxat cheksiz
+ * to'lib ketmaydi. Javob yuborilganda "dismissedByUser" ham
+ * false qilib qo'yiladi — shu orqali foydalanuvchi tomonida
+ * (game.html) yangi javob haqidagi bildirishnoma qayta chiqadi.
+ */
+
+function formatMsgDate(ts) {
+  try {
+    const d = ts?.toDate ? ts.toDate() : null;
+    if (!d) return "";
+
+    return d.toLocaleString("uz-UZ", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  } catch (e) {
+    return "";
+  }
+}
+
+function startMessagesListener() {
+  if (messagesUnsub || !adminMessagesList) return;
+
+  try {
+    const q = query(
+      collection(db, SUPPORT_COLLECTION),
+      orderBy("createdAt", "desc")
+    );
+
+    messagesUnsub = onSnapshot(
+      q,
+      snap => {
+        supportMessages = snap.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        }));
+        renderMessages();
+      },
+      err => {
+        console.error("startMessagesListener:", err);
+        adminMessagesList.innerHTML =
+          '<div class="usersEmpty">❌ Murojaatlarni yuklab bo\'lmadi. Firestore qoidalarini tekshiring.</div>';
+      }
+    );
+  } catch (e) {
+    console.error("startMessagesListener:", e);
+  }
+}
+
+function renderMessages() {
+  if (!adminMessagesList) return;
+
+  if (!supportMessages.length) {
+    adminMessagesList.innerHTML =
+      '<div class="usersEmpty">Hozircha murojaatlar yo\'q.</div>';
+    return;
+  }
+
+  adminMessagesList.innerHTML = supportMessages
+    .map(m => {
+      const answered = !!m.adminReply;
+      const fromLabel = m.email || m.displayName || m.uid || "Noma'lum";
+
+      return `
+        <div class="messageRow ${
+          answered ? "isAnswered" : "isPending"
+        }" data-id="${escapeHtml(m.id)}">
+          <div class="messageTop">
+            <div class="messageFrom">
+              <span class="messageEmail">${escapeHtml(fromLabel)}</span>
+              <span class="messageDate">${escapeHtml(
+                formatMsgDate(m.createdAt)
+              )}</span>
+            </div>
+            <button
+              type="button"
+              class="messageDeleteBtn"
+              data-action="deleteMessage"
+              title="O'chirish"
+            >🗑</button>
+          </div>
+
+          <div class="messageText">${escapeHtml(m.message)}</div>
+
+          <div class="messageReplyBlock">
+            ${
+              answered
+                ? `<div class="messageExistingReply"><strong>Yuborilgan javob:</strong> ${escapeHtml(
+                    m.adminReply
+                  )}</div>`
+                : '<div class="messageStatusPending">⏳ Javob kutilmoqda</div>'
+            }
+            <textarea
+              class="messageReplyInput"
+              placeholder="Javob yozing..."
+            >${escapeHtml(m.adminReply || "")}</textarea>
+            <button type="button" class="messageReplyBtn" data-action="sendReply">
+              ${answered ? "Javobni yangilash" : "Javob yuborish"}
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+adminMessagesList?.addEventListener("click", async e => {
+  const row = e.target.closest(".messageRow");
+  if (!row) return;
+
+  const id = row.dataset.id;
+  if (!id) return;
+
+  if (e.target.closest("[data-action='deleteMessage']")) {
+    if (!confirm("Bu murojaatni o'chirmoqchimisiz?")) return;
+
+    try {
+      await deleteDoc(doc(db, SUPPORT_COLLECTION, id));
+      showToast("Murojaat o'chirildi");
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Xatolik: " + err.message, true);
+    }
+
+    return;
+  }
+
+  const replyBtn = e.target.closest("[data-action='sendReply']");
+  if (replyBtn) {
+    const textarea = row.querySelector(".messageReplyInput");
+    const replyText = textarea?.value?.trim();
+
+    if (!replyText) {
+      return showToast("Javob matnini kiriting", true);
+    }
+
+    replyBtn.disabled = true;
+
+    try {
+      await updateDoc(doc(db, SUPPORT_COLLECTION, id), {
+        adminReply: replyText,
+        repliedAt: serverTimestamp(),
+        dismissedByUser: false
+      });
+
+      showToast("✅ Javob yuborildi");
+    } catch (err) {
+      console.error(err);
+      showToast("❌ Xatolik: " + err.message, true);
+    } finally {
+      replyBtn.disabled = false;
+    }
+  }
 });

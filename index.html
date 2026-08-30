@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Beks Game - Kirish</title>
   <link rel="stylesheet" href="index.css">
+  <script src="i18n.js"></script>
 </head>
 <body>
 
@@ -14,7 +15,7 @@
       <div class="brandMark"><img src="logo.svg" alt="Beks Game"></div>
       <div class="brandText">
         <div class="brand-main">Beks Game</div>
-        <div class="brand-sub">O‘yin bilan tez o‘rganasiz</div>
+        <div class="brand-sub" data-i18n="brand.tagline.index">O‘yin bilan tez o‘rganasiz</div>
       </div>
     </div>
 
@@ -25,21 +26,21 @@
   ========================== -->
   <div class="gamesWrap" id="gamesWrap">
     <div class="gamesCard">
-      <h3 class="gamesCardTitle">🎮 O‘yin rejimlari</h3>
+      <h3 class="gamesCardTitle" data-i18n="games.title">🎮 O‘yin rejimlari</h3>
 
       <div class="gameModeBlock">
-        <button type="button" class="gameModeBtn roomModeBtn" id="roomEntryBtn">🏠 Jonli xona</button>
-        <p class="gameModeGuide">Onlayn xona oching — ishtirokchilar boshqa qurilmadan xona kodi bilan real vaqtda qo‘shilib, birga musobaqalashadi.</p>
+        <button type="button" class="gameModeBtn roomModeBtn" id="roomEntryBtn" data-i18n="games.room.title">🏠 Jonli xona</button>
+        <p class="gameModeGuide" data-i18n="games.room.guide">Onlayn xona oching — ishtirokchilar boshqa qurilmadan xona kodi bilan real vaqtda qo‘shilib, birga musobaqalashadi.</p>
       </div>
 
       <div class="gameModeBlock">
-        <button type="button" class="gameModeBtn duelModeBtn" id="liveModeDuelBtn">⚔️ Duel</button>
-        <p class="gameModeGuide">Bitta qurilmada ikki kishi navbat bilan bellashadi. Ism kiritmasangiz — "Ishtirokchi 1" va "Ishtirokchi 2" nomi bilan boshlanadi.</p>
+        <button type="button" class="gameModeBtn duelModeBtn" id="liveModeDuelBtn" data-i18n="games.duel.title">⚔️ Duel</button>
+        <p class="gameModeGuide" data-i18n="games.duel.guide">Bitta qurilmada ikki kishi navbat bilan bellashadi. Ism kiritmasangiz — "Ishtirokchi 1" va "Ishtirokchi 2" nomi bilan boshlanadi.</p>
       </div>
 
       <div class="gameModeBlock">
-        <button type="button" class="gameModeBtn playModeBtn" id="liveModePlayBtn">🎯 Play</button>
-        <p class="gameModeGuide">Yakka mashq qiling yoki bir nechta ishtirokchi ismini kiritib, ular orasida navbat bilan reyting shakllantiring.</p>
+        <button type="button" class="gameModeBtn playModeBtn" id="liveModePlayBtn" data-i18n="games.play.title">🎯 Play</button>
+        <p class="gameModeGuide" data-i18n="games.play.guide">Yakka mashq qiling yoki bir nechta ishtirokchi ismini kiritib, ular orasida navbat bilan reyting shakllantiring.</p>
       </div>
     </div>
   </div>
@@ -50,8 +51,8 @@
   ========================== -->
   <div class="authActionsWrap" id="authActionsBlock">
     <div class="authActionsCard">
-      <button type="button" class="authActionBtn authLoginActionBtn" id="loginOpenBtn">🔑 Kirish</button>
-      <button type="button" class="authActionBtn authRegisterActionBtn" id="registerOpenBtn">📝 Ro‘yxatdan o‘tish</button>
+      <button type="button" class="authActionBtn authLoginActionBtn" id="loginOpenBtn" data-i18n="auth.login">🔑 Kirish</button>
+      <button type="button" class="authActionBtn authRegisterActionBtn" id="registerOpenBtn" data-i18n="auth.register">📝 Ro‘yxatdan o‘tish</button>
     </div>
   </div>
 
@@ -62,15 +63,15 @@
     <div class="miniModalCard">
       <button type="button" class="miniModalCloseX" id="loginModalCloseX">×</button>
 
-      <h2>🔑 Kirish</h2>
+      <h2 data-i18n="auth.login">🔑 Kirish</h2>
 
       <form id="loginForm" class="headerAuthForm" onsubmit="return false;">
-        <input type="email" id="loginEmail" placeholder="Email" required>
-        <input type="password" id="loginPassword" placeholder="Parol" required>
+        <input type="email" id="loginEmail" placeholder="Email" data-i18n-placeholder="auth.email.ph" required>
+        <input type="password" id="loginPassword" placeholder="Parol" data-i18n-placeholder="auth.password.ph" required>
 
         <div class="miniModalActions">
-          <button type="button" class="miniModalBtn secondaryModalBtn" id="loginModalBackBtn">Orqaga</button>
-          <button type="button" class="miniModalBtn primaryModalBtn" onclick="loginUser()">Kirish</button>
+          <button type="button" class="miniModalBtn secondaryModalBtn" id="loginModalBackBtn" data-i18n="auth.back">Orqaga</button>
+          <button type="button" class="miniModalBtn primaryModalBtn" onclick="loginUser()" data-i18n="auth.login.plain">Kirish</button>
         </div>
       </form>
     </div>
@@ -83,17 +84,17 @@
     <div class="miniModalCard">
       <button type="button" class="miniModalCloseX" id="registerModalCloseX">×</button>
 
-      <h2>📝 Ro‘yxatdan o‘tish</h2>
+      <h2 data-i18n="auth.register">📝 Ro‘yxatdan o‘tish</h2>
 
       <form id="registerForm" class="headerAuthForm" onsubmit="return false;">
-        <input type="text" id="registerName" placeholder="Ism" required>
-        <input type="email" id="registerEmail" placeholder="Email" required>
-        <input type="password" id="registerPassword" placeholder="Parol" required>
-        <input type="password" id="registerPasswordConfirm" placeholder="Parolni tasdiqlash" required>
+        <input type="text" id="registerName" placeholder="Ism" data-i18n-placeholder="auth.name.ph" required>
+        <input type="email" id="registerEmail" placeholder="Email" data-i18n-placeholder="auth.email.ph" required>
+        <input type="password" id="registerPassword" placeholder="Parol" data-i18n-placeholder="auth.password.ph" required>
+        <input type="password" id="registerPasswordConfirm" placeholder="Parolni tasdiqlash" data-i18n-placeholder="auth.passwordConfirm.ph" required>
 
         <div class="miniModalActions">
-          <button type="button" class="miniModalBtn secondaryModalBtn" id="registerModalBackBtn">Orqaga</button>
-          <button type="button" class="miniModalBtn primaryModalBtn" onclick="registerUser()">Ro‘yxatdan o‘tish</button>
+          <button type="button" class="miniModalBtn secondaryModalBtn" id="registerModalBackBtn" data-i18n="auth.back">Orqaga</button>
+          <button type="button" class="miniModalBtn primaryModalBtn" onclick="registerUser()" data-i18n="auth.register.plain">Ro‘yxatdan o‘tish</button>
         </div>
       </form>
     </div>
