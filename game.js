@@ -299,6 +299,203 @@ async function getAppLimits() {
   };
 }
 
+/* =========================================================
+   BANNER (LIVE QUIZ ARENA) BOSHQARUVI
+   ---------------------------------------------------------
+   settings/app hujjatidagi "heroBanner" maydoni orqali
+   BARCHA foydalanuvchilar uchun bir xil ko'rinadigan banner
+   (orqa fon rasmi + matnlar) boshqariladi. Tahrirlash tugmasi
+   FAQAT admin uchun ko'rinadi (game.js'da role tekshirilib
+   ko'rsatiladi), yozish esa Firestore xavfsizlik qoidalari
+   bilan ham himoyalangan ("settings/app" faqat admin
+   tomonidan yozilishi mumkin). Admin o'zgartirgan zahoti,
+   BARCHA foydalanuvchilar sahifani qayta ochganda (yoki
+   ochiq bo'lsa keyingi safar) yangi holatni ko'radi.
+   Kelajakda shu joy reklama banneri sifatida ham
+   ishlatilishi mumkin.
+========================================================= */
+
+let currentHeroBanner = null;
+let pendingHeroImageDataUrl = "";
+
+function applyHeroBanner(banner) {
+  const heroEl = document.getElementById("gameHero");
+  if (!heroEl) return;
+
+  currentHeroBanner = banner || null;
+
+  if (banner?.imageDataUrl) {
+    heroEl.style.setProperty(
+      "--heroBgImage",
+      `url("${banner.imageDataUrl}")`
+    );
+    heroEl.classList.add("hasCustomBg");
+  } else {
+    heroEl.style.removeProperty("--heroBgImage");
+    heroEl.classList.remove("hasCustomBg");
+  }
+
+  const eyebrowEl = $("heroEyebrow");
+  const titleEl = $("heroTitle");
+  const subtitleEl = $("heroSubtitle");
+
+  if (eyebrowEl) {
+    eyebrowEl.textContent = banner?.eyebrow?.trim() || "LIVE QUIZ ARENA";
+  }
+
+  if (titleEl) {
+    titleEl.textContent = banner?.title?.trim() || "Bilimingizni sinang.";
+  }
+
+  if (subtitleEl) {
+    subtitleEl.textContent =
+      banner?.subtitle?.trim() ||
+      "Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting.";
+  }
+}
+
+async function loadAndApplyHeroBanner() {
+  try {
+    const settings = await fetchAppSettingsOnce();
+    applyHeroBanner(settings?.heroBanner || null);
+  } catch (e) {
+    console.warn("loadAndApplyHeroBanner:", e);
+  }
+}
+
+function updateHeroPreview() {
+  const preview = $("heroEditPreview");
+  const eyebrowEl = $("heroPreviewEyebrow");
+  const titleEl = $("heroPreviewTitle");
+  const subtitleEl = $("heroPreviewSubtitle");
+
+  if (preview) {
+    preview.style.backgroundImage = pendingHeroImageDataUrl
+      ? `url("${pendingHeroImageDataUrl}")`
+      : "none";
+  }
+
+  if (eyebrowEl) {
+    eyebrowEl.textContent =
+      $("heroEyebrowInput")?.value?.trim() || "LIVE QUIZ ARENA";
+  }
+
+  if (titleEl) {
+    titleEl.textContent =
+      $("heroTitleInput")?.value?.trim() || "Bilimingizni sinang.";
+  }
+
+  if (subtitleEl) {
+    subtitleEl.textContent =
+      $("heroSubtitleInput")?.value?.trim() ||
+      "Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting.";
+  }
+}
+
+$("heroEyebrowInput")?.addEventListener("input", updateHeroPreview);
+$("heroTitleInput")?.addEventListener("input", updateHeroPreview);
+$("heroSubtitleInput")?.addEventListener("input", updateHeroPreview);
+
+$("heroImageInput")?.addEventListener("change", async e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  try {
+    /*
+     * Banner katta joy egallagani uchun ishtirokchi
+     * rasmiga nisbatan kattaroq o'lcham/sifatda saqlaymiz,
+     * lekin baribir Firestore hujjat hajmi chegarasidan
+     * (1MB) xavfsiz miqdorda qolish uchun siqib olamiz.
+     */
+    pendingHeroImageDataUrl = await resizeImageFile(file, 1280, 0.72);
+    updateHeroPreview();
+  } catch (err) {
+    console.error("Hero rasm yuklashda xatolik:", err);
+    alert("❌ Rasmni yuklab bo'lmadi: " + err.message);
+  }
+});
+
+function removeHeroImage() {
+  pendingHeroImageDataUrl = "";
+  if ($("heroImageInput")) $("heroImageInput").value = "";
+  updateHeroPreview();
+}
+window.removeHeroImage = removeHeroImage;
+
+function resetHeroToDefault() {
+  pendingHeroImageDataUrl = "";
+  if ($("heroImageInput")) $("heroImageInput").value = "";
+  if ($("heroEyebrowInput")) $("heroEyebrowInput").value = "";
+  if ($("heroTitleInput")) $("heroTitleInput").value = "";
+  if ($("heroSubtitleInput")) $("heroSubtitleInput").value = "";
+  updateHeroPreview();
+}
+window.resetHeroToDefault = resetHeroToDefault;
+
+async function saveHeroSettings() {
+  const heroBanner = {
+    imageDataUrl: pendingHeroImageDataUrl || "",
+    eyebrow: $("heroEyebrowInput")?.value?.trim() || "",
+    title: $("heroTitleInput")?.value?.trim() || "",
+    subtitle: $("heroSubtitleInput")?.value?.trim() || ""
+  };
+
+  const btn = $("heroSaveBtn");
+  if (btn) btn.disabled = true;
+
+  try {
+    await setDoc(doc(db, "settings", "app"), { heroBanner }, { merge: true });
+
+    resetAppSettingsCache();
+    applyHeroBanner(heroBanner);
+
+    const status = $("heroSaveStatus");
+
+    if (status) {
+      status.textContent =
+        "✅ Saqlandi — barcha foydalanuvchilarga qo'llanildi";
+
+      clearTimeout(saveHeroSettings._t);
+      saveHeroSettings._t = setTimeout(() => {
+        if (status) status.textContent = "";
+      }, 3000);
+    }
+  } catch (e) {
+    console.error("saveHeroSettings:", e);
+    alert("❌ Saqlab bo'lmadi: " + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+window.saveHeroSettings = saveHeroSettings;
+
+function fillHeroEditForm() {
+  const b = currentHeroBanner || {};
+
+  if ($("heroEyebrowInput")) $("heroEyebrowInput").value = b.eyebrow || "";
+  if ($("heroTitleInput")) $("heroTitleInput").value = b.title || "";
+  if ($("heroSubtitleInput")) $("heroSubtitleInput").value = b.subtitle || "";
+  if ($("heroImageInput")) $("heroImageInput").value = "";
+
+  pendingHeroImageDataUrl = b.imageDataUrl || "";
+  updateHeroPreview();
+}
+
+function openHeroEditModal() {
+  const modal = $("heroEditModal");
+  if (!modal) return;
+
+  fillHeroEditForm();
+  modal.style.display = "flex";
+}
+window.openHeroEditModal = openHeroEditModal;
+
+function closeHeroEditModal() {
+  const modal = $("heroEditModal");
+  if (modal) modal.style.display = "none";
+}
+window.closeHeroEditModal = closeHeroEditModal;
+
 async function getMyPermissions() {
   try {
     const d = await fetchUserDocOnce();
@@ -9708,6 +9905,14 @@ onAuthStateChanged(
     startMyMessagesListener();
 
     /*
+     * Live Quiz Arena banneri (orqa fon rasmi + matnlar)
+     * BARCHA foydalanuvchilar (mehmonlar ham) uchun bir
+     * xilda qo'llaniladi — admin uni o'zgartirsa, hamma
+     * shu holatni ko'radi.
+     */
+    loadAndApplyHeroBanner();
+
+    /*
      * Har yangi kirishda (login)
      * hujjat keshi tozalanadi —
      * shunda eski/boshqa
@@ -9849,6 +10054,19 @@ onAuthStateChanged(
           $("adminPanelBtn")
         ) {
           $("adminPanelBtn").classList.remove("hidden");
+        }
+
+        /*
+         * "✏️" banner tahrirlash tugmasi ham FAQAT
+         * shu yerda, xuddi boshqaruv paneli tugmasi
+         * kabi — role: "admin" tasdiqlangandan keyin —
+         * ko'rsatiladi.
+         */
+        if (
+          myDoc?.role === "admin" &&
+          $("heroEditBtn")
+        ) {
+          $("heroEditBtn").classList.remove("hidden");
         }
       } catch (e) {
         console.warn("Admin holatini tekshirishda xatolik:", e);

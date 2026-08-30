@@ -20,7 +20,7 @@
       </div>
       <div class="brandText">
         <div class="brand-main">Beks Game</div>
-        
+        <div class="brand-sub" data-i18n-html="brand.tagline.game">Top <span class="brand-f">F</span>ast Education</div>
       </div>
     </div>
 
@@ -117,6 +117,55 @@
 
       <div class="modalActions">
         <button class="bigBtn secondaryBtn" onclick="closeContactModal()" data-i18n="common.close">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       BANNER (LIVE QUIZ ARENA) TAHRIRLASH MODALI
+       Faqat admin ko'radi (tugma game.js orqali
+       role tekshirilib ko'rsatiladi). Bu yerda
+       kiritilgan har bir o'zgarish settings/app
+       hujjatiga yoziladi va BARCHA foydalanuvchilar
+       uchun bir xilda ko'rinadi (kelajakda reklama
+       banneri sifatida ham ishlatilishi mumkin).
+  ========================== -->
+  <div class="modal" id="heroEditModal">
+    <div class="modal-box heroEditBox">
+      <div class="modalHeader">
+        <div>
+          <span class="eyebrow">ADMIN</span>
+          <h2>Banner sozlamalari</h2>
+        </div>
+        <button class="iconBtn" onclick="closeHeroEditModal()">×</button>
+      </div>
+
+      <div class="heroEditPreview" id="heroEditPreview">
+        <span class="heroEditPreviewEyebrow" id="heroPreviewEyebrow">LIVE QUIZ ARENA</span>
+        <span class="heroEditPreviewTitle" id="heroPreviewTitle">Bilimingizni sinang.</span>
+        <span class="heroEditPreviewSubtitle" id="heroPreviewSubtitle">Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting.</span>
+      </div>
+
+      <label>Orqa fon rasmi</label>
+      <div class="heroImageRow">
+        <input type="file" id="heroImageInput" accept="image/*">
+        <button type="button" class="smallBtn dangerBtn" id="heroImageRemoveBtn" onclick="removeHeroImage()">Rasmni olib tashlash</button>
+      </div>
+
+      <label for="heroEyebrowInput">Ustki yorliq</label>
+      <input type="text" id="heroEyebrowInput" maxlength="40" placeholder="LIVE QUIZ ARENA">
+
+      <label for="heroTitleInput">Sarlavha</label>
+      <input type="text" id="heroTitleInput" maxlength="80" placeholder="Bilimingizni sinang.">
+
+      <label for="heroSubtitleInput">Qo'shimcha matn</label>
+      <textarea id="heroSubtitleInput" rows="2" maxlength="220" placeholder="Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting."></textarea>
+
+      <div class="heroSaveStatus" id="heroSaveStatus"></div>
+
+      <div class="modalActions">
+        <button class="bigBtn secondaryBtn" onclick="resetHeroToDefault()">Standartga qaytarish</button>
+        <button class="bigBtn primaryBtn" id="heroSaveBtn" onclick="saveHeroSettings()">💾 Saqlash</button>
       </div>
     </div>
   </div>
@@ -281,11 +330,19 @@
   <main class="app">
 
     <!-- GAME HERO -->
-    <section class="gameHero">
+    <section class="gameHero" id="gameHero">
+      <button
+        type="button"
+        id="heroEditBtn"
+        class="heroEditBtn hidden"
+        onclick="openHeroEditModal()"
+        title="Banner sozlamalari (faqat admin)"
+      >✏️</button>
+
       <div class="heroInfo">
-        <span class="eyebrow">LIVE QUIZ ARENA</span>
-        <h1>Bilimingizni sinang.</h1>
-        <p>Jamoani tanlang, savolni oching va eng yuqori natijani qo‘lga kiriting.</p>
+        <span class="eyebrow" id="heroEyebrow">LIVE QUIZ ARENA</span>
+        <h1 id="heroTitle">Bilimingizni sinang.</h1>
+        <p id="heroSubtitle">Jamoani tanlang, savolni oching va eng yuqori natijani qo‘lga kiriting.</p>
       </div>
 
       <div class="heroStatus">
