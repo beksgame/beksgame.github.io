@@ -1,0 +1,311 @@
+/* ==========================================================
+   BEKS GAME — ADMIN PANEL
+   game.css bilan bir xil "dark glass" uslub, faqat
+   shu sahifaga xos qo'shimcha elementlar
+========================================================== */
+
+.pageWrap{
+  width:min(1100px,calc(100% - 32px));
+  margin:0 auto 40px;
+}
+
+.hidden{display:none!important}
+
+/* ---------- KIRISH TAQIQLANGAN EKRANI ---------- */
+
+.deniedCard{
+  max-width:460px;
+  margin:80px auto 0;
+  padding:36px 30px;
+  text-align:center;
+  border:1px solid var(--line2);
+  border-radius:var(--radius);
+  background:rgba(8,18,33,.62);
+  box-shadow:var(--shadow);
+}
+
+.deniedCard .deniedEmoji{
+  font-size:42px;
+  margin-bottom:12px;
+}
+
+.deniedCard h2{
+  margin:0 0 8px;
+  font-size:20px;
+  font-weight:900;
+}
+
+.deniedCard p{
+  margin:0 0 20px;
+  color:var(--muted);
+  font-size:13.5px;
+  line-height:1.5;
+}
+
+/* ---------- SARLAVHA / STATISTIKA ---------- */
+
+.adminTopRow{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.adminStatsRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.adminStatChip{
+  padding:10px 16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+  font-size:12.5px;
+  font-weight:800;
+  color:var(--muted);
+}
+
+.adminStatChip strong{
+  color:#fff;
+  font-size:16px;
+  margin-right:6px;
+}
+
+/* ---------- FOYDALANUVCHILAR RO'YXATI ---------- */
+
+.usersList{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.userRow{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  transition:.15s;
+}
+
+.userRow:hover{
+  border-color:var(--line2);
+  background:rgba(255,255,255,.06);
+}
+
+.userTop{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.userAvatar{
+  width:42px;
+  height:42px;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:950;
+  color:#04121f;
+  background:linear-gradient(135deg,#20d9ff,#4f8cff 60%,#8c5cff);
+}
+
+.userInfo{
+  min-width:0;
+  flex:1 1 auto;
+}
+
+.userName{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:14.5px;
+  font-weight:850;
+  color:#f1f6fb;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.userMeta{
+  margin-top:2px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:600;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.roleBadge{
+  flex:0 0 auto;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
+
+.roleBadge.isAdmin{
+  color:#04121f;
+  background:linear-gradient(135deg,#ffd166,#ffb347);
+}
+
+.adminToggleBtn{
+  flex:0 0 auto;
+  min-height:38px;
+  padding:8px 12px;
+  border-radius:11px;
+  border:1px solid rgba(140,92,255,.4);
+  background:rgba(140,92,255,.10);
+  color:#e4d9ff;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:.15s;
+}
+
+.adminToggleBtn:hover{
+  background:rgba(140,92,255,.18);
+}
+
+.adminToggleBtn:disabled{
+  opacity:.5;
+  cursor:default;
+}
+
+/* ---------- RUXSAT SVITCHLARI (Claude Preferences uslubida) ---------- */
+
+.userPerms{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:8px 18px;
+  padding-top:12px;
+  border-top:1px solid var(--line);
+}
+
+.permToggle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  cursor:pointer;
+}
+
+.permToggleLabel{
+  font-size:12.5px;
+  font-weight:700;
+  color:#dbe6f2;
+}
+
+.toggleSwitch{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  flex:0 0 auto;
+}
+
+.toggleSwitch input{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+
+.toggleTrack{
+  width:38px;
+  height:21px;
+  border-radius:999px;
+  background:rgba(255,255,255,.14);
+  border:1px solid var(--line2);
+  position:relative;
+  transition:.2s;
+  flex:0 0 auto;
+}
+
+.toggleThumb{
+  position:absolute;
+  top:1px;
+  left:1px;
+  width:17px;
+  height:17px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.35);
+  transition:.2s;
+}
+
+.toggleSwitch input:checked + .toggleTrack{
+  background:linear-gradient(135deg,#20d9ff,#4f8cff);
+  border-color:transparent;
+}
+
+.toggleSwitch input:checked + .toggleTrack .toggleThumb{
+  transform:translateX(17px);
+}
+
+.toggleSwitch input:focus-visible + .toggleTrack{
+  box-shadow:0 0 0 3px rgba(32,217,255,.25);
+}
+
+.toggleSwitch input:disabled + .toggleTrack{
+  opacity:.5;
+}
+
+.usersEmpty,
+.usersLoading{
+  padding:40px 20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:13.5px;
+  font-weight:700;
+}
+
+/* ---------- TOAST ---------- */
+
+.adminToast{
+  position:fixed;
+  left:50%;
+  bottom:26px;
+  transform:translateX(-50%) translateY(20px);
+  padding:12px 20px;
+  border-radius:12px;
+  border:1px solid rgba(53,220,140,.4);
+  background:rgba(12,30,22,.95);
+  color:#8affbc;
+  font-size:13px;
+  font-weight:800;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:2000;
+}
+
+.adminToast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+.adminToast.isError{
+  border-color:rgba(255,83,100,.45);
+  color:#ff8a95;
+}
+
+@media(max-width:560px){
+  .userPerms{
+    grid-template-columns:1fr;
+  }
+}

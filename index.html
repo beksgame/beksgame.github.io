@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beks Game - Kirish</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <div class="brandWrap" id="authHeader">
+
+    <div class="brand">
+      <div class="brandMark"><img src="logo.svg" alt="Beks Game"></div>
+      <div class="brandText">
+        <div class="brand-main">Beks Game</div>
+        <div class="brand-sub">O‘yin bilan tez o‘rganasiz</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================
+       O'YIN REJIMLARI — ALOHIDA BLOK
+  ========================== -->
+  <div class="gamesWrap" id="gamesWrap">
+    <div class="gamesCard">
+      <h3 class="gamesCardTitle">🎮 O‘yin rejimlari</h3>
+
+      <div class="gameModeBlock">
+        <button type="button" class="gameModeBtn roomModeBtn" id="roomEntryBtn">🏠 Jonli xona</button>
+        <p class="gameModeGuide">Onlayn xona oching — ishtirokchilar boshqa qurilmadan xona kodi bilan real vaqtda qo‘shilib, birga musobaqalashadi.</p>
+      </div>
+
+      <div class="gameModeBlock">
+        <button type="button" class="gameModeBtn duelModeBtn" id="liveModeDuelBtn">⚔️ Duel</button>
+        <p class="gameModeGuide">Bitta qurilmada ikki kishi navbat bilan bellashadi. Ism kiritmasangiz — "Ishtirokchi 1" va "Ishtirokchi 2" nomi bilan boshlanadi.</p>
+      </div>
+
+      <div class="gameModeBlock">
+        <button type="button" class="gameModeBtn playModeBtn" id="liveModePlayBtn">🎯 Play</button>
+        <p class="gameModeGuide">Yakka mashq qiling yoki bir nechta ishtirokchi ismini kiritib, ular orasida navbat bilan reyting shakllantiring.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       KIRISH / RO'YXATDAN O'TISH — ALOHIDA BLOK
+       (o'yin rejimlari blokidan pastda, ikkita tugma)
+  ========================== -->
+  <div class="authActionsWrap" id="authActionsBlock">
+    <div class="authActionsCard">
+      <button type="button" class="authActionBtn authLoginActionBtn" id="loginOpenBtn">🔑 Kirish</button>
+      <button type="button" class="authActionBtn authRegisterActionBtn" id="registerOpenBtn">📝 Ro‘yxatdan o‘tish</button>
+    </div>
+  </div>
+
+  <!-- =========================
+       KIRISH MODALI
+  ========================== -->
+  <div class="miniModalOverlay hidden" id="loginModal">
+    <div class="miniModalCard">
+      <button type="button" class="miniModalCloseX" id="loginModalCloseX">×</button>
+
+      <h2>🔑 Kirish</h2>
+
+      <form id="loginForm" class="headerAuthForm" onsubmit="return false;">
+        <input type="email" id="loginEmail" placeholder="Email" required>
+        <input type="password" id="loginPassword" placeholder="Parol" required>
+
+        <div class="miniModalActions">
+          <button type="button" class="miniModalBtn secondaryModalBtn" id="loginModalBackBtn">Orqaga</button>
+          <button type="button" class="miniModalBtn primaryModalBtn" onclick="loginUser()">Kirish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================
+       RO'YXATDAN O'TISH MODALI
+  ========================== -->
+  <div class="miniModalOverlay hidden" id="registerModal">
+    <div class="miniModalCard">
+      <button type="button" class="miniModalCloseX" id="registerModalCloseX">×</button>
+
+      <h2>📝 Ro‘yxatdan o‘tish</h2>
+
+      <form id="registerForm" class="headerAuthForm" onsubmit="return false;">
+        <input type="text" id="registerName" placeholder="Ism" required>
+        <input type="email" id="registerEmail" placeholder="Email" required>
+        <input type="password" id="registerPassword" placeholder="Parol" required>
+        <input type="password" id="registerPasswordConfirm" placeholder="Parolni tasdiqlash" required>
+
+        <div class="miniModalActions">
+          <button type="button" class="miniModalBtn secondaryModalBtn" id="registerModalBackBtn">Orqaga</button>
+          <button type="button" class="miniModalBtn primaryModalBtn" onclick="registerUser()">Ro‘yxatdan o‘tish</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================
+       JONLI MAYDON — LOBBI / SAVOL / NATIJA / YAKUN
+       (ilgari play.html'da bo'lgan ekranlar — endi
+       shu sahifaning o'zida, alohida faylsiz ishlaydi)
+  ========================== -->
+  <div id="liveRoomApp" class="playWrap hidden">
+
+    <!--
+      MUHIM TUZATISH: "roomExitFab" ilgari BEVOSITA
+      .playWrap (butun ekranni qoplaydigan fon) ga
+      yopishtirilgan edi (position:fixed; top;right).
+      Lekin kartaning o'zi markazda va odatda ekrandan
+      ancha TOR (masalan 460px) — shu sabab X tugmasi
+      kartadan uzoqda, ekranning burchagida "yolg'iz"
+      osilib qolardi. Endi uni kartalar bilan BIR XIL
+      o'ralgan (.liveRoomInner) konteynerga joylashtirdik —
+      shunda u doim faol kartaning o'ng yuqori burchagiga
+      yopishib turadi.
+    -->
+    <div class="liveRoomInner">
+
+      <button type="button" class="roomExitFab hidden" id="roomExitFab" title="Xonadan chiqish">✕</button>
+
+      <!-- KUTISH / LOBBY -->
+      <div id="lobbyScreen" class="screen hidden">
+        <div class="lobbyCard">
+          <div class="lobbyPulse">⏳</div>
+          <h2>Xonaga qo‘shildingiz!</h2>
+          <p class="lobbyName" id="lobbyName"></p>
+          <p class="lobbyHint">Nazoratchi o‘yinni boshlashini kuting...</p>
+
+          <div class="lobbyPlayersList" id="lobbyPlayersList"></div>
+
+          <div class="roomChatBox">
+            <div class="roomChatHead">💬 Chat</div>
+            <div class="roomChatMessages" id="lobbyChatMessages"></div>
+            <div class="roomChatInputRow">
+              <input type="text" id="lobbyChatInput" maxlength="300" placeholder="Xabar yozing...">
+              <button type="button" class="roomChatSendBtn" id="lobbyChatSendBtn">➤</button>
+            </div>
+          </div>
+
+          <button type="button" class="leaveRoomBtn" id="leaveRoomBtn">🚪 Xonadan chiqish</button>
+        </div>
+      </div>
+
+    <!-- SAVOL EKRANI -->
+    <div id="questionScreen" class="screen hidden">
+
+      <div class="qHeader">
+        <span id="qRoundLabel" class="qRoundLabel"></span>
+        <span id="qTimerRing" class="qTimerRing">10</span>
+        <span id="qScoreLabel" class="qScoreLabel"></span>
+      </div>
+
+      <div class="qTextBox">
+        <div id="qText" class="qText"></div>
+      </div>
+
+      <div id="qOptions" class="qOptions"></div>
+
+      <div id="qParticipants" class="qParticipants"></div>
+
+    </div>
+
+    <!-- NATIJA (REVEAL) -->
+    <div id="revealScreen" class="screen hidden">
+
+      <div id="revealMark" class="revealMark"></div>
+      <div id="revealCorrectAnswer" class="revealCorrectAnswer"></div>
+
+      <div class="revealScoreCard">
+        <span class="revealScoreLabel">SIZNING BALINGIZ</span>
+        <strong id="revealScoreValue" class="revealScoreValue">0</strong>
+      </div>
+
+      <p class="revealHint">Keyingi savolga o‘tilmoqda...</p>
+
+    </div>
+
+    <!-- RAUND TUGADI -->
+    <div id="roundDoneScreen" class="screen hidden">
+
+      <div class="endedTitle">✅ Siz tugatdingiz!</div>
+
+      <div class="endedRankCard">
+        <strong id="roundDoneScore" class="endedRankBig">0 ball</strong>
+        <div id="roundDoneStats" class="endedRankSub"></div>
+      </div>
+
+      <p class="lobbyHint">Boshqa ishtirokchilarni yoki nazoratchi keyingi mavzu tanlashini kuting — sahifa avtomatik davom etadi.</p>
+
+      <div class="endedLeaderboardHead">
+        <span class="endedLeaderboardTitle">Jonli reyting</span>
+        <button id="shareLeaderboardBtn" type="button" class="smallLightBtn">📤 Ulashish</button>
+      </div>
+
+      <div id="roundDoneLeaderboard" class="endedLeaderboard"></div>
+
+      <div class="roomChatBox">
+        <div class="roomChatHead">💬 Chat</div>
+        <div class="roomChatMessages" id="roundDoneChatMessages"></div>
+        <div class="roomChatInputRow">
+          <input type="text" id="roundDoneChatInput" maxlength="300" placeholder="Xabar yozing...">
+          <button type="button" class="roomChatSendBtn" id="roundDoneChatSendBtn">➤</button>
+        </div>
+      </div>
+
+    </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       JONLI MAYDON — BITTA MODAL, BOSQICHMA-BOSQICH
+  ========================== -->
+  <div class="miniModalOverlay hidden" id="liveEntryModal">
+    <div class="miniModalCard liveEntryCard">
+      <button type="button" class="miniModalCloseX" id="liveEntryCloseX">×</button>
+
+      <!-- BOSQICH 1: JONLI XONA — OCHISH / QO'SHILISH -->
+      <div class="liveStep" id="liveStepRoomChoice">
+        <h2>🏠 Jonli xona</h2>
+
+        <p class="miniModalGuide">
+          Jonli xona — onlayn o‘yin xonasi. Nazoratchi sifatida yangi xona
+          oching (boshqalar telefonidan xona kodi bilan qo‘shiladi), yoki
+          mavjud xona kodi bilan ishtirokchi sifatida qo‘shiling.
+        </p>
+
+        <button type="button" class="miniModalBtn primaryModalBtn" id="liveModeRoomBtn">
+          🏠 Xona ochish <span class="miniModalRoleTag">(Nazoratchi)</span>
+          <small>Yangi jonli xona yarating va o‘yinchilarni kuting</small>
+        </button>
+
+        <button type="button" class="miniModalBtn secondaryModalBtn" id="liveModeJoinBtn">
+          🔑 Xonaga qo‘shilish <span class="miniModalRoleTag">(Ishtirokchi)</span>
+          <small>Xona kodi bilan mavjud onlayn xonaga kiring</small>
+        </button>
+      </div>
+
+      <!-- BOSQICH 2A: XONAGA QO'SHILISH (kod + ism) -->
+      <div class="liveStep hidden" id="liveStepJoin">
+        <h2>🔑 Xonaga qo‘shilish</h2>
+
+        <label for="indexJoinCode">Xona kodi</label>
+        <input type="text" id="indexJoinCode" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="off">
+
+        <label for="indexJoinName">Ismingiz</label>
+        <input type="text" id="indexJoinName" maxlength="24" placeholder="Ismingizni kiriting" autocomplete="off">
+
+        <p class="formError hidden" id="indexJoinError"></p>
+
+        <div class="miniModalActions">
+          <button type="button" class="miniModalBtn secondaryModalBtn" id="liveStepJoinBackBtn">Orqaga</button>
+          <button type="button" class="miniModalBtn primaryModalBtn" id="liveStepJoinConfirmBtn">Kirish</button>
+        </div>
+      </div>
+
+      <!-- BOSQICH 2B: DUEL — ISHTIROKCHILAR -->
+      <div class="liveStep hidden" id="liveStepDuel">
+        <h2>⚔️ Duel — ishtirokchilar</h2>
+
+        <p class="miniModalGuide">
+          Ismlarni kiritmasangiz ham bo‘ladi — bunday holda o‘yin
+          "Ishtirokchi 1" va "Ishtirokchi 2" nomi bilan boshlanadi.
+        </p>
+
+        <label for="duelName1">1-ishtirokchi (ixtiyoriy)</label>
+        <input type="text" id="duelName1" maxlength="24" placeholder="Ism">
+
+        <label for="duelName2">2-ishtirokchi (ixtiyoriy)</label>
+        <input type="text" id="duelName2" maxlength="24" placeholder="Ism">
+
+        <div class="miniModalActions">
+          <button type="button" class="miniModalBtn secondaryModalBtn" id="liveStepDuelBackBtn">Orqaga</button>
+          <button type="button" class="miniModalBtn primaryModalBtn" id="liveStepDuelNextBtn">Davom etish</button>
+        </div>
+      </div>
+
+      <!-- BOSQICH 2C: PLAY — ISHTIROKCHILAR -->
+      <div class="liveStep hidden" id="liveStepPlay">
+        <h2>🎯 Play — ishtirokchilar</h2>
+
+        <p class="miniModalGuide">
+          Hech kim kiritmasangiz — yakka (solo) mashq boshlanadi.
+          Bir nechta ism kiritsangiz, o‘sha ishtirokchilar orasida
+          navbat bilan reyting shakllanadi.
+        </p>
+
+        <div id="playNamesList" class="liveNamesList">
+          <input type="text" class="liveNameInput" maxlength="24" placeholder="Ishtirokchi ismi (ixtiyoriy)">
+        </div>
+
+        <button type="button" class="miniModalBtn secondaryModalBtn" id="playAddNameBtn">+ Yana ishtirokchi</button>
+
+        <div class="miniModalActions">
+          <button type="button" class="miniModalBtn secondaryModalBtn" id="liveStepPlayBackBtn">Orqaga</button>
+          <button type="button" class="miniModalBtn primaryModalBtn" id="liveStepPlayNextBtn">Davom etish</button>
+        </div>
+      </div>
+
+      <!-- BOSQICH: YUKLANMOQDA -->
+      <div class="liveStep hidden" id="liveStepLoading">
+        <div class="liveLoadingSpinner"></div>
+        <p class="liveLoadingText" id="liveLoadingText">Iltimos kuting...</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+  import { auth, db } from "./firebase.js";
+  import {
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    updateProfile,
+    setPersistence,
+    browserLocalPersistence,
+    onAuthStateChanged,
+    signInAnonymously
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  // =========================
+  // 🔥 1) OFFLINE UCHUN PERSISTENCE
+  // =========================
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    console.log("✅ Auth persistence yoqildi (offline qo‘llab-quvvatlash)");
+  } catch (e) {
+    console.warn("⚠️ Persistence yoqilmadi:", e);
+  }
+
+  // =========================
+  // 🔄 KIRISH / RO'YXATDAN O'TISH MODALLARI
+  // =========================
+  const loginModal = document.getElementById("loginModal");
+  const registerModal = document.getElementById("registerModal");
+
+  function openLoginModal() {
+    registerModal?.classList.add("hidden");
+    loginModal?.classList.remove("hidden");
+  }
+
+  function closeLoginModal() {
+    loginModal?.classList.add("hidden");
+  }
+
+  function openRegisterModal() {
+    loginModal?.classList.add("hidden");
+    registerModal?.classList.remove("hidden");
+  }
+
+  function closeRegisterModal() {
+    registerModal?.classList.add("hidden");
+  }
+
+  document.getElementById("loginOpenBtn")?.addEventListener("click", openLoginModal);
+  document.getElementById("registerOpenBtn")?.addEventListener("click", openRegisterModal);
+
+  document.getElementById("loginModalCloseX")?.addEventListener("click", closeLoginModal);
+  document.getElementById("loginModalBackBtn")?.addEventListener("click", closeLoginModal);
+
+  document.getElementById("registerModalCloseX")?.addEventListener("click", closeRegisterModal);
+  document.getElementById("registerModalBackBtn")?.addEventListener("click", closeRegisterModal);
+
+  // =========================
+  // ✅ LOGIN
+  // =========================
+  window.loginUser = async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+
+    if (!email || !password) {
+      return alert("Email va parol kiriting!");
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+
+      // UID ni localStorage ga saqlaymiz (game.js ga kerak)
+      localStorage.setItem("uid", auth.currentUser.uid);
+
+      window.location.href = "game.html";
+    } catch (e) {
+      console.error(e);
+
+      if (e.code === "auth/network-request-failed") {
+        alert("❌ Internet yo‘q!\nAgar oldin shu qurilmada kirgan bo‘lsangiz, qayta urinib ko‘ring.");
+      } else {
+        alert("Xato: " + e.message);
+      }
+    }
+  };
+
+  // =========================
+  // ✅ REGISTER
+  // =========================
+  window.registerUser = async () => {
+    const name = document.getElementById("registerName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value;
+    const passwordConfirm = document.getElementById("registerPasswordConfirm").value;
+
+    if (!name || !email || !password || !passwordConfirm) {
+      return alert("Barcha maydonlar to‘ldirilishi kerak!");
+    }
+
+    if (password !== passwordConfirm) {
+      return alert("Parol va tasdiqlash mos emas!");
+    }
+
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Ismni profilga yozamiz
+      await updateProfile(userCred.user, { displayName: name });
+
+      /*
+       * Firestore'da darhol users/{uid} hujjatini yaratamiz —
+       * shunda foydalanuvchi hali birinchi natijasini saqlamagan
+       * bo'lsa ham, admin panelda darhol ko'rinadi va
+       * ruxsat maydonlari (role/canAddQuestions) boshidanoq
+       * to'g'ri, xavfsiz qiymat bilan boshlanadi.
+       */
+      try {
+        await setDoc(
+          doc(db, "users", userCred.user.uid),
+          {
+            displayName: name,
+            email: email,
+            role: "user",
+            canAddQuestions: false,
+            createdAt: serverTimestamp()
+          },
+          { merge: true }
+        );
+      } catch (e) {
+        console.warn("users hujjatini yaratishda xatolik:", e);
+      }
+
+      // UID ni localStorage ga saqlaymiz
+      localStorage.setItem("uid", userCred.user.uid);
+
+      window.location.href = "game.html";
+    } catch (e) {
+      console.error(e);
+      alert("Xato: " + e.message);
+    }
+  };
+
+  // =========================
+  // 🎮 JONLI MAYDON — BITTA MODAL, BOSQICHMA-BOSQICH
+  // =========================
+
+  const liveEntryModal = document.getElementById("liveEntryModal");
+
+  const LIVE_STEPS = [
+    "liveStepRoomChoice",
+    "liveStepJoin",
+    "liveStepDuel",
+    "liveStepPlay",
+    "liveStepLoading"
+  ];
+
+  function showLiveStep(id) {
+    LIVE_STEPS.forEach(s => {
+      document.getElementById(s)?.classList.toggle("hidden", s !== id);
+    });
+  }
+
+  function openLiveEntryModal(step) {
+    liveEntryModal?.classList.remove("hidden");
+    showLiveStep(step || "liveStepRoomChoice");
+  }
+
+  function closeLiveEntryModal() {
+    liveEntryModal?.classList.add("hidden");
+  }
+
+  // showScreen() ikkinchi <script type="module"> blokida (alohida
+  // modul qamrovida) joylashgan, shuning uchun bu yerdagi
+  // closeLiveEntryModal'ni o'sha yerdan ham chaqira olish uchun
+  // window'ga chiqarib qo'yamiz (tryAutoRejoin muvaffaqiyatli
+  // bo'lganda bu modalni yopish uchun kerak).
+  window.closeLiveEntryModal = closeLiveEntryModal;
+
+  function showLiveLoading(text) {
+    const textEl = document.getElementById("liveLoadingText");
+    if (textEl) textEl.textContent = text || "Iltimos kuting...";
+    showLiveStep("liveStepLoading");
+  }
+
+  document.getElementById("roomEntryBtn")?.addEventListener("click", () => openLiveEntryModal("liveStepRoomChoice"));
+  document.getElementById("liveEntryCloseX")?.addEventListener("click", closeLiveEntryModal);
+
+  document.getElementById("liveStepJoinBackBtn")?.addEventListener("click", () => showLiveStep("liveStepRoomChoice"));
+  document.getElementById("liveStepDuelBackBtn")?.addEventListener("click", closeLiveEntryModal);
+  document.getElementById("liveStepPlayBackBtn")?.addEventListener("click", closeLiveEntryModal);
+
+  // ---- 🏠 XONA OCHISH (nazoratchi) ----
+  async function startLiveRoomOpen() {
+    showLiveLoading("Xona tayyorlanmoqda...");
+
+    try {
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
+      localStorage.setItem("uid", auth.currentUser.uid);
+      window.location.href = "game.html?liveStart=room";
+    } catch (e) {
+      console.error(e);
+      alert("Xatolik yuz berdi: " + (e?.message || e));
+      showLiveStep("liveStepMode");
+    }
+  }
+
+  document.getElementById("liveModeRoomBtn")?.addEventListener("click", startLiveRoomOpen);
+
+  // ---- 🔑 XONAGA QO'SHILISH (kod + ism) ----
+  const indexJoinError = document.getElementById("indexJoinError");
+
+  function showIndexJoinError(msg) {
+    if (!indexJoinError) return;
+    indexJoinError.textContent = msg;
+    indexJoinError.classList.remove("hidden");
+  }
+
+  document.getElementById("liveModeJoinBtn")?.addEventListener("click", () => {
+    const nameInput = document.getElementById("indexJoinName");
+    const savedName = localStorage.getItem("beksPlayerName");
+
+    if (nameInput && savedName && !nameInput.value) {
+      nameInput.value = savedName;
+    }
+
+    indexJoinError?.classList.add("hidden");
+    showLiveStep("liveStepJoin");
+
+    setTimeout(() => document.getElementById("indexJoinCode")?.focus(), 50);
+  });
+
+  document.getElementById("indexJoinCode")?.addEventListener("keydown", e => {
+    if (e.key === "Enter") document.getElementById("indexJoinName")?.focus();
+  });
+
+  document.getElementById("indexJoinName")?.addEventListener("keydown", e => {
+    if (e.key === "Enter") confirmIndexJoinRoom();
+  });
+
+  document.getElementById("liveStepJoinConfirmBtn")?.addEventListener("click", confirmIndexJoinRoom);
+
+  async function confirmIndexJoinRoom() {
+    const code = (document.getElementById("indexJoinCode")?.value || "").trim();
+    const name = (document.getElementById("indexJoinName")?.value || "").trim();
+
+    indexJoinError?.classList.add("hidden");
+
+    if (!/^\d{6}$/.test(code)) {
+      showIndexJoinError("6 xonali xona kodini kiriting!");
+      return;
+    }
+
+    if (!name) {
+      showIndexJoinError("Ismingizni kiriting!");
+      return;
+    }
+
+    showLiveLoading("Xonaga ulanmoqda...");
+
+    try {
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
+      const roomRef = doc(db, "rooms", code);
+      const snap = await getDoc(roomRef);
+
+      if (!snap.exists()) {
+        showLiveStep("liveStepJoin");
+        showIndexJoinError("Bunday xona topilmadi!");
+        return;
+      }
+
+      const room = snap.data();
+
+      const playerId =
+        "p_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+
+      await setDoc(
+        doc(db, "rooms", code, "players", playerId),
+        {
+          uid: auth.currentUser?.uid || null,
+          name,
+          correctCount: 0,
+          wrongCount: 0,
+          totalTimeMs: 0,
+          roundId: room.roundId || 1,
+          answeredIndex: -1,
+          finishedRound: false,
+          lastAnswerChoice: null,
+          lastAnswerCorrect: null,
+          joinedAt: Date.now()
+        }
+      );
+
+      localStorage.setItem(
+        "activeRoomPlayer",
+        JSON.stringify({ roomCode: code, playerId, name })
+      );
+      localStorage.setItem("beksPlayerName", name);
+
+      /*
+       * play.js'ning bosqichlari shu sahifaning o'zida
+       * (index.html) allaqachon yuklangan — localStorage'ga
+       * "activeRoomPlayer" yozilgach, sahifani qayta yuklasak,
+       * uning tryAutoRejoin() mexanizmi darhol shu xonaga
+       * ulanib, lobbiga olib kiradi.
+       */
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      showLiveStep("liveStepJoin");
+      showIndexJoinError("Xatolik yuz berdi: " + (e?.message || e));
+    }
+  }
+
+  // ---- ⚔️ DUEL ----
+  document.getElementById("liveModeDuelBtn")?.addEventListener("click", () => {
+    openLiveEntryModal("liveStepDuel");
+    setTimeout(() => document.getElementById("duelName1")?.focus(), 50);
+  });
+
+  document.getElementById("liveStepDuelNextBtn")?.addEventListener("click", () => {
+    const n1 = (document.getElementById("duelName1")?.value || "").trim();
+    const n2 = (document.getElementById("duelName2")?.value || "").trim();
+
+    launchLocalLiveMode("duel", [n1, n2].filter(Boolean));
+  });
+
+  // ---- 🎯 PLAY ----
+  document.getElementById("liveModePlayBtn")?.addEventListener("click", () => {
+    openLiveEntryModal("liveStepPlay");
+    setTimeout(() => document.querySelector("#playNamesList .liveNameInput")?.focus(), 50);
+  });
+
+  document.getElementById("playAddNameBtn")?.addEventListener("click", () => {
+    const list = document.getElementById("playNamesList");
+    if (!list || list.children.length >= 20) return;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "liveNameInput";
+    input.maxLength = 24;
+    input.placeholder = "Ishtirokchi ismi (ixtiyoriy)";
+
+    list.appendChild(input);
+    input.focus();
+  });
+
+  document.getElementById("liveStepPlayNextBtn")?.addEventListener("click", () => {
+    const names = Array.from(
+      document.querySelectorAll("#playNamesList .liveNameInput")
+    )
+      .map(i => i.value.trim())
+      .filter(Boolean);
+
+    launchLocalLiveMode("play", names);
+  });
+
+  // ---- Duel/Play uchun umumiy: anonim kirish + game.html'ga o'tish ----
+  async function launchLocalLiveMode(mode, names) {
+    showLiveLoading(
+      mode === "duel" ? "Duel tayyorlanmoqda..." : "O‘yin tayyorlanmoqda..."
+    );
+
+    try {
+      if (!auth.currentUser) {
+        await signInAnonymously(auth);
+      }
+
+      localStorage.setItem("uid", auth.currentUser.uid);
+
+      const namesParam = names.map(n => encodeURIComponent(n)).join(",");
+      const url =
+        "game.html?liveStart=" +
+        mode +
+        (namesParam ? "&names=" + namesParam : "");
+
+      window.location.href = url;
+    } catch (e) {
+      console.error(e);
+      alert("Xatolik yuz berdi: " + (e?.message || e));
+      showLiveStep(mode === "duel" ? "liveStepDuel" : "liveStepPlay");
+    }
+  }
+
+  // ---- Ulashilgan xona havolasi (?code=) bilan kirilsa ----
+  (function checkIncomingRoomCode() {
+    const urlCode = new URLSearchParams(window.location.search).get("code");
+
+    if (!urlCode || !/^\d{6}$/.test(urlCode)) return;
+
+    // Agar bu qurilmada aynan shu xona uchun "activeRoomPlayer"
+    // allaqachon saqlangan bo'lsa — demak foydalanuvchi bu xonaga
+    // avval qo'shilgan va hozir shunchaki qayta yuklanmoqda
+    // (tryAutoRejoin uni to'g'ridan-to'g'ri lobbiga olib kiradi).
+    // Bunday holda kod+ism so'raydigan modalni umuman ochmaymiz.
+    try {
+      const saved = JSON.parse(localStorage.getItem("activeRoomPlayer") || "null");
+      if (saved?.roomCode === urlCode) return;
+    } catch {}
+
+    // Quyidagi (ikkinchi) skriptdagi tryAutoRejoin() mexanizmiga
+    // vaqt beramiz — agar u muvaffaqiyatli ulansa, authWrap
+    // yashirilib qoladi va bu yerda modal ochish shart bo'lmaydi.
+    setTimeout(() => {
+      const authWrapEl = document.getElementById("authHeader");
+
+      if (authWrapEl && !authWrapEl.classList.contains("hidden")) {
+        openLiveEntryModal("liveStepJoin");
+
+        const codeInput = document.getElementById("indexJoinCode");
+        if (codeInput) codeInput.value = urlCode;
+
+        const nameInput = document.getElementById("indexJoinName");
+        const savedName = localStorage.getItem("beksPlayerName");
+        if (nameInput && savedName) nameInput.value = savedName;
+      }
+    }, 500);
+  })();
+
+  // =========================
+  // 🔍 AGAR ALLAQACHON KIRGAN BO‘LSA — AVTOMAT KIRISH
+  // =========================
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Oldindan kirilgan user:", user.uid);
+      localStorage.setItem("uid", user.uid);
+      // ixtiyoriy: avtomatik o‘tkazish
+      // window.location.href = "game.html";
+    }
+  });
+</script>
+
+  <!--
+    "Jonli maydon" > "Xonaga qo'shilish" oqimi shu sahifaning
+    o'zida (alohida play.html faylisiz) davom etishi uchun,
+    ilgari play.js'da bo'lgan kod to'g'ridan-to'g'ri shu yerga
+    ko'chirildi. EMBEDDED bayrog'i unga o'zining qaysi
+    "qobiqda" ishlayotganini bildiradi.
+  -->
+  <script>window.BEKS_EMBEDDED_IN_INDEX = true;</script>
+  <script type="module">
+import { auth, db } from "./firebase.js";
+import {
+  signInAnonymously
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  onSnapshot,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+  increment
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* =========================================================
+   HOLAT
+========================================================= */
+
+let roomCode = null;
+let playerId = null;
+let playerName = null;
+
+let roomData = null;
+let playerData = null;
+let roomPlayers = [];
+
+let roomUnsub = null;
+let playerUnsub = null;
+let playersListUnsub = null;
+let chatUnsub = null;
+let chatMessages = [];
+
+let localTimerInterval = null;
+let advanceLock = false;
+let showingReveal = false;
+let currentTimerIndex = -1;
+
+const OPTION_CLASSES = ["optA", "optB", "optC", "optD"];
+
+/*
+ * REYTING QOIDASI: ballik tizim emas — avval KIM KO'P
+ * TO'G'RI JAVOB BERGANI (correctCount ko'p bo'lgani
+ * yuqorida), teng bo'lsa KIM TEZROQ JAVOB BERGANI
+ * (totalTimeMs kam bo'lgani yuqorida) hal qiladi.
+ */
+function rankRoomPlayers(players) {
+  return [...players].sort((a, b) => {
+    const ac = Number(a.correctCount) || 0;
+    const bc = Number(b.correctCount) || 0;
+
+    if (bc !== ac) return bc - ac;
+
+    const at = Number(a.totalTimeMs) || 0;
+    const bt = Number(b.totalTimeMs) || 0;
+
+    return at - bt;
+  });
+}
+
+/* =========================================================
+   YORDAMCHI
+========================================================= */
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = String(value ?? "");
+  return div.innerHTML;
+}
+
+/*
+ * Bu skript index.html ichida ishlaydi — shu sabab
+ * "qobiq" har doim EMBEDDED bo'ladi.
+ */
+const EMBEDDED_IN_INDEX = !!window.BEKS_EMBEDDED_IN_INDEX;
+
+function showScreen(name) {
+
+  if (EMBEDDED_IN_INDEX) {
+
+    const liveWrap = $("liveRoomApp");
+    const authWrap = document.getElementById("authHeader");
+    const gamesWrap = document.getElementById("gamesWrap");
+    const authActionsBlock = document.getElementById("authActionsBlock");
+
+    if (name === "joinScreen") {
+      /*
+       * Faol xona yo'q — index.html'ning oddiy
+       * kirish/ro'yxatdan o'tish oynasini va o'yin
+       * rejimlari blokini ko'rsatamiz.
+       */
+      liveWrap?.classList.add("hidden");
+      authWrap?.classList.remove("hidden");
+      gamesWrap?.classList.remove("hidden");
+      authActionsBlock?.classList.remove("hidden");
+    } else {
+      authWrap?.classList.add("hidden");
+      gamesWrap?.classList.add("hidden");
+      authActionsBlock?.classList.add("hidden");
+      liveWrap?.classList.remove("hidden");
+      // Xavfsizlik uchun: agar kod+ism kiritish modali negadir
+      // hali ochiq bo'lsa (masalan sekin internetda poyga holati
+      // yuzaga kelgan bo'lsa), lobbiga o'tayotganda uni yopamiz.
+      window.closeLiveEntryModal?.();
+    }
+  }
+
+  [
+    "joinScreen",
+    "lobbyScreen",
+    "questionScreen",
+    "revealScreen",
+    "roundDoneScreen"
+  ].forEach(id => {
+    const el = $(id);
+    if (el) {
+      el.classList.toggle("hidden", id !== name);
+    }
+  });
+
+  const exitFab = $("roomExitFab");
+  if (exitFab) {
+    if (name === "joinScreen") {
+      /*
+       * Bu holatda faol xona umuman yo'q (asosiy
+       * sahifadamiz) — shu sabab "xonadan chiqish"
+       * tugmasi ko'rsatilmasligi kerak edi, lekin
+       * ilgari shartsiz ko'rsatilardi.
+       */
+      exitFab.classList.add("hidden");
+      return;
+    }
+
+    /*
+     * Endi bu — MODALNING o'zining doimiy yopish (×)
+     * tugmasi, xona egasining oynasidagi × bilan bir xil
+     * mantiqda: qaysi bosqichda bo'lishidan qat'iy nazar
+     * (lobbi, savol, natija, yakun) doim ko'rinadi.
+     *
+     * MUHIM TUZATISH: tugma endi HAR SAFAR aynan hozir
+     * ko'rinib turgan ekran (.screen) ning ICHIGA jismonan
+     * ko'chirib qo'yiladi — shunda u har doim o'sha
+     * kartaning aniq burchagida turadi, kartalar turli
+     * enga ega bo'lsa ham "ko'chib" qolmaydi.
+     */
+    const activeScreen = $(name);
+    if (activeScreen && activeScreen.firstChild !== exitFab) {
+      activeScreen.insertBefore(exitFab, activeScreen.firstChild);
+    }
+    exitFab.classList.remove("hidden");
+  }
+}
+
+/* =========================================================
+   FIREBASE'GA ANONIM KIRISH
+========================================================= */
+
+async function ensureAuth() {
+  if (auth.currentUser) return auth.currentUser;
+
+  try {
+    const cred = await signInAnonymously(auth);
+    return cred.user;
+  } catch (e) {
+    console.error("Anonim kirish xatosi:", e);
+    throw e;
+  }
+}
+
+/* =========================================================
+   AVTOMATIK QAYTA ULANISH
+========================================================= */
+
+async function tryAutoRejoin() {
+  const saved = localStorage.getItem("activeRoomPlayer");
+
+  if (!saved) return false;
+
+  let parsed;
+
+  try {
+    parsed = JSON.parse(saved);
+  } catch {
+    return false;
+  }
+
+  if (!parsed?.roomCode || !parsed?.playerId) {
+    return false;
+  }
+
+  try {
+    await ensureAuth();
+
+    const snap = await getDoc(
+      doc(db, "rooms", parsed.roomCode)
+    );
+
+    if (!snap.exists()) {
+      localStorage.removeItem("activeRoomPlayer");
+      return false;
+    }
+
+    /*
+     * MUHIM TUZATISH: ilgari faqat XONA hujjati
+     * borligi tekshirilardi. Lekin agar host xonani
+     * "to'g'ri" yopmasdan (masalan brauzerni shunchaki
+     * yopib) tashlab ketgan bo'lsa, xona hujjati
+     * Firestore'da ABADIY qolib ketaveradi — va har safar
+     * shu qurilmadan kirganda eski, allaqachon tugagan
+     * xonaga "qo'shildingiz" deb qayta kiritib yuborardi.
+     *
+     * Shu sabab endi: agar xona 8 soatdan ko'proq oldin
+     * yaratilgan bo'lsa — uni "tashlab ketilgan" deb
+     * hisoblaymiz va avtomatik qo'shilmaymiz.
+     */
+    const roomData = snap.data();
+    const ROOM_STALE_MS = 8 * 60 * 60 * 1000; // 8 soat
+
+    if (
+      roomData?.createdAt &&
+      Date.now() - Number(roomData.createdAt) > ROOM_STALE_MS
+    ) {
+      localStorage.removeItem("activeRoomPlayer");
+      return false;
+    }
+
+    /*
+     * IKKINCHI TUZATISH: xona hujjati bor bo'lsa ham,
+     * O'ZINING ishtirokchi hujjati o'chirilgan bo'lishi
+     * mumkin (host tomonidan chiqarib yuborilgan, yoki
+     * "Xonadan chiqish" tugmasi orqali o'zi chiqqan).
+     * Bu holatda ham qayta kiritmaymiz.
+     */
+    const playerSnap = await getDoc(
+      doc(db, "rooms", parsed.roomCode, "players", parsed.playerId)
+    );
+
+    if (!playerSnap.exists()) {
+      localStorage.removeItem("activeRoomPlayer");
+      return false;
+    }
+
+    roomCode = parsed.roomCode;
+    playerId = parsed.playerId;
+    playerName = parsed.name;
+
+    startListening();
+
+    return true;
+  } catch (e) {
+    console.warn("Auto-rejoin:", e);
+    return false;
+  }
+}
+
+/* =========================================================
+   XONAGA QO'SHILISH
+========================================================= */
+
+async function joinRoom() {
+  const code = ($("joinCode")?.value || "").trim();
+  const name = ($("joinName")?.value || "").trim();
+
+  const errorEl = $("joinError");
+
+  const hideError = () => errorEl?.classList.add("hidden");
+
+  const showError = msg => {
+    if (errorEl) {
+      errorEl.textContent = msg;
+      errorEl.classList.remove("hidden");
+    }
+  };
+
+  hideError();
+
+  if (!/^\d{6}$/.test(code)) {
+    showError("6 xonali xona kodini kiriting!");
+    return;
+  }
+
+  if (!name) {
+    showError("Ismingizni kiriting!");
+    return;
+  }
+
+  const joinBtn = $("joinBtn");
+
+  if (joinBtn) {
+    joinBtn.disabled = true;
+    joinBtn.textContent = "Kirilmoqda...";
+  }
+
+  try {
+    await ensureAuth();
+
+    const roomRef = doc(db, "rooms", code);
+    const snap = await getDoc(roomRef);
+
+    if (!snap.exists()) {
+      showError("Bunday xona topilmadi!");
+      return;
+    }
+
+    const room = snap.data();
+
+    roomCode = code;
+    playerName = name;
+
+    playerId =
+      "p_" +
+      Date.now() +
+      "_" +
+      Math.random().toString(36).slice(2, 8);
+
+    await setDoc(
+      doc(db, "rooms", code, "players", playerId),
+      {
+        uid: auth.currentUser?.uid || null,
+        name,
+        correctCount: 0,
+        wrongCount: 0,
+        totalTimeMs: 0,
+        roundId: room.roundId || 1,
+        answeredIndex: -1,
+        finishedRound: false,
+        lastAnswerChoice: null,
+        lastAnswerCorrect: null,
+        joinedAt: Date.now()
+      }
+    );
+
+    localStorage.setItem(
+      "activeRoomPlayer",
+      JSON.stringify({ roomCode: code, playerId, name })
+    );
+
+    startListening();
+  } catch (e) {
+    console.error(e);
+    showError("Xatolik yuz berdi: " + (e?.message || e));
+  } finally {
+    if (joinBtn) {
+      joinBtn.disabled = false;
+      joinBtn.textContent = "Kirish";
+    }
+  }
+}
+
+window.joinRoom = joinRoom;
+
+/* =========================================================
+   JONLI TINGLASH
+========================================================= */
+
+function startListening() {
+  showScreen("lobbyScreen");
+
+  const nameEl = $("lobbyName");
+  if (nameEl) nameEl.textContent = "👤 " + playerName;
+
+  roomUnsub?.();
+  playerUnsub?.();
+  playersListUnsub?.();
+
+  subscribeRoomChat();
+
+  roomUnsub = onSnapshot(
+    doc(db, "rooms", roomCode),
+    snap => {
+      if (!snap.exists()) {
+        alert("Xona yopildi.");
+        resetToJoin();
+        return;
+      }
+
+      const prevRoundId = roomData?.roundId;
+
+      roomData = snap.data();
+
+      const roundChanged =
+        prevRoundId !== undefined &&
+        prevRoundId !== roomData.roundId;
+
+      if (roundChanged) {
+        currentTimerIndex = -1;
+        showingReveal = false;
+        clearLocalTimer();
+
+        /*
+         * XATOLIK TUZATILDI: ilgari bu yerda faqat MAHALLIY
+         * (local) holat tozalanardi — Firestore'dagi o'z
+         * ishtirokchi hujjatimizdagi correctCount/wrongCount
+         * hech qachon 0'ga qaytarilmasdi. Natijada nazoratchi
+         * yangi mavzu tanlab davom ettirganda, bizning eski
+         * ballarimiz yangi raundnikiga QO'SHILIB ketaverardi.
+         * Xona hujjati (roundId) o'zgarganini ko'rgan zahoti,
+         * agar o'zimizning hujjatimiz hali eski roundId'da
+         * bo'lsa — darhol reset qilamiz.
+         */
+        if (
+          playerData &&
+          playerData.roundId !== roomData.roundId
+        ) {
+          resetPlayerRoundProgress();
+        }
+      }
+
+      renderRoomState();
+    },
+    e => {
+      console.error("room listen:", e);
+    }
+  );
+
+  playerUnsub = onSnapshot(
+    doc(db, "rooms", roomCode, "players", playerId),
+    snap => {
+      if (!snap.exists()) {
+        alert("Siz xonadan chiqarildingiz.");
+        resetToJoin();
+        return;
+      }
+
+      playerData = snap.data();
+
+      /*
+       * Ikkinchi tekshiruv: agar xona hujjati bizning
+       * hujjatimizdan OLDIN kelib ulgurgan bo'lsa (poyga
+       * holati), shu yerda ham reset qilinadi. Bir marta
+       * reset qilingandan so'ng roundId'lar tenglashadi va
+       * bu shart qayta ishga tushmaydi (cheksiz yozuvning
+       * oldi olinadi).
+       */
+      if (
+        roomData &&
+        playerData.roundId !== roomData.roundId
+      ) {
+        resetPlayerRoundProgress();
+      }
+
+      renderRoomState();
+    },
+    e => {
+      console.error("player listen:", e);
+    }
+  );
+
+  playersListUnsub = onSnapshot(
+    collection(db, "rooms", roomCode, "players"),
+    snap => {
+      roomPlayers = snap.docs.map(d => ({
+        id: d.id,
+        ...d.data()
+      }));
+
+      renderRoomState();
+    },
+    e => {
+      console.error("players list listen:", e);
+    }
+  );
+}
+
+/*
+ * YANGI RAUND BOSHLANGANDA O'ZIMIZNING XONADAGI
+ * HUJJATIMIZNI (correctCount/wrongCount/answeredIndex/...)
+ * 0'GA QAYTARISH. Bu game.js'dagi resetHostRoundProgress()
+ * bilan bir xil mantiq — xona egasi (agar u ham o'ynasa)
+ * uchun bu logika allaqachon bor edi, lekin oddiy
+ * ishtirokchilar uchun umuman yo'q edi.
+ */
+async function resetPlayerRoundProgress() {
+  if (!roomCode || !playerId || !roomData) return;
+
+  currentTimerIndex = -1;
+  showingReveal = false;
+  clearLocalTimer();
+
+  try {
+    await updateDoc(
+      doc(db, "rooms", roomCode, "players", playerId),
+      {
+        roundId: roomData.roundId,
+        answeredIndex: -1,
+        finishedRound: false,
+        correctCount: 0,
+        wrongCount: 0,
+        totalTimeMs: 0,
+        lastAnswerChoice: null,
+        lastAnswerCorrect: null
+      }
+    );
+  } catch (e) {
+    console.warn("player round reset:", e);
+  }
+}
+
+function resetToJoin() {
+  roomUnsub?.();
+  playerUnsub?.();
+  playersListUnsub?.();
+  chatUnsub?.();
+
+  roomUnsub = null;
+  playerUnsub = null;
+  playersListUnsub = null;
+  chatUnsub = null;
+  chatMessages = [];
+
+  clearLocalTimer();
+  currentTimerIndex = -1;
+
+  roomCode = null;
+  playerId = null;
+  playerData = null;
+  roomData = null;
+  roomPlayers = [];
+
+  localStorage.removeItem("activeRoomPlayer");
+
+  showScreen("joinScreen");
+}
+
+/*
+ * O'YINCHI O'ZI XONADAN CHIQISHI:
+ * Ilgari bu imkoniyat umuman yo'q edi — shu sabab odam
+ * brauzerni shunchaki yopib "chiqib ketgan" bo'lardi, lekin
+ * tizim buni bilmasdi va keyingi safar avtomatik yana o'sha
+ * (aslida tugagan) xonaga qo'shib qo'yardi.
+ */
+async function leaveRoom() {
+  if (!confirm("Xonadan chiqmoqchimisiz?")) return;
+
+  try {
+    if (roomCode && playerId) {
+      await deleteDoc(
+        doc(db, "rooms", roomCode, "players", playerId)
+      );
+    }
+  } catch (e) {
+    console.warn("Xonadan chiqishda xatolik:", e);
+  }
+
+  resetToJoin();
+}
+
+document.getElementById("leaveRoomBtn")?.addEventListener("click", leaveRoom);
+document.getElementById("roomExitFab")?.addEventListener("click", leaveRoom);
+
+/* =========================================================
+   XONA CHATI — lobbi va yakun ekranida umumiy chat
+========================================================= */
+
+function subscribeRoomChat() {
+  chatUnsub?.();
+
+  chatUnsub = onSnapshot(
+    query(
+      collection(db, "rooms", roomCode, "messages"),
+      orderBy("createdAt", "asc"),
+      limit(200)
+    ),
+    snap => {
+      chatMessages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderChatMessages();
+    },
+    e => console.warn("chat listen:", e)
+  );
+}
+
+async function sendChatMessage(text) {
+  const trimmed = (text || "").trim();
+
+  if (!trimmed || !roomCode || !playerId) return;
+
+  try {
+    await addDoc(
+      collection(db, "rooms", roomCode, "messages"),
+      {
+        text: trimmed.slice(0, 300),
+        name: playerName || "O‘yinchi",
+        senderId: playerId,
+        isHost: false,
+        createdAt: Date.now()
+      }
+    );
+  } catch (e) {
+    console.warn("chat send:", e);
+  }
+}
+
+function renderChatMessages() {
+  const html = chatMessages
+    .map(m => {
+      const isMe = m.senderId === playerId;
+
+      return `
+        <div class="chatBubble${isMe ? " isMe" : ""}${m.isHost ? " isHost" : ""}">
+          <span class="chatBubbleName">${escapeHtml(m.name || "—")}${m.isHost ? " 👑" : ""}</span>
+          <span class="chatBubbleText">${escapeHtml(m.text || "")}</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  ["lobbyChatMessages", "roundDoneChatMessages"].forEach(id => {
+    const el = $(id);
+    if (!el) return;
+
+    el.innerHTML = html;
+    el.scrollTop = el.scrollHeight;
+  });
+}
+
+function wireChatInput(inputId, btnId) {
+  const input = $(inputId);
+  const btn = $(btnId);
+
+  const submit = () => {
+    if (!input) return;
+    sendChatMessage(input.value);
+    input.value = "";
+  };
+
+  btn?.addEventListener("click", submit);
+
+  input?.addEventListener("keydown", e => {
+    if (e.key === "Enter") submit();
+  });
+}
+
+wireChatInput("lobbyChatInput", "lobbyChatSendBtn");
+wireChatInput("roundDoneChatInput", "roundDoneChatSendBtn");
+
+/* =========================================================
+   LOBBY RO'YXATI
+========================================================= */
+
+function renderLobbyPlayers() {
+  const box = $("lobbyPlayersList");
+
+  if (!box) return;
+
+  box.innerHTML = roomPlayers
+    .map(
+      p => `
+        <span class="lobbyPlayerChip">
+          ${escapeHtml(p.name)}
+        </span>
+      `
+    )
+    .join("");
+}
+
+/* =========================================================
+   ASOSIY HOLAT BOSHQARUVI
+========================================================= */
+
+function renderRoomState() {
+  if (!roomData || !playerData) return;
+
+  if (roomData.status === "lobby") {
+    renderLobbyPlayers();
+    showScreen("lobbyScreen");
+    return;
+  }
+
+  if (roomData.status === "playing") {
+    renderQuestionOrWaiting();
+    return;
+  }
+
+  if (roomData.status === "finished") {
+    renderRoundDone();
+    return;
+  }
+}
+
+function clearLocalTimer() {
+  if (localTimerInterval) {
+    clearInterval(localTimerInterval);
+    localTimerInterval = null;
+  }
+}
+
+function renderRoundSyncing() {
+  showScreen("questionScreen");
+
+  const roundLabel = $("qRoundLabel");
+  if (roundLabel) roundLabel.textContent = "YANGI RAUND";
+
+  const scoreLabel = $("qScoreLabel");
+  if (scoreLabel) scoreLabel.textContent = "✅ 0 · ❌ 0";
+
+  const qText = $("qText");
+  if (qText) qText.textContent = "Yangi raund tayyorlanmoqda...";
+
+  const optsBox = $("qOptions");
+  if (optsBox) optsBox.innerHTML = "";
+
+  const ring = $("qTimerRing");
+  if (ring) ring.textContent = "⏳";
+
+  clearLocalTimer();
+}
+
+function renderQuestionOrWaiting() {
+  const questions = roomData.questions || [];
+  const idx = roomData.currentIndex ?? 0;
+  const q = questions[idx];
+
+  if (!q) {
+    renderRoundDone();
+    return;
+  }
+
+  /*
+   * Xona yangi raundga o'tgan, lekin bizning
+   * hujjatimizdagi ball hali reset bo'lishini
+   * kutmoqda (bir zumlik holat). Shu daqiqada
+   * savolni ko'rsatib, javob berishga ruxsat
+   * bersak, eski balga yangisi qo'shilib ketishi
+   * mumkin edi — shu sabab bu yerda to'xtaymiz.
+   */
+  if (playerData.roundId !== roomData.roundId) {
+    renderRoundSyncing();
+    return;
+  }
+
+  if (playerData.finishedRound) {
+    renderRoundDone();
+    return;
+  }
+
+  const alreadyAnswered = playerData.answeredIndex === idx;
+
+  if (currentTimerIndex !== idx) {
+    currentTimerIndex = idx;
+    showingReveal = false;
+    advanceLock = false;
+  }
+
+  if (showingReveal) {
+    renderReveal(q);
+    return;
+  }
+
+  showScreen("questionScreen");
+
+  const roundLabel = $("qRoundLabel");
+  if (roundLabel) {
+    roundLabel.textContent =
+      "SAVOL " + (idx + 1) + "/" + questions.length;
+  }
+
+  const scoreLabel = $("qScoreLabel");
+  if (scoreLabel) {
+    scoreLabel.textContent =
+      "✅ " + (playerData.correctCount || 0) +
+      " · ❌ " + (playerData.wrongCount || 0);
+  }
+
+  const textEl = $("qText");
+  if (textEl) textEl.textContent = q.text || q.q || "";
+
+  const optsBox = $("qOptions");
+
+  if (optsBox) {
+    const options = q.options || q.opts || [];
+
+    optsBox.innerHTML = options
+      .map((opt, i) => {
+        const cls = OPTION_CLASSES[i % OPTION_CLASSES.length];
+        const chosen =
+          alreadyAnswered && playerData.lastAnswerChoice === i;
+
+        return `
+          <button
+            type="button"
+            class="qOptionBtn ${cls}${chosen ? " chosen" : ""}"
+            data-idx="${i}"
+            ${alreadyAnswered ? "disabled" : ""}
+          >${escapeHtml(opt)}</button>
+        `;
+      })
+      .join("");
+
+    optsBox.querySelectorAll(".qOptionBtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        submitAnswer(idx, Number(btn.dataset.idx), q);
+      });
+    });
+  }
+
+  renderQuestionParticipants(idx);
+
+  startLocalTimer(q, idx, alreadyAnswered);
+}
+
+function renderQuestionParticipants(idx) {
+  const box = $("qParticipants");
+
+  if (!box) return;
+
+  box.innerHTML = `
+    <div class="qParticipantsLabel">Ishtirokchilar</div>
+    <div class="qParticipantChips">
+      ${roomPlayers
+        .map(p => {
+          const answered = p.answeredIndex === idx || p.finishedRound;
+          const isMe = p.id === playerId;
+
+          return `
+            <span class="qParticipantChip${answered ? " answered" : ""}${isMe ? " isMe" : ""}">
+              ${escapeHtml(p.name)}${answered ? " ✅" : ""}
+            </span>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function startLocalTimer(q, idx, alreadyAnswered) {
+  clearLocalTimer();
+
+  const seconds = Number(q.seconds || q.time || 10);
+  const ring = $("qTimerRing");
+
+  if (alreadyAnswered) {
+    if (ring) ring.textContent = "⏳";
+
+    const waitNote = document.createElement("div");
+    waitNote.className = "qWaitingNote";
+    waitNote.textContent = "Javobingiz qabul qilindi — boshqalarni kutmoqdamiz...";
+
+    const optsBox = $("qOptions");
+    if (optsBox && !optsBox.nextElementSibling?.classList?.contains("qWaitingNote")) {
+      optsBox.insertAdjacentElement("afterend", waitNote);
+    }
+    return;
+  }
+
+  let remaining = seconds;
+  if (ring) ring.textContent = String(remaining);
+
+  const startedAt = Date.now();
+
+  localTimerInterval = setInterval(() => {
+    remaining = Math.max(
+      0,
+      seconds - Math.floor((Date.now() - startedAt) / 1000)
+    );
+
+    if (ring) ring.textContent = String(remaining);
+
+    if (remaining <= 0) {
+      clearLocalTimer();
+      submitAnswer(idx, -1, q, true);
+    }
+  }, 250);
+}
+
+/*
+ * MUHIM TUZATISH: xona savollari (game.js tomonidan
+ * tayyorlanadi) da "correct" maydoni INDEKS emas —
+ * balki to'g'ri javobning O'ZI (matn, masalan "Parij")
+ * sifatida saqlanadi! Shu sabab avvalgi kod
+ * Number(q.correct) qilib NaN hosil qilardi — natijada:
+ *  1) "To'g'ri javob" har doim "—" bo'lib chiqardi
+ *  2) Hech qanday javob "to'g'ri" deb hisoblanmasdi
+ *     (chunki hech narsa NaN ga teng bo'lolmaydi)
+ * Bu funksiya avval sonli indeksni sinaydi, topilmasa
+ * variantlar ichidan MATN bo'yicha mos kelganini qidiradi.
+ */
+function resolveCorrectIndex(q, options) {
+  const asIndex = Number(q.correctIndex);
+
+  if (
+    Number.isInteger(asIndex) &&
+    asIndex >= 0 &&
+    asIndex < options.length
+  ) {
+    return asIndex;
+  }
+
+  const correctText = String(q.correct ?? "").trim().toLowerCase();
+
+  if (correctText) {
+    const found = options.findIndex(
+      opt => String(opt ?? "").trim().toLowerCase() === correctText
+    );
+    if (found !== -1) return found;
+  }
+
+  return -1;
+}
+
+async function submitAnswer(idx, choiceIdx, q, isTimeout = false) {
+  if (advanceLock) return;
+  if (playerData.answeredIndex === idx) return;
+
+  /*
+   * MUHIM (POYGA HOLATI TUZATILDI): agar xona allaqachon
+   * yangi raundga o'tgan bo'lsa-yu, bizning hujjatimizdagi
+   * "reset" (roundId) hali ulgurmagan bo'lsa — bu yerda
+   * to'xtaymiz. Aks holda quyidagi yozuv eski (hali
+   * nolga tushmagan) balga qo'shilib, "eng tez javob
+   * bergan" ishtirokchida ball noto'g'ri o'sib ketardi —
+   * chunki ular yangi savolga eng birinchi javob
+   * berishga ulguraverishar edi.
+   */
+  if (
+    !roomData ||
+    playerData.roundId !== roomData.roundId
+  ) {
+    return;
+  }
+
+  advanceLock = true;
+  clearLocalTimer();
+
+  const options = q.options || q.opts || [];
+  const correctIdx = resolveCorrectIndex(q, options);
+  const isCorrect = !isTimeout && choiceIdx === correctIdx;
+
+  const timeMs = Date.now() - (roomData.questionStartedAt || Date.now());
+
+  /*
+   * MUHIM TUZATISH: bu qator ilgari umuman yo'q edi.
+   * game.js'da (xona egasi javob berganda) shu bilan
+   * bir xil "isDone" hisoblanib, "finishedRound: isDone"
+   * deb yozilardi — lekin xonaga QO'SHILGAN o'yinchilar
+   * uchun bu HECH QACHON yozilmagan edi. Natijada:
+   *  1) Reyting jadvalida ular oxirigacha "⏳" bo'lib
+   *     ko'rinaverar edi (o'yin tugagan bo'lsa ham)
+   *  2) G'olib banneri xonaga qo'shilganlarga UMUMAN
+   *     chiqmasdi (chunki hech qachon "tugatgan" deb
+   *     belgilanmagan edilar)
+   */
+  const isDone = idx >= (roomData.totalQuestions - 1);
+
+  try {
+    await updateDoc(
+      doc(db, "rooms", roomCode, "players", playerId),
+      {
+        answeredIndex: idx,
+        finishedRound: isDone,
+        lastAnswerChoice: choiceIdx,
+        lastAnswerCorrect: isCorrect,
+        /*
+         * Endi mahalliy (local) qiymatga qo'shish o'rniga
+         * Firestore'ning ATOMIK increment() usuli
+         * ishlatiladi — shunda mahalliy nusxa vaqtincha
+         * eskirgan (stale) bo'lib qolgan taqdirda ham,
+         * server har doim O'ZINING joriy qiymatidan
+         * hisoblaydi, hech qachon eski raunddan qolgan
+         * balga "qo'shilib" ketmaydi.
+         */
+        correctCount:
+          increment(isCorrect ? 1 : 0),
+        wrongCount:
+          increment(isCorrect ? 0 : 1),
+        totalTimeMs:
+          increment(Math.max(0, timeMs))
+      }
+    );
+  } catch (e) {
+    console.error("submitAnswer:", e);
+  }
+
+  showingReveal = true;
+  renderReveal(q, isCorrect);
+
+  advanceLock = false;
+}
+
+function renderReveal(q, isCorrectOverride) {
+  showScreen("revealScreen");
+
+  const options = q.options || q.opts || [];
+  const correctIdx = resolveCorrectIndex(q, options);
+
+  const isCorrect =
+    isCorrectOverride !== undefined
+      ? isCorrectOverride
+      : playerData?.lastAnswerCorrect;
+
+  const markEl = $("revealMark");
+  if (markEl) {
+    markEl.textContent = isCorrect ? "✅" : "❌";
+    markEl.className =
+      "revealMark " + (isCorrect ? "isCorrect" : "isWrong");
+  }
+
+  const correctEl = $("revealCorrectAnswer");
+  if (correctEl) {
+    const correctText =
+      options[correctIdx] || q.correct || "—";
+
+    correctEl.innerHTML =
+      "To‘g‘ri javob: <strong>" +
+      escapeHtml(correctText) +
+      "</strong>";
+  }
+
+  const scoreEl = $("revealScoreValue");
+  if (scoreEl) {
+    scoreEl.textContent =
+      "✅ " + (playerData?.correctCount || 0) +
+      " · ❌ " + (playerData?.wrongCount || 0);
+  }
+}
+
+function renderRoundDone() {
+  showScreen("roundDoneScreen");
+
+  const scoreEl = $("roundDoneScore");
+  if (scoreEl) {
+    scoreEl.textContent =
+      "✅ " + (playerData?.correctCount || 0) + " ta to‘g‘ri";
+  }
+
+  const statsEl = $("roundDoneStats");
+  if (statsEl) {
+    const seconds = ((Number(playerData?.totalTimeMs) || 0) / 1000).toFixed(1);
+    statsEl.textContent =
+      "❌ " + (playerData?.wrongCount || 0) +
+      " ta xato · ⏱ " + seconds + "s";
+  }
+
+  renderLeaderboardInto("roundDoneLeaderboard");
+
+  maybeShowWinBanner();
+}
+
+let roomWinnerModalShownFor = null;
+
+function maybeShowWinBanner() {
+  /*
+   * XATOLIK TUZATILDI: bu yerda "roomData.finished" deb
+   * tekshirilardi — lekin bunday maydon UMUMAN yo'q edi
+   * (game.js xona hujjatiga "status: 'finished'" deb
+   * yozadi, "finished: true" emas). Shu sabab bu shart
+   * hech qachon rost bo'lmay, banner xonaga qo'shilgan
+   * hech kimga chiqmasdi (faqat xona egasida, chunki
+   * uning bannerini game.js boshqa yo'l bilan ko'rsatadi).
+   */
+  if (roomData?.status !== "finished") return;
+  if (roomWinnerModalShownFor === roomData.roundId) return;
+
+  roomWinnerModalShownFor = roomData.roundId;
+
+  const sorted = rankRoomPlayers(roomPlayers);
+  const winner = sorted[0];
+
+  if (!winner) return;
+
+  const amIWinner = winner.id === playerId;
+
+  const overlay = document.createElement("div");
+  overlay.className = "winBannerOverlay";
+  overlay.innerHTML = `
+    <div class="winBannerCard">
+      <div class="winBannerEmoji">${amIWinner ? "🏆" : "🎉"}</div>
+      <div class="winBannerTitle">${
+        amIWinner ? "Tabriklaymiz, siz g‘oliб bo‘ldingiz!" : "G‘olib e’lon qilindi!"
+      }</div>
+      <div class="winBannerName">${escapeHtml(winner.name)}</div>
+      <div class="winBannerStats">✅ ${winner.correctCount || 0} to‘g‘ri &nbsp; ⏱ ${(
+        (Number(winner.totalTimeMs) || 0) / 1000
+      ).toFixed(1)}s</div>
+      <button type="button" class="playBtn primaryPlayBtn winBannerCloseBtn">Yopish</button>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  overlay
+    .querySelector(".winBannerCloseBtn")
+    ?.addEventListener("click", () => overlay.remove());
+}
+
+/* =========================================================
+   JONLI REYTINGNI RASM QILIB ULASHISH
+========================================================= */
+
+function wrapCanvasText(ctx, text, maxWidth) {
+  const words = String(text || "").split(" ");
+  const lines = [];
+  let line = "";
+
+  words.forEach(word => {
+    const test = line ? line + " " + word : word;
+
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  });
+
+  if (line) lines.push(line);
+
+  return lines;
+}
+
+async function buildLeaderboardImageBlob() {
+
+  const sorted = rankRoomPlayers(roomPlayers);
+
+  const ROW_H = 74;
+  const TOP = 210;
+  const BOTTOM = 70;
+
+  const W = 720;
+  const H = TOP + Math.max(sorted.length, 1) * ROW_H + BOTTOM;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+
+  const ctx = canvas.getContext("2d");
+
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, "#07111f");
+  bg.addColorStop(1, "#0b1930");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const glow1 = ctx.createRadialGradient(80, 60, 10, 80, 60, 260);
+  glow1.addColorStop(0, "rgba(32,217,255,.22)");
+  glow1.addColorStop(1, "rgba(32,217,255,0)");
+  ctx.fillStyle = glow1;
+  ctx.fillRect(0, 0, W, H);
+
+  const glow2 = ctx.createRadialGradient(W - 80, 90, 10, W - 80, 90, 280);
+  glow2.addColorStop(0, "rgba(140,92,255,.24)");
+  glow2.addColorStop(1, "rgba(140,92,255,0)");
+  ctx.fillStyle = glow2;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#f7f9fc";
+  ctx.font = "900 34px Inter, Arial, sans-serif";
+  ctx.fillText("Beks Game", W / 2, 70);
+
+  ctx.fillStyle = "#20d9ff";
+  ctx.font = "800 15px Inter, Arial, sans-serif";
+  ctx.fillText("JONLI REYTING", W / 2, 100);
+
+  if (roomData?.topicTitle) {
+    ctx.fillStyle = "#9eacc0";
+    ctx.font = "700 17px Inter, Arial, sans-serif";
+    const topicLines = wrapCanvasText(ctx, roomData.topicTitle, W - 140);
+    topicLines.slice(0, 1).forEach(line => {
+      ctx.fillText(line, W / 2, 135);
+    });
+  }
+
+  const rowX = 50;
+  const rowW = W - 100;
+
+  sorted.forEach((p, i) => {
+
+    const y = TOP + i * ROW_H;
+    const rowH = ROW_H - 14;
+    const radius = 16;
+
+    ctx.beginPath();
+    ctx.moveTo(rowX + radius, y);
+    ctx.arcTo(rowX + rowW, y, rowX + rowW, y + rowH, radius);
+    ctx.arcTo(rowX + rowW, y + rowH, rowX, y + rowH, radius);
+    ctx.arcTo(rowX, y + rowH, rowX, y, radius);
+    ctx.arcTo(rowX, y, rowX + rowW, y, radius);
+    ctx.closePath();
+
+    if (i === 0) {
+      const winBg = ctx.createLinearGradient(rowX, y, rowX + rowW, y + rowH);
+      winBg.addColorStop(0, "rgba(32,217,255,.22)");
+      winBg.addColorStop(1, "rgba(255,255,255,.04)");
+      ctx.fillStyle = winBg;
+      ctx.strokeStyle = "rgba(32,217,255,.55)";
+    } else {
+      ctx.fillStyle = "rgba(255,255,255,.045)";
+      ctx.strokeStyle = "rgba(255,255,255,.14)";
+    }
+
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const isMe = p.id === playerId;
+
+    if (isMe) {
+      ctx.strokeStyle = "rgba(32,217,255,.8)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    const centerY = y + rowH / 2 + 8;
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = i === 0 ? "#20d9ff" : "#8fa3b9";
+    ctx.font = "900 26px Inter, Arial, sans-serif";
+    ctx.fillText(i === 0 ? "🏆" : "#" + (i + 1), rowX + 22, centerY);
+
+    ctx.fillStyle = "#f1f6fb";
+    ctx.font = "800 24px Inter, Arial, sans-serif";
+    const nameLines = wrapCanvasText(ctx, p.name || "—", rowW - 220);
+    ctx.fillText(nameLines[0] || "—", rowX + 90, centerY);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#67e8f9";
+    ctx.font = "900 26px Inter, Arial, sans-serif";
+    ctx.fillText(
+      "✅" + (p.correctCount || 0),
+      rowX + rowW - 24,
+      centerY
+    );
+  });
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#5c6c82";
+  ctx.font = "700 14px Inter, Arial, sans-serif";
+  ctx.fillText("Xona kodi: " + (roomCode || "—"), W / 2, H - 28);
+
+  return await new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob), "image/png");
+  });
+}
+
+async function shareLeaderboardImage() {
+  const btn = $("shareLeaderboardBtn");
+  const originalText = btn?.textContent;
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Tayyorlanmoqda...";
+  }
+
+  try {
+    const blob = await buildLeaderboardImageBlob();
+
+    if (!blob) throw new Error("Rasm yaratilmadi");
+
+    const file = new File(
+      [blob],
+      "reyting.png",
+      { type: "image/png" }
+    );
+
+    if (
+      navigator.canShare &&
+      navigator.canShare({ files: [file] })
+    ) {
+      await navigator.share({
+        files: [file],
+        title: "Beks Game — jonli reyting",
+        text: "Jonli xona reytingi!"
+      });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "reyting.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+  } catch (e) {
+    if (e?.name !== "AbortError") {
+      console.warn("Reytingni ulashishda xato:", e);
+      alert("Rasmni ulashib bo‘lmadi: " + (e?.message || e));
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = originalText || "📤 Ulashish";
+    }
+  }
+}
+
+$("shareLeaderboardBtn")?.addEventListener("click", shareLeaderboardImage);
+
+/* =========================================================
+   JONLI REYTING (bir necha ekranda ishlatiladi)
+========================================================= */
+
+function renderLeaderboardInto(containerId) {
+  const el = $(containerId);
+
+  if (!el) return;
+
+  const sorted = rankRoomPlayers(roomPlayers);
+
+  el.innerHTML = sorted
+    .map(
+      (p, i) => `
+        <div class="liveLeaderRow${
+          p.id === playerId ? " isMe" : ""
+        }">
+          <span>${i === 0 ? "🏆" : "#" + (i + 1)}</span>
+          <strong>${escapeHtml(p.name)}</strong>
+          <span>✅${p.correctCount || 0} · ❌${p.wrongCount || 0} · ${(
+        (Number(p.totalTimeMs) || 0) / 1000
+      ).toFixed(1)}s${p.finishedRound ? " ✅" : " ⏳"}</span>
+        </div>
+      `
+    )
+    .join("");
+}
+
+/* =========================================================
+   ISHGA TUSHIRISH
+========================================================= */
+
+$("joinBtn")?.addEventListener("click", joinRoom);
+
+$("joinCode")?.addEventListener("keydown", e => {
+  if (e.key === "Enter") $("joinName")?.focus();
+});
+
+$("joinName")?.addEventListener("keydown", e => {
+  if (e.key === "Enter") joinRoom();
+});
+
+(async () => {
+  const urlCode = new URLSearchParams(
+    window.location.search
+  ).get("code");
+
+  const hasValidUrlCode = urlCode && /^\d{6}$/.test(urlCode);
+
+  /*
+   * Agar link ichida yangi xona kodi (?code=) bo'lsa va bu
+   * qurilmada localStorage'da BOSHQA (eski) xonaga oid
+   * "activeRoomPlayer" saqlangan bo'lsa — o'sha eski
+   * sessiyani o'chirib tashlaymiz. Aks holda tryAutoRejoin()
+   * URL'dagi yangi kodni butunlay e'tiborsiz qoldirib,
+   * qurilmani eski (balki allaqachon tugagan) xonaga
+   * avtomatik ulab qo'yardi.
+   */
+  if (hasValidUrlCode) {
+    const saved = localStorage.getItem("activeRoomPlayer");
+    let savedRoomCode = null;
+
+    if (saved) {
+      try {
+        savedRoomCode = JSON.parse(saved)?.roomCode;
+      } catch {
+        savedRoomCode = null;
+      }
+    }
+
+    if (savedRoomCode && savedRoomCode !== urlCode) {
+      localStorage.removeItem("activeRoomPlayer");
+    }
+  }
+
+  const rejoined = await tryAutoRejoin();
+
+  if (!rejoined) {
+    showScreen("joinScreen");
+  }
+})();
+  </script>
+
+</body>
+</html>

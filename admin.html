@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beks Game — Boshqaruv paneli</title>
+  <link rel="stylesheet" href="game.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- =========================
+       TOP BAR
+  ========================== -->
+  <header class="appHeader">
+    <div class="brand">
+      <div class="brandMark">
+        <img src="logo.svg" alt="Beks Game">
+      </div>
+      <div class="brandText">
+        <div class="brand-main">Boshqaruv paneli</div>
+        <div class="brand-sub">Foydalanuvchi <span class="brand-f">R</span>uxsatlari</div>
+      </div>
+    </div>
+
+    <div class="headerActions">
+      <button class="topBtn" onclick="location.href='game.html'">← O'yinga qaytish</button>
+      <button class="topBtn dangerBtn" id="adminLogoutBtn">↪ Chiqish</button>
+    </div>
+  </header>
+
+  <div class="pageWrap">
+
+    <!-- =========================
+         KIRISH TAQIQLANGAN
+    ========================== -->
+    <div id="deniedScreen" class="deniedCard hidden">
+      <div class="deniedEmoji">🔒</div>
+      <h2>Bu sahifa faqat administratorlar uchun</h2>
+      <p>Sizning hisobingizda boshqaruv paneliga kirish huquqi yo'q. Agar bu xato deb hisoblasangiz, tizim egasi bilan bog'laning.</p>
+      <button class="bigBtn primaryBtn" onclick="location.href='game.html'">O'yinga qaytish</button>
+    </div>
+
+    <!-- =========================
+         ADMIN PANEL
+    ========================== -->
+    <div id="adminPanel" class="hidden">
+
+      <div class="adminTopRow">
+        <div>
+          <span class="eyebrow">ADMIN</span>
+          <h2 style="margin:2px 0 0;font-size:20px;font-weight:900;">Foydalanuvchilar</h2>
+        </div>
+        <div class="boardSearch">
+          <input type="text" id="userSearchInput" placeholder="Ism, email yoki UID bo'yicha qidirish...">
+        </div>
+      </div>
+
+      <div class="adminStatsRow" id="adminStatsRow"></div>
+
+      <div id="usersList" class="usersList">
+        <div class="usersLoading">Yuklanmoqda...</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="adminToast" id="adminToast"></div>
+
+  <script type="module" src="admin.js"></script>
+
+</body>
+</html>
