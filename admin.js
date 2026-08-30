@@ -476,13 +476,11 @@ function renderMessages() {
         <div class="messageRow ${
           answered ? "isAnswered" : "isPending"
         }" data-id="${escapeHtml(m.id)}">
-          <div class="messageTop">
-            <div class="messageFrom">
-              <span class="messageEmail">${escapeHtml(fromLabel)}</span>
-              <span class="messageDate">${escapeHtml(
-                formatMsgDate(m.createdAt)
-              )}</span>
-            </div>
+          <div class="messageFrom">
+            <span class="messageEmail">${escapeHtml(fromLabel)}</span>
+            <span class="messageDate">${escapeHtml(
+              formatMsgDate(m.createdAt)
+            )}</span>
             <button
               type="button"
               class="messageDeleteBtn"
@@ -491,23 +489,25 @@ function renderMessages() {
             >🗑</button>
           </div>
 
-          <div class="messageText">${escapeHtml(m.message)}</div>
-
-          <div class="messageReplyBlock">
+          <div class="messageMain">
+            <div class="messageText">${escapeHtml(m.message)}</div>
             ${
               answered
-                ? `<div class="messageExistingReply"><strong>Yuborilgan javob:</strong> ${escapeHtml(
+                ? `<div class="messageExistingReply"><strong>Javob:</strong> ${escapeHtml(
                     m.adminReply
                   )}</div>`
                 : '<div class="messageStatusPending">⏳ Javob kutilmoqda</div>'
             }
-            <textarea
-              class="messageReplyInput"
-              placeholder="Javob yozing..."
-            >${escapeHtml(m.adminReply || "")}</textarea>
-            <button type="button" class="messageReplyBtn" data-action="sendReply">
-              ${answered ? "Javobni yangilash" : "Javob yuborish"}
-            </button>
+            <div class="messageReplyBlock">
+              <textarea
+                class="messageReplyInput"
+                rows="1"
+                placeholder="Javob yozing..."
+              >${escapeHtml(m.adminReply || "")}</textarea>
+              <button type="button" class="messageReplyBtn" data-action="sendReply">
+                ${answered ? "Yangilash" : "Yuborish"}
+              </button>
+            </div>
           </div>
         </div>
       `;

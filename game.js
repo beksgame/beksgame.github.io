@@ -9112,30 +9112,50 @@ function startMyMessagesListener() {
   if (!currentUserUid || isGuestUser) return;
 
   try {
+    /*
+     * MUHIM: bu yerda ATAYLAB orderBy ISHLATILMAYDI.
+     * Firestore'da "where(uid==...) + orderBy(createdAt)"
+     * kombinatsiyasi maxsus composite index talab qiladi —
+     * agar u Firebase konsolida yaratilmagan bo'lsa, so'rov
+     * xato bilan (permission/failed-precondition) muvaffaqiyatsiz
+     * tugaydi va onSnapshot HECH QANDAY ma'lumot bermaydi
+     * (aynan shu sabab avvalgi versiyada foydalanuvchi o'z
+     * murojaatlarini va admin javobini ko'ra olmagan edi).
+     * Shu sabab faqat oddiy "where" so'rovi yuboriladi,
+     * saralash esa pastda JS orqali qo'lda amalga oshiriladi.
+     */
     const q = query(
       collection(db, SUPPORT_COLLECTION),
-      where("uid", "==", currentUserUid),
-      orderBy("createdAt", "desc"),
-      limit(20)
+      where("uid", "==", currentUserUid)
     );
 
     myMessagesUnsub = onSnapshot(
       q,
       snap => {
-        myMessages = snap.docs.map(d => ({
-          id: d.id,
-          ...d.data()
-        }));
+        myMessages = snap.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => {
+            const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+            const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+            return bt - at;
+          })
+          .slice(0, 30);
 
         renderMyMessages();
         renderReplyBanners();
       },
       err => {
-        console.warn("startMyMessagesListener:", err);
+        console.error("startMyMessagesListener:", err);
+
+        if (contactModalBody) {
+          contactModalBody.innerHTML = `<div class="usersEmpty">❌ Murojaatlar tarixini yuklab bo'lmadi (${escapeHtml(
+            err?.code || err?.message || "xatolik"
+          )}). Firestore qoidalarini tekshiring.</div>`;
+        }
       }
     );
   } catch (e) {
-    console.warn("startMyMessagesListener:", e);
+    console.error("startMyMessagesListener:", e);
   }
 }
 

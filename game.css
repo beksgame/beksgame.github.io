@@ -1007,6 +1007,9 @@ select option{background:#101c31;color:#fff}
 
 .contactBody{
   text-align:left;
+  max-height:260px;
+  overflow-y:auto;
+  padding-right:4px;
 }
 
 .contactComposeWrap{
