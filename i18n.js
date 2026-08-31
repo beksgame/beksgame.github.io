@@ -44,9 +44,9 @@
       ru: "Учись быстро через игру"
     },
     "brand.tagline.game": {
-      uz: "Top <span class=\"brand-f\">F</span>ast Education",
-      en: "Top <span class=\"brand-f\">F</span>ast Education",
-      ru: "Top <span class=\"brand-f\">F</span>ast Education"
+      uz: "O‘yin bilan tez o‘rganing",
+      en: "Learn fast through play",
+      ru: "Учись быстро через игру"
     },
     "brand.tagline.admin": {
       uz: "Foydalanuvchi <span class=\"brand-f\">R</span>uxsatlari",
@@ -69,13 +69,15 @@
       en: "Open an online room — participants join in real time from other devices using the room code and compete together.",
       ru: "Откройте онлайн-комнату — участники присоединяются в реальном времени с других устройств по коду комнаты и соревнуются вместе."
     },
-    "games.duel.title": { uz: "⚔️ Duel", en: "⚔️ Duel", ru: "⚔️ Дуэль" },
+    "games.duel.title": { uz: "⚔️ Birga bir", en: "⚔️ Duel", ru: "⚔️ Дуэль" },
     "games.duel.guide": {
       uz: "Bitta qurilmada ikki kishi navbat bilan bellashadi. Ism kiritmasangiz — \"Ishtirokchi 1\" va \"Ishtirokchi 2\" nomi bilan boshlanadi.",
       en: "Two people take turns on one device. If you don't enter a name, it starts as \"Participant 1\" and \"Participant 2\".",
       ru: "Двое соревнуются по очереди на одном устройстве. Если не ввести имя, начнётся как «Участник 1» и «Участник 2»."
     },
-    "games.play.title": { uz: "🎯 Play", en: "🎯 Play", ru: "🎯 Play" },
+    "games.play.title": { uz: "🎯 O‘yin boshlash", en: "🎯 Start game", ru: "🎯 Начать игру" },
+    "games.duel.stepTitle": { uz: "⚔️ Birga bir — ishtirokchilar", en: "⚔️ Duel — participants", ru: "⚔️ Дуэль — участники" },
+    "games.play.stepTitle": { uz: "🎯 O‘yin boshlash — ishtirokchilar", en: "🎯 Start game — participants", ru: "🎯 Начать игру — участники" },
     "games.play.guide": {
       uz: "Yakka mashq qiling yoki bir nechta ishtirokchi ismini kiritib, ular orasida navbat bilan reyting shakllantiring.",
       en: "Practice alone, or enter several participant names and build a turn-by-turn ranking between them.",

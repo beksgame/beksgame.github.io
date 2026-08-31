@@ -1,0 +1,9 @@
+# Beks Game — robots.txt
+# Qidiruv botlariga saytni skanerlashga ruxsat beradi,
+# admin panelini esa qidiruv natijalaridan chetlab o'tadi.
+
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://beksgame.github.io/sitemap.xml
