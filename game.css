@@ -5,6 +5,7 @@
 ========================================================== */
 
 :root{
+  color-scheme:dark;
   --bg:#07111f;
   --bg2:#0b1930;
   --panel:rgba(14,27,48,.78);
@@ -260,53 +261,11 @@ select option{background:#101c31;color:#fff}
   border:1px solid var(--line);
   border-radius:var(--radius);
   background:
-    var(--heroBgImage, none),
     linear-gradient(115deg,rgba(32,217,255,.10),transparent 45%),
     linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.025));
-  background-size:cover;
-  background-position:center;
   box-shadow:var(--shadow);
   overflow:hidden;
   position:relative;
-}
-
-/*
- * Admin orqa fon rasmi o'rnatganda, matn har doim
- * o'qilishi uchun qorong'i qatlam qo'shiladi va
- * dekorativ blur doira (::after) o'chirib qo'yiladi.
- */
-.gameHero.hasCustomBg::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:0;
-  background:linear-gradient(115deg,rgba(6,14,26,.74),rgba(6,14,26,.5) 60%,rgba(6,14,26,.68));
-}
-
-.gameHero.hasCustomBg::after{
-  content:none;
-}
-
-.heroEditBtn{
-  position:absolute;
-  top:14px;
-  right:14px;
-  z-index:2;
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.25);
-  background:rgba(10,20,36,.55);
-  color:#fff;
-  font-size:15px;
-  line-height:1;
-  cursor:pointer;
-  backdrop-filter:blur(6px);
-}
-
-.heroEditBtn:hover{
-  background:rgba(32,217,255,.28);
-  border-color:rgba(32,217,255,.5);
 }
 
 .gameHero::after{
@@ -1168,135 +1127,31 @@ select option{background:#101c31;color:#fff}
   word-break:break-word;
 }
 
-/* ---------- BANNER (LIVE QUIZ ARENA) TAHRIRLASH MODALI ---------- */
-
-.heroEditBox{
-  width:min(480px,92vw);
-  text-align:left;
-}
-
-.heroEditBox label{
-  display:block;
-  margin:14px 0 6px;
-  color:var(--muted);
-  font-size:11px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:.04em;
-}
-
-.heroEditBox input[type="text"],
-.heroEditBox textarea{
-  width:100%;
-  padding:10px 12px;
-  border-radius:11px;
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.05);
-  color:#f1f6fb;
-  font-size:13.5px;
-  font-family:inherit;
-  resize:vertical;
-}
-
-.heroEditBox input[type="text"]:focus,
-.heroEditBox textarea:focus{
-  outline:none;
-  border-color:rgba(32,217,255,.5);
-  background:rgba(32,217,255,.06);
-}
-
-.heroImageRow{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.heroImageRow input[type="file"]{
-  flex:1 1 auto;
-  min-width:0;
-  font-size:11.5px;
-  color:var(--muted);
-}
-
-.heroEditPreview{
-  position:relative;
-  padding:22px 20px;
-  border-radius:16px;
-  border:1px solid var(--line);
-  background-size:cover;
-  background-position:center;
-  overflow:hidden;
-  margin-bottom:4px;
-}
-
-.heroEditPreview::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:0;
-  background:linear-gradient(115deg,rgba(6,14,26,.68),rgba(6,14,26,.42));
-}
-
-.heroEditPreview > *{
-  position:relative;
-  z-index:1;
-  display:block;
-}
-
-.heroEditPreviewEyebrow{
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:#8ee9ff;
-}
-
-.heroEditPreviewTitle{
-  font-size:20px;
-  font-weight:900;
-  margin:6px 0 4px;
-  letter-spacing:-.5px;
-}
-
-.heroEditPreviewSubtitle{
-  font-size:12.5px;
-  color:#d8e4f3;
-}
-
-.heroSaveStatus{
-  min-height:16px;
-  margin-top:10px;
-  color:#7CFFB2;
-  font-size:12px;
-  font-weight:800;
-}
-
 /* ---------- ADMIN JAVOBI HAQIDA BILDIRISHNOMA (HEADER OSTIDA) ---------- */
 
 .adminReplyBanners{
-  width:min(1480px,calc(100% - 32px));
+  width:min(620px,calc(100% - 32px));
   margin:0 auto 20px;
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:8px;
 }
 
 .adminReplyBanner{
   display:flex;
   align-items:flex-start;
-  gap:12px;
-  padding:14px 16px;
-  border-radius:16px;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:13px;
   border:1px solid rgba(255,200,87,.5);
-  border-left:4px solid #ffc857;
+  border-left:3px solid #ffc857;
   background:rgba(255,200,87,.1);
   box-shadow:var(--shadowSmall);
 }
 
 .adminReplyIcon{
   flex:0 0 auto;
-  font-size:18px;
+  font-size:15px;
   line-height:1;
 }
 
@@ -1304,8 +1159,8 @@ select option{background:#101c31;color:#fff}
   flex:1 1 auto;
   min-width:0;
   color:#fff3d9;
-  font-size:13.5px;
-  line-height:1.5;
+  font-size:12px;
+  line-height:1.45;
   white-space:pre-wrap;
   word-break:break-word;
 }
@@ -1316,13 +1171,13 @@ select option{background:#101c31;color:#fff}
 
 .adminReplyCloseBtn{
   flex:0 0 auto;
-  width:28px;
-  height:28px;
-  border-radius:9px;
+  width:22px;
+  height:22px;
+  border-radius:7px;
   border:1px solid rgba(255,255,255,.2);
   background:rgba(255,255,255,.08);
   color:#fff3d9;
-  font-size:16px;
+  font-size:13px;
   line-height:1;
   cursor:pointer;
 }
@@ -1859,6 +1714,14 @@ select option{background:#101c31;color:#fff}
 }
 .team strong{margin-top:7px}
 .team span{margin:6px 0 2px;font-size:34px}
+.team span.hidden{display:none!important}
+.teamStatLine{
+  margin:2px 0 4px;
+  font-size:11.5px;
+  font-weight:800;
+  color:#cbd7e7;
+  letter-spacing:.2px;
+}
 .teamStatus{color:#6f8198;font-size:8px;font-weight:900;letter-spacing:1px}
 .team .closeBtn{z-index:3}
 
@@ -2466,6 +2329,28 @@ select option{background:#101c31;color:#fff}
   letter-spacing: 2px;
 }
 
+/* SAVOL RAQAMI / NECHTASIGA JAVOB BERILGANI */
+#modal .questionTop .questionProgress {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  text-align: center;
+
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media(max-width: 560px){
+  #modal .questionTop .questionProgress {
+    font-size: 10.5px;
+  }
+}
+
 
 /* TIMER */
 #modal #timer {
@@ -2670,6 +2555,16 @@ select option{background:#101c31;color:#fff}
   opacity: .75;
 }
 
+/* Ballik hisob o'chirilganda (to'g'ri/xato belgisi) —
+   raqamli ball bilan bir xil emas, ancha kichikroq bo'lishi kerak */
+.participantLiveScore.participantLiveScoreCW {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* =========================================
    LIVE PARTICIPANTS — SCROLL CONTAINER
 ========================================= */
@@ -2730,7 +2625,7 @@ select option{background:#101c31;color:#fff}
   padding:14px !important;
   grid-template-columns:
     repeat(
-      2,
+      3,
       minmax(0, 1fr)
     ) !important;
   gap:0 !important;
@@ -2744,7 +2639,9 @@ select option{background:#101c31;color:#fff}
 
 .settingsToggleBar{
   display:flex;
+  align-items:center;
   justify-content:flex-end;
+  gap:8px;
   margin-top:12px;
 }
 
@@ -2768,7 +2665,7 @@ select option{background:#101c31;color:#fff}
   display:none !important;
 }
 
-.controlDock > .toolBox {
+.controlDock .toolBox {
   min-width: 0 !important;
   min-height: 0 !important;
   height: 100% !important;
@@ -2791,34 +2688,86 @@ select option{background:#101c31;color:#fff}
   box-sizing: border-box !important;
 }
 
+.controlDock > .questionCardToolBox {
+  border-right:1px solid rgba(255,255,255,.10) !important;
+}
 
 /* ==========================================
-   YANGI MAVZU
+   VAQT + BALL — bitta ustunda ketma-ket
+   (birinchi vaqt, keyin ball)
 ========================================== */
 
-.controlDock > .topicToolBox .toolRow {
+.controlDock > .toolColStack {
+  min-width: 0 !important;
+  height: 100% !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  border-right:1px solid rgba(255,255,255,.10) !important;
+  box-sizing: border-box !important;
+}
+
+.controlDock .toolColStack > .toolBox {
+  height: auto !important;
+  flex: 1 1 50% !important;
+}
+
+.controlDock .toolColStack > .toolBox.timerTool {
+  border-bottom:1px solid rgba(255,255,255,.10) !important;
+}
+
+
+/* ==========================================
+   SAVOL QO'SHISH (birlashtirilgan blok —
+   bitta qatorda, boshqa 3 blok bilan teng
+   ustunda)
+========================================== */
+
+.controlDock > .questionCardToolBox .toolRow {
   width: 100% !important;
   display: flex !important;
   gap: 8px !important;
 }
 
-.controlDock > .topicToolBox input[type="text"] {
+.controlDock > .questionCardToolBox input[type="text"],
+.controlDock > .questionCardToolBox select.excelTargetSelect {
   height: 36px !important;
   min-height: 36px !important;
   padding: 8px 12px !important;
   font-size: 12.5px !important;
+  min-width: 0 !important;
+  width: 100% !important;
 }
 
-.controlDock > .topicToolBox .smallBtn {
+.controlDock > .questionCardToolBox input[type="file"] {
   height: 36px !important;
   min-height: 36px !important;
-  padding: 8px 12px !important;
+  padding: 7px 10px !important;
+  font-size: 10.5px !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.qcActionsRow {
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-top: 2px !important;
+}
+
+.controlDock > .questionCardToolBox .qcActionsRow .smallBtn {
+  height: 36px !important;
+  min-height: 36px !important;
+  width: auto !important;
+  max-width: 100% !important;
+  padding: 8px 16px !important;
   font-size: 11.5px !important;
   white-space: nowrap !important;
+  flex: 0 0 auto !important;
 }
 
 .linkBtn{
-  margin-top: 9px;
+  margin: 0;
   padding: 0;
   border: none;
   background: none;
@@ -2839,42 +2788,13 @@ select option{background:#101c31;color:#fff}
   color: #20d9ff;
 }
 
-
-/* ==========================================
-   EXCEL'DAN YUKLASH
-========================================== */
-
-.controlDock > .excelToolBox .toolRow {
-  width: 100% !important;
-  display: flex !important;
-  gap: 8px !important;
-  margin-bottom: 7px !important;
-}
-
-.controlDock > .excelToolBox .toolRow:last-child{
-  margin-bottom: 0 !important;
-}
-
-.controlDock > .excelToolBox select.excelTargetSelect {
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 8px 12px !important;
-  font-size: 12px !important;
-}
-
-.controlDock > .excelToolBox input[type="file"] {
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 8px 10px !important;
+.qcHint {
+  display: block !important;
+  margin-top: 2px !important;
+  color: var(--muted) !important;
   font-size: 10.5px !important;
-}
-
-.controlDock > .excelToolBox .smallBtn {
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 8px 12px !important;
-  font-size: 11.5px !important;
-  white-space: nowrap !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
 }
 
 
@@ -2882,7 +2802,7 @@ select option{background:#101c31;color:#fff}
    BALL SOZLAMASI
 ========================================== */
 
-.controlDock > .pointToolBox .inlineForm {
+.controlDock .pointToolBox .inlineForm {
   width: 100% !important;
 
   display: flex !important;
@@ -2893,14 +2813,14 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .pointToolBox .field {
+.controlDock .pointToolBox .field {
   display: flex !important;
   flex-direction: column !important;
   gap: 5px !important;
 }
 
 
-.controlDock > .pointToolBox label {
+.controlDock .pointToolBox label {
   color: var(--muted) !important;
 
   font-size: 10px !important;
@@ -2910,7 +2830,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .pointToolBox input {
+.controlDock .pointToolBox input {
   width: 74px !important;
   height: 36px !important;
   min-height: 36px !important;
@@ -2922,7 +2842,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .pointToolBox select {
+.controlDock .pointToolBox select {
   width: 120px !important;
   height: 36px !important;
   min-height: 36px !important;
@@ -2934,7 +2854,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .pointToolBox .smallBtn {
+.controlDock .pointToolBox .smallBtn {
   height: 36px !important;
   min-height: 36px !important;
 
@@ -2946,28 +2866,8 @@ select option{background:#101c31;color:#fff}
   white-space: nowrap !important;
 }
 
-
-/* ==========================================
-   RANDOMIZER
-========================================== */
-
-.controlDock > .randomizerToolBox {
-  justify-content: center !important;
-}
-
-
-.controlDock > .randomizerToolBox .smallBtn {
-  width: 100% !important;
-
-  height: 36px !important;
-  min-height: 36px !important;
-
-  padding: 10px 14px !important;
-
-  font-size: 12.5px !important;
-  font-weight: 850 !important;
-  white-space: normal !important;
-  line-height: 1.3 !important;
+.controlDock .pointToolBox .qcHint {
+  margin-top: 6px !important;
 }
 
 
@@ -2975,12 +2875,12 @@ select option{background:#101c31;color:#fff}
    TIMER
 ========================================== */
 
-.controlDock > .toolBox.timerTool {
+.controlDock .toolBox.timerTool {
   justify-content: center !important;
 }
 
 
-.controlDock > .toolBox.timerTool .toolTitle {
+.controlDock .toolBox.timerTool .toolTitle {
   display: block !important;
 
   margin: 0 0 8px !important;
@@ -2994,7 +2894,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .toolBox.timerTool .toolRow {
+.controlDock .toolBox.timerTool .toolRow {
   width: 100% !important;
 
   display: flex !important;
@@ -3004,7 +2904,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .toolBox.timerTool input {
+.controlDock .toolBox.timerTool input {
   width: 74px !important;
 
   height: 36px !important;
@@ -3015,7 +2915,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .toolBox.timerTool .unit {
+.controlDock .toolBox.timerTool .unit {
   color: var(--muted) !important;
 
   font-size: 11px !important;
@@ -3025,7 +2925,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .toolBox.timerTool .smallBtn {
+.controlDock .toolBox.timerTool .smallBtn {
   height: 36px !important;
   min-height: 36px !important;
 
@@ -3039,11 +2939,49 @@ select option{background:#101c31;color:#fff}
 
 
 /* ==========================================
+   BONUS REJIMI
+========================================== */
+
+.controlDock > .bonusToolBox {
+  gap: 6px !important;
+}
+
+.controlDock > .bonusToolBox .bonusCheckRow {
+  margin-bottom: 0 !important;
+}
+
+.controlDock > .bonusToolBox .bonusRow {
+  margin-bottom: 0 !important;
+  gap: 7px !important;
+}
+
+.controlDock > .bonusToolBox .bonusRow input[type="number"] {
+  height: 34px !important;
+  min-height: 34px !important;
+}
+
+.controlDock > .bonusToolBox .bonusRow select {
+  height: 34px !important;
+  min-height: 34px !important;
+}
+
+.controlDock > .bonusToolBox .wideBtn {
+  width: auto !important;
+  align-self: flex-end !important;
+
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 8px 18px !important;
+  margin-top: 4px !important;
+}
+
+
+/* ==========================================
    HAMMA TEXT BIR XIL FONT TIZIMI
 ========================================== */
 
-.controlDock > .toolBox,
-.controlDock > .toolBox * {
+.controlDock .toolBox,
+.controlDock .toolBox * {
   font-family: Inter, "Segoe UI", Arial, sans-serif !important;
 }
 
@@ -3052,7 +2990,7 @@ select option{background:#101c31;color:#fff}
    HOVER
 ========================================== */
 
-.controlDock > .toolBox {
+.controlDock .toolBox {
   transition:
     transform .18s var(--ease),
     border-color .18s ease,
@@ -3060,7 +2998,7 @@ select option{background:#101c31;color:#fff}
 }
 
 
-.controlDock > .toolBox:hover {
+.controlDock .toolBox:hover {
   transform: translateY(-2px) !important;
 
   border-color: rgba(32,217,255,.28) !important;
@@ -3135,15 +3073,23 @@ select option{background:#101c31;color:#fff}
 @media(max-width:1050px) {
 
   .controlDockWide {
-    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: 1fr !important;
   }
 
-  .controlDock > .toolBox:nth-child(odd) {
-    border-left:0 !important;
+  .controlDock > .questionCardToolBox {
+    border-right:0 !important;
+    border-bottom:1px solid rgba(255,255,255,.10) !important;
+    padding-bottom:16px !important;
   }
 
-  .controlDock > .toolBox:nth-child(n + 3) {
-    border-top:1px solid rgba(255,255,255,.10) !important;
+  .controlDock > .toolColStack {
+    border-right:0 !important;
+    border-bottom:1px solid rgba(255,255,255,.10) !important;
+  }
+
+  .controlDock > .toolColStack,
+  .controlDock > .bonusToolBox {
+    padding-top:16px !important;
   }
 
 }
@@ -3155,11 +3101,7 @@ select option{background:#101c31;color:#fff}
 
 @media(max-width:720px) {
 
-  .controlDock > .toolBox:first-child {
-    grid-column: auto !important;
-  }
-
-  .controlDock > .toolBox:first-child .inlineForm {
+  .controlDock > .questionCardToolBox .qcActionsRow {
     flex-wrap: wrap !important;
   }
 
@@ -3168,26 +3110,20 @@ select option{background:#101c31;color:#fff}
 
 @media(max-width:520px) {
 
-  .controlDock > .toolBox {
+  .controlDock .toolBox {
     min-height: auto !important;
     padding: 14px !important;
   }
 
-  .controlDock > .toolBox:first-child .inlineForm {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  .controlDock > .toolBox:first-child .smallBtn {
-    grid-column: 1 / -1 !important;
+  .controlDock > .questionCardToolBox .qcActionsRow .smallBtn {
     width: 100% !important;
   }
 
-  .controlDock > .toolBox.timerTool .toolRow {
+  .controlDock .toolBox.timerTool .toolRow {
     flex-wrap: wrap !important;
   }
 
-  .controlDock > .toolBox.timerTool .bigBtn {
+  .controlDock .toolBox.timerTool .bigBtn {
     flex: 1 !important;
   }
 
@@ -5275,7 +5211,9 @@ select option{background:#101c31;color:#fff}
 ========================================================== */
 
 #teacherLockBtn{
-  font-size:16px;
+  font-size:14px;
+  flex:0 0 auto;
+  padding:8px 12px;
 }
 
 .teacherPinLabel{

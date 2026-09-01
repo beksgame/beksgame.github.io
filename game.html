@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08111f">
   <title>Beks Game</title>
-  <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" type="image/svg+xml" href="logo.svg">
   <link rel="stylesheet" href="game.css">
   <script src="i18n.js"></script>
 </head>
@@ -22,14 +22,13 @@
       </div>
       <div class="brandText">
         <div class="brand-main">Beks Game</div>
-        <div class="brand-sub" data-i18n="brand.tagline.game">O‘yin bilan tez o‘rganing</div>
+        <div class="brand-sub" data-i18n-html="brand.tagline.game">Top <span class="brand-f">F</span>ast Education</div>
       </div>
     </div>
 
     <div class="headerActions">
       <button class="topBtn hidden" id="adminPanelBtn" onclick="location.href='admin.html'" title="Foydalanuvchi ruxsatlarini boshqarish" data-i18n-title="header.adminPanel" data-i18n="header.adminPanel">🛠 Boshqaruv paneli</button>
       <button class="topBtn" id="contactAdminBtn" onclick="openContactModal()" data-i18n="header.contact">💬 Murojaat</button>
-      <button class="topBtn" id="teacherLockBtn" title="Boshqaruvni qulflash/ochish">🔒</button>
       <button class="topBtn" id="accountBtn" data-i18n="header.profile">👤 Profil</button>
       <button class="topBtn dangerBtn" id="logoutBtn" data-i18n="header.logout">↪ Chiqish</button>
     </div>
@@ -119,55 +118,6 @@
 
       <div class="modalActions">
         <button class="bigBtn secondaryBtn" onclick="closeContactModal()" data-i18n="common.close">Yopish</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================
-       BANNER (LIVE QUIZ ARENA) TAHRIRLASH MODALI
-       Faqat admin ko'radi (tugma game.js orqali
-       role tekshirilib ko'rsatiladi). Bu yerda
-       kiritilgan har bir o'zgarish settings/app
-       hujjatiga yoziladi va BARCHA foydalanuvchilar
-       uchun bir xilda ko'rinadi (kelajakda reklama
-       banneri sifatida ham ishlatilishi mumkin).
-  ========================== -->
-  <div class="modal" id="heroEditModal">
-    <div class="modal-box heroEditBox">
-      <div class="modalHeader">
-        <div>
-          <span class="eyebrow">ADMIN</span>
-          <h2>Banner sozlamalari</h2>
-        </div>
-        <button class="iconBtn" onclick="closeHeroEditModal()">×</button>
-      </div>
-
-      <div class="heroEditPreview" id="heroEditPreview">
-        <span class="heroEditPreviewEyebrow" id="heroPreviewEyebrow">LIVE QUIZ ARENA</span>
-        <span class="heroEditPreviewTitle" id="heroPreviewTitle">Bilimingizni sinang.</span>
-        <span class="heroEditPreviewSubtitle" id="heroPreviewSubtitle">Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting.</span>
-      </div>
-
-      <label>Orqa fon rasmi</label>
-      <div class="heroImageRow">
-        <input type="file" id="heroImageInput" accept="image/*">
-        <button type="button" class="smallBtn dangerBtn" id="heroImageRemoveBtn" onclick="removeHeroImage()">Rasmni olib tashlash</button>
-      </div>
-
-      <label for="heroEyebrowInput">Ustki yorliq</label>
-      <input type="text" id="heroEyebrowInput" maxlength="40" placeholder="LIVE QUIZ ARENA">
-
-      <label for="heroTitleInput">Sarlavha</label>
-      <input type="text" id="heroTitleInput" maxlength="80" placeholder="Bilimingizni sinang.">
-
-      <label for="heroSubtitleInput">Qo'shimcha matn</label>
-      <textarea id="heroSubtitleInput" rows="2" maxlength="220" placeholder="Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting."></textarea>
-
-      <div class="heroSaveStatus" id="heroSaveStatus"></div>
-
-      <div class="modalActions">
-        <button class="bigBtn secondaryBtn" onclick="resetHeroToDefault()">Standartga qaytarish</button>
-        <button class="bigBtn primaryBtn" id="heroSaveBtn" onclick="saveHeroSettings()">💾 Saqlash</button>
       </div>
     </div>
   </div>
@@ -332,19 +282,11 @@
   <main class="app">
 
     <!-- GAME HERO -->
-    <section class="gameHero" id="gameHero">
-      <button
-        type="button"
-        id="heroEditBtn"
-        class="heroEditBtn hidden"
-        onclick="openHeroEditModal()"
-        title="Banner sozlamalari (faqat admin)"
-      >✏️</button>
-
+    <section class="gameHero">
       <div class="heroInfo">
-        <span class="eyebrow" id="heroEyebrow">LIVE QUIZ ARENA</span>
-        <h1 id="heroTitle">Bilimingizni sinang.</h1>
-        <p id="heroSubtitle">Jamoani tanlang, savolni oching va eng yuqori natijani qo‘lga kiriting.</p>
+        <span class="eyebrow">LIVE QUIZ ARENA</span>
+        <h1>Bilimingizni sinang.</h1>
+        <p>Jamoani tanlang, savolni oching va eng yuqori natijani qo‘lga kiriting.</p>
       </div>
 
       <div class="heroStatus">
@@ -384,6 +326,14 @@
         <div class="settingsToggleBar">
           <button
             class="smallBtn settingsToggleBtn"
+            id="teacherLockBtn"
+            type="button"
+            title="Boshqaruvni qulflash/ochish"
+          >
+            🔒
+          </button>
+          <button
+            class="smallBtn settingsToggleBtn"
             id="settingsToggleBtn"
             type="button"
             aria-expanded="true"
@@ -395,51 +345,52 @@
 
         <section class="controlDock controlDockWide">
 
-          <div class="toolBox topicToolBox">
-            <span class="toolTitle">Yangi mavzu</span>
-            <div class="toolRow">
-              <input type="text" id="newUserTopicTitle" placeholder="Mavzu nomi">
-              <button class="smallBtn" onclick="addUserTopic()">Qo‘shish</button>
-            </div>
-            <button class="linkBtn" id="downloadTemplateBtn">📄 Shablon yuklab olish</button>
-          </div>
+          <div class="toolBox questionCardToolBox">
+            <span class="toolTitle">📥 Savol qo‘shish</span>
 
-          <div class="toolBox excelToolBox">
-            <span class="toolTitle">Excel’dan yuklash</span>
             <div class="toolRow">
+              <input type="text" id="newUserTopicTitle" placeholder="Yangi karta nomi (yangisi uchun)">
+            </div>
+
+            <div class="toolRow" id="qcExistingRow">
               <select id="userTopicExcelTarget" class="excelTargetSelect"></select>
             </div>
+
             <div class="toolRow">
-              <input type="file" id="userTopicExcelInput">
-              <button class="smallBtn" onclick="importExcelForUserTopic()">Yuklash</button>
+              <input type="file" id="userTopicExcelInput" accept=".xlsx,.xls">
             </div>
+
+            <div class="toolRow qcActionsRow">
+              <button type="button" class="linkBtn" id="downloadTemplateBtn">📄 Shablon yuklab olish</button>
+              <button type="button" class="smallBtn" id="qcSaveBtn" onclick="saveQuestionCard()">💾 Saqlash</button>
+            </div>
+
+            <span class="qcHint" id="qcHint">Nom yozsangiz — YANGI karta yaratiladi. Nomni bo‘sh qoldirib, pastdagi ro‘yxatdan mavjud kartani tanlasangiz — o‘sha kartadagi savollar Excel fayldagilar bilan ALMASHTIRILADI (replace).</span>
           </div>
 
-          <div class="toolBox pointToolBox">
-            <span class="toolTitle">Ball</span>
-            <div class="inlineForm">
-              <div class="field compactField">
-                <label for="pointStepInput">BALL</label>
-                <input type="number" id="pointStepInput" value="100" min="1">
+          <div class="toolColStack">
+
+            <div class="toolBox timerTool">
+              <span class="toolTitle">⏱ Savol vaqti</span>
+              <div class="toolRow">
+                <input type="number" id="timerInput" min="1" max="300" value="10">
+                <button class="smallBtn" onclick="updateTimer()">O‘zgartirish</button>
               </div>
-
-              <button class="smallBtn" onclick="updatePointSettings()">Saqlash</button>
             </div>
-          </div>
 
-          <div class="toolBox randomizerToolBox">
-            <span class="toolTitle">Randomizer</span>
-            <button class="smallBtn wideBtn" onclick="shuffleQuestionsByButton()">
-              🔀 Savollarni aralashtirish
-            </button>
-          </div>
+            <div class="toolBox pointToolBox">
+              <span class="toolTitle">Ball</span>
+              <div class="inlineForm">
+                <div class="field compactField">
+                  <label for="pointStepInput">BALL</label>
+                  <input type="number" id="pointStepInput" value="100" min="0">
+                </div>
 
-          <div class="toolBox timerTool">
-            <span class="toolTitle">⏱ Savol vaqti</span>
-            <div class="toolRow">
-              <input type="number" id="timerInput" min="1" max="300" value="10">
-              <button class="smallBtn" onclick="updateTimer()">O‘zgartirish</button>
+                <button class="smallBtn" onclick="updatePointSettings()">Saqlash</button>
+              </div>
+              <span class="qcHint">0 qilib qo‘ysangiz, ballik hisob o‘chadi — o‘rniga to‘g‘ri/xato javoblar statistikasi ko‘rsatiladi.</span>
             </div>
+
           </div>
 
           <div class="toolBox bonusToolBox">
@@ -548,6 +499,7 @@
 
         <div class="questionTop">
           <span class="eyebrow">QUESTION</span>
+          <span id="questionProgress" class="questionProgress"></span>
           <div id="timer">10</div>
         </div>
 

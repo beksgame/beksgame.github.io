@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08111f">
   <meta name="google-site-verification" content="9HWR05-wlStINyTsfoS5W8u0CfdDJ_ACr75yQri7FDw" />
 
   <title>Beks Game — O‘yin bilan tez o‘rganing</title>
@@ -315,8 +317,12 @@
         </p>
 
         <div id="playNamesList" class="liveNamesList">
-          <input type="text" class="liveNameInput" maxlength="24" placeholder="Ishtirokchi ismi (ixtiyoriy)">
+          <div class="playFirstNameRow">
+            <input type="text" class="liveNameInput" maxlength="24" placeholder="Ishtirokchi ismi (ixtiyoriy)">
+            <input type="number" id="playTimerInput" class="playTimerCompact" inputmode="numeric" min="5" max="120" step="1" placeholder="10" title="Har bir savolga vaqt, soniyalarda (ixtiyoriy)">
+          </div>
         </div>
+        <p class="playTimerHint">⏱ O‘ngdagi kichik maydonga — har bir savolga necha soniya berilishini yozing (bo‘sh qoldirsangiz, standart qiymat ishlatiladi).</p>
 
         <button type="button" class="miniModalBtn secondaryModalBtn" id="playAddNameBtn">+ Yana ishtirokchi</button>
 
@@ -698,11 +704,20 @@
       .map(i => i.value.trim())
       .filter(Boolean);
 
-    launchLocalLiveMode("play", names);
+    // Ixtiyoriy: mehmon o'zi vaqt kiritmasa, game.html'dagi
+    // standart (shaxsiy yoki admin belgilagan global) qiymat ishlatiladi.
+    const timerRaw = document.getElementById("playTimerInput")?.value;
+    const timerValue = parseInt(timerRaw, 10);
+    const timer =
+      Number.isFinite(timerValue) && timerValue > 0
+        ? Math.min(timerValue, 120)
+        : null;
+
+    launchLocalLiveMode("play", names, timer);
   });
 
   // ---- Duel/Play uchun umumiy: anonim kirish + game.html'ga o'tish ----
-  async function launchLocalLiveMode(mode, names) {
+  async function launchLocalLiveMode(mode, names, timer) {
     showLiveLoading(
       mode === "duel" ? "Duel tayyorlanmoqda..." : "O‘yin tayyorlanmoqda..."
     );
@@ -718,7 +733,8 @@
       const url =
         "game.html?liveStart=" +
         mode +
-        (namesParam ? "&names=" + namesParam : "");
+        (namesParam ? "&names=" + namesParam : "") +
+        (timer ? "&timer=" + timer : "");
 
       window.location.href = url;
     } catch (e) {

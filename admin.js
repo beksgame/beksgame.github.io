@@ -31,8 +31,20 @@ const participantLimitInput = $("participantLimitInput");
 const saveSettingsBtn = $("saveSettingsBtn");
 const adminMessagesList = $("adminMessagesList");
 
+const defaultPointStepInput = $("defaultPointStepInput");
+const defaultTimerInput = $("defaultTimerInput");
+const defaultBonusModeCheckbox = $("defaultBonusModeCheckbox");
+const defaultBonusCountInput = $("defaultBonusCountInput");
+const defaultBonusMultiplierSelect = $("defaultBonusMultiplierSelect");
+const defaultStreakBonusCheckbox = $("defaultStreakBonusCheckbox");
+const saveGameDefaultsBtn = $("saveGameDefaultsBtn");
+
 const DEFAULT_TOPIC_LIMIT = 10;
 const DEFAULT_PARTICIPANT_LIMIT = 10;
+const DEFAULT_POINT_STEP = 100;
+const DEFAULT_TIMER = 10;
+const DEFAULT_BONUS_COUNT = 3;
+const DEFAULT_BONUS_MULTIPLIER = "2x";
 const SUPPORT_COLLECTION = "supportMessages";
 
 let allUsers = [];
@@ -333,6 +345,11 @@ function toPositiveInt(value, fallback) {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+function toNonNegativeInt(value, fallback) {
+  const n = parseInt(value, 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
 async function loadAppSettings() {
   try {
     const snap = await getDoc(doc(db, "settings", "app"));
@@ -350,6 +367,44 @@ async function loadAppSettings() {
         data.participantLimit,
         DEFAULT_PARTICIPANT_LIMIT
       );
+    }
+
+    if (defaultPointStepInput) {
+      defaultPointStepInput.value = toNonNegativeInt(
+        data.pointStep,
+        DEFAULT_POINT_STEP
+      );
+    }
+
+    if (defaultTimerInput) {
+      defaultTimerInput.value = toPositiveInt(
+        data.timer,
+        DEFAULT_TIMER
+      );
+    }
+
+    if (defaultBonusCountInput) {
+      defaultBonusCountInput.value = toPositiveInt(
+        data.bonusQuestionCount,
+        DEFAULT_BONUS_COUNT
+      );
+    }
+
+    if (defaultBonusMultiplierSelect) {
+      defaultBonusMultiplierSelect.value =
+        data.bonusMultiplierMode === "2x" ||
+        data.bonusMultiplierMode === "3x" ||
+        data.bonusMultiplierMode === "mixed"
+          ? data.bonusMultiplierMode
+          : DEFAULT_BONUS_MULTIPLIER;
+    }
+
+    if (defaultBonusModeCheckbox) {
+      defaultBonusModeCheckbox.checked = data.bonusModeEnabled === true;
+    }
+
+    if (defaultStreakBonusCheckbox) {
+      defaultStreakBonusCheckbox.checked = data.streakBonusEnabled === true;
     }
   } catch (e) {
     console.error("Sozlamalarni yuklashda xatolik:", e);
@@ -392,6 +447,75 @@ saveSettingsBtn?.addEventListener("click", async () => {
     showToast("❌ Xatolik: " + err.message, true);
   } finally {
     saveSettingsBtn.disabled = false;
+  }
+});
+
+/* ================= O'YIN STANDARTLARI (GLOBAL) =================
+ *
+ * Xuddi shu "settings/app" hujjatiga { pointStep, timer,
+ * bonusModeEnabled, bonusQuestionCount, bonusMultiplierMode,
+ * streakBonusEnabled } maydonlari qo'shiladi. game.js buni
+ * getAppDefaults() orqali o'qiydi va FAQAT foydalanuvchi
+ * o'zi (localStorage'da) hech qachon o'zgartirmagan
+ * bo'lsagina qo'llaydi — demak bu yerdagi qiymatlar hech
+ * kimning shaxsiy sozlamasini bosib o'tmaydi, faqat "hali
+ * hech narsa tanlanmagan" holatlar uchun standart bo'ladi.
+ */
+
+saveGameDefaultsBtn?.addEventListener("click", async () => {
+  const pointStep = toNonNegativeInt(
+    defaultPointStepInput?.value,
+    DEFAULT_POINT_STEP
+  );
+
+  const timer = toPositiveInt(
+    defaultTimerInput?.value,
+    DEFAULT_TIMER
+  );
+
+  const bonusQuestionCount = toPositiveInt(
+    defaultBonusCountInput?.value,
+    DEFAULT_BONUS_COUNT
+  );
+
+  const bonusMultiplierModeRaw = defaultBonusMultiplierSelect?.value;
+  const bonusMultiplierMode =
+    bonusMultiplierModeRaw === "2x" ||
+    bonusMultiplierModeRaw === "3x" ||
+    bonusMultiplierModeRaw === "mixed"
+      ? bonusMultiplierModeRaw
+      : DEFAULT_BONUS_MULTIPLIER;
+
+  const bonusModeEnabled = !!defaultBonusModeCheckbox?.checked;
+  const streakBonusEnabled = !!defaultStreakBonusCheckbox?.checked;
+
+  saveGameDefaultsBtn.disabled = true;
+
+  try {
+    await setDoc(
+      doc(db, "settings", "app"),
+      {
+        pointStep,
+        timer,
+        bonusQuestionCount,
+        bonusMultiplierMode,
+        bonusModeEnabled,
+        streakBonusEnabled
+      },
+      { merge: true }
+    );
+
+    if (defaultPointStepInput) defaultPointStepInput.value = pointStep;
+    if (defaultTimerInput) defaultTimerInput.value = timer;
+    if (defaultBonusCountInput) defaultBonusCountInput.value = bonusQuestionCount;
+    if (defaultBonusMultiplierSelect) defaultBonusMultiplierSelect.value = bonusMultiplierMode;
+
+    showToast("✅ O'yin standartlari saqlandi");
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Xatolik: " + err.message, true);
+  } finally {
+    saveGameDefaultsBtn.disabled = false;
   }
 });
 

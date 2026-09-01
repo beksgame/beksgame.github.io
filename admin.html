@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08111f">
   <title>Beks Game — Boshqaruv paneli</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="game.css">
@@ -71,6 +73,70 @@
 
         <div class="adminSettingsActions">
           <button type="button" class="bigBtn primaryBtn" id="saveSettingsBtn" data-i18n="admin.settings.save">💾 Sozlamalarni saqlash</button>
+        </div>
+      </div>
+
+      <!-- =========================
+           O'YIN STANDARTLARI (GLOBAL)
+           Har bir admin/foydalanuvchi bularni o'zi uchun
+           game.html'dagi toolbox'lardan (Ball / Savol vaqti /
+           Bonus rejimi) alohida o'zgartira oladi — bu yerda
+           belgilangan qiymat esa hech kim o'zicha
+           o'zgartirmagan hollarda ishlatiladigan STANDART
+           (default) bo'ladi.
+      ========================== -->
+      <div class="adminSettingsCard" id="adminGameDefaultsCard">
+        <div class="adminSettingsHeader">
+          <span class="eyebrow">STANDART</span>
+          <h3>🎮 O‘yin standartlari (global)</h3>
+        </div>
+
+        <div class="adminSettingsGrid">
+          <label class="settingsField">
+            <span>Standart ball (savol narxi)</span>
+            <input type="number" id="defaultPointStepInput" min="0" step="1" placeholder="100">
+          </label>
+
+          <label class="settingsField">
+            <span>Standart savol vaqti (soniyalarda)</span>
+            <input type="number" id="defaultTimerInput" min="1" max="300" step="1" placeholder="10">
+          </label>
+
+          <label class="settingsField">
+            <span>Bonus savollar soni</span>
+            <input type="number" id="defaultBonusCountInput" min="1" max="20" step="1" placeholder="3">
+          </label>
+
+          <label class="settingsField">
+            <span>Bonus ko‘paytiruvchisi</span>
+            <select id="defaultBonusMultiplierSelect">
+              <option value="2x">2X</option>
+              <option value="3x">3X</option>
+              <option value="mixed">2X/3X aralash</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="adminSettingsGrid" style="margin-top:14px;">
+          <label class="permToggle">
+            <span class="permToggleLabel">🔥 Bonus rejimi standart bo‘yicha yoqilgan bo‘lsin</span>
+            <span class="toggleSwitch">
+              <input type="checkbox" id="defaultBonusModeCheckbox">
+              <span class="toggleTrack"><span class="toggleThumb"></span></span>
+            </span>
+          </label>
+
+          <label class="permToggle">
+            <span class="permToggleLabel">3 ta ketma-ket to‘g‘ri javob → keyingi savol 2X (standart)</span>
+            <span class="toggleSwitch">
+              <input type="checkbox" id="defaultStreakBonusCheckbox">
+              <span class="toggleTrack"><span class="toggleThumb"></span></span>
+            </span>
+          </label>
+        </div>
+
+        <div class="adminSettingsActions">
+          <button type="button" class="bigBtn primaryBtn" id="saveGameDefaultsBtn">💾 Standartlarni saqlash</button>
         </div>
       </div>
 

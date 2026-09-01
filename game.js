@@ -299,202 +299,42 @@ async function getAppLimits() {
   };
 }
 
-/* =========================================================
-   BANNER (LIVE QUIZ ARENA) BOSHQARUVI
-   ---------------------------------------------------------
-   settings/app hujjatidagi "heroBanner" maydoni orqali
-   BARCHA foydalanuvchilar uchun bir xil ko'rinadigan banner
-   (orqa fon rasmi + matnlar) boshqariladi. Tahrirlash tugmasi
-   FAQAT admin uchun ko'rinadi (game.js'da role tekshirilib
-   ko'rsatiladi), yozish esa Firestore xavfsizlik qoidalari
-   bilan ham himoyalangan ("settings/app" faqat admin
-   tomonidan yozilishi mumkin). Admin o'zgartirgan zahoti,
-   BARCHA foydalanuvchilar sahifani qayta ochganda (yoki
-   ochiq bo'lsa keyingi safar) yangi holatni ko'radi.
-   Kelajakda shu joy reklama banneri sifatida ham
-   ishlatilishi mumkin.
-========================================================= */
-
-let currentHeroBanner = null;
-let pendingHeroImageDataUrl = "";
-
-function applyHeroBanner(banner) {
-  const heroEl = document.getElementById("gameHero");
-  if (!heroEl) return;
-
-  currentHeroBanner = banner || null;
-
-  if (banner?.imageDataUrl) {
-    heroEl.style.setProperty(
-      "--heroBgImage",
-      `url("${banner.imageDataUrl}")`
-    );
-    heroEl.classList.add("hasCustomBg");
-  } else {
-    heroEl.style.removeProperty("--heroBgImage");
-    heroEl.classList.remove("hasCustomBg");
-  }
-
-  const eyebrowEl = $("heroEyebrow");
-  const titleEl = $("heroTitle");
-  const subtitleEl = $("heroSubtitle");
-
-  if (eyebrowEl) {
-    eyebrowEl.textContent = banner?.eyebrow?.trim() || "LIVE QUIZ ARENA";
-  }
-
-  if (titleEl) {
-    titleEl.textContent = banner?.title?.trim() || "Bilimingizni sinang.";
-  }
-
-  if (subtitleEl) {
-    subtitleEl.textContent =
-      banner?.subtitle?.trim() ||
-      "Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting.";
-  }
+/*
+ * O'YIN STANDARTLARI (settings/app): Ball, Savol vaqti va
+ * Bonus rejimi — bular ilgari FAQAT localStorage'da (har bir
+ * admin/qurilma uchun alohida) saqlanardi. Endi boshqaruv
+ * panelidan (admin.html) administrator ularni "global
+ * standart" sifatida belgilashi mumkin — settings/app
+ * hujjatiga yoziladi. Foydalanuvchi o'zi hech qachon
+ * o'zgartirmagan bo'lsa (localStorage'da mos kalit umuman
+ * yo'q bo'lsa), shu global standart ishlatiladi; o'zi bir
+ * marta o'zgartirgan bo'lsa — o'sha shaxsiy qiymati saqlanib
+ * qoladi (global standart uni bosib o'tmaydi).
+ */
+function toPositiveIntOrZero(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : fallback;
 }
 
-async function loadAndApplyHeroBanner() {
-  try {
-    const settings = await fetchAppSettingsOnce();
-    applyHeroBanner(settings?.heroBanner || null);
-  } catch (e) {
-    console.warn("loadAndApplyHeroBanner:", e);
-  }
-}
+async function getAppDefaults() {
+  const s = await fetchAppSettingsOnce();
 
-function updateHeroPreview() {
-  const preview = $("heroEditPreview");
-  const eyebrowEl = $("heroPreviewEyebrow");
-  const titleEl = $("heroPreviewTitle");
-  const subtitleEl = $("heroPreviewSubtitle");
+  const multiplier = s?.bonusMultiplierMode;
 
-  if (preview) {
-    preview.style.backgroundImage = pendingHeroImageDataUrl
-      ? `url("${pendingHeroImageDataUrl}")`
-      : "none";
-  }
-
-  if (eyebrowEl) {
-    eyebrowEl.textContent =
-      $("heroEyebrowInput")?.value?.trim() || "LIVE QUIZ ARENA";
-  }
-
-  if (titleEl) {
-    titleEl.textContent =
-      $("heroTitleInput")?.value?.trim() || "Bilimingizni sinang.";
-  }
-
-  if (subtitleEl) {
-    subtitleEl.textContent =
-      $("heroSubtitleInput")?.value?.trim() ||
-      "Jamoani tanlang, savolni oching va eng yuqori natijani qo'lga kiriting.";
-  }
-}
-
-$("heroEyebrowInput")?.addEventListener("input", updateHeroPreview);
-$("heroTitleInput")?.addEventListener("input", updateHeroPreview);
-$("heroSubtitleInput")?.addEventListener("input", updateHeroPreview);
-
-$("heroImageInput")?.addEventListener("change", async e => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  try {
-    /*
-     * Banner katta joy egallagani uchun ishtirokchi
-     * rasmiga nisbatan kattaroq o'lcham/sifatda saqlaymiz,
-     * lekin baribir Firestore hujjat hajmi chegarasidan
-     * (1MB) xavfsiz miqdorda qolish uchun siqib olamiz.
-     */
-    pendingHeroImageDataUrl = await resizeImageFile(file, 1280, 0.72);
-    updateHeroPreview();
-  } catch (err) {
-    console.error("Hero rasm yuklashda xatolik:", err);
-    alert("❌ Rasmni yuklab bo'lmadi: " + err.message);
-  }
-});
-
-function removeHeroImage() {
-  pendingHeroImageDataUrl = "";
-  if ($("heroImageInput")) $("heroImageInput").value = "";
-  updateHeroPreview();
-}
-window.removeHeroImage = removeHeroImage;
-
-function resetHeroToDefault() {
-  pendingHeroImageDataUrl = "";
-  if ($("heroImageInput")) $("heroImageInput").value = "";
-  if ($("heroEyebrowInput")) $("heroEyebrowInput").value = "";
-  if ($("heroTitleInput")) $("heroTitleInput").value = "";
-  if ($("heroSubtitleInput")) $("heroSubtitleInput").value = "";
-  updateHeroPreview();
-}
-window.resetHeroToDefault = resetHeroToDefault;
-
-async function saveHeroSettings() {
-  const heroBanner = {
-    imageDataUrl: pendingHeroImageDataUrl || "",
-    eyebrow: $("heroEyebrowInput")?.value?.trim() || "",
-    title: $("heroTitleInput")?.value?.trim() || "",
-    subtitle: $("heroSubtitleInput")?.value?.trim() || ""
+  return {
+    pointStep: toPositiveIntOrZero(s?.pointStep, 100),
+    timer: toPositiveInt(s?.timer, 10),
+    bonusModeEnabled: s?.bonusModeEnabled === true,
+    bonusQuestionCount: toPositiveInt(s?.bonusQuestionCount, 3),
+    bonusMultiplierMode:
+      multiplier === "2x" ||
+      multiplier === "3x" ||
+      multiplier === "mixed"
+        ? multiplier
+        : "2x",
+    streakBonusEnabled: s?.streakBonusEnabled === true
   };
-
-  const btn = $("heroSaveBtn");
-  if (btn) btn.disabled = true;
-
-  try {
-    await setDoc(doc(db, "settings", "app"), { heroBanner }, { merge: true });
-
-    resetAppSettingsCache();
-    applyHeroBanner(heroBanner);
-
-    const status = $("heroSaveStatus");
-
-    if (status) {
-      status.textContent =
-        "✅ Saqlandi — barcha foydalanuvchilarga qo'llanildi";
-
-      clearTimeout(saveHeroSettings._t);
-      saveHeroSettings._t = setTimeout(() => {
-        if (status) status.textContent = "";
-      }, 3000);
-    }
-  } catch (e) {
-    console.error("saveHeroSettings:", e);
-    alert("❌ Saqlab bo'lmadi: " + e.message);
-  } finally {
-    if (btn) btn.disabled = false;
-  }
 }
-window.saveHeroSettings = saveHeroSettings;
-
-function fillHeroEditForm() {
-  const b = currentHeroBanner || {};
-
-  if ($("heroEyebrowInput")) $("heroEyebrowInput").value = b.eyebrow || "";
-  if ($("heroTitleInput")) $("heroTitleInput").value = b.title || "";
-  if ($("heroSubtitleInput")) $("heroSubtitleInput").value = b.subtitle || "";
-  if ($("heroImageInput")) $("heroImageInput").value = "";
-
-  pendingHeroImageDataUrl = b.imageDataUrl || "";
-  updateHeroPreview();
-}
-
-function openHeroEditModal() {
-  const modal = $("heroEditModal");
-  if (!modal) return;
-
-  fillHeroEditForm();
-  modal.style.display = "flex";
-}
-window.openHeroEditModal = openHeroEditModal;
-
-function closeHeroEditModal() {
-  const modal = $("heroEditModal");
-  if (modal) modal.style.display = "none";
-}
-window.closeHeroEditModal = closeHeroEditModal;
 
 async function getMyPermissions() {
   try {
@@ -527,8 +367,23 @@ function showLimitWarning(message) {
 
 /* ================= SETTINGS ================= */
 
-function initSettings() {
-  pointStep = parseInt(localStorage.getItem("pointStep"), 10) || 100;
+async function initSettings() {
+
+  const defaults = await getAppDefaults();
+
+  // ---- BALL (Ball qadami) ----
+  {
+    const storedRaw = localStorage.getItem("pointStep");
+    if (storedRaw === null) {
+      pointStep = defaults.pointStep;
+    } else {
+      const storedStep = parseInt(storedRaw, 10);
+      pointStep =
+        Number.isFinite(storedStep) && storedStep >= 0
+          ? storedStep
+          : defaults.pointStep;
+    }
+  }
   pointMode = localStorage.getItem("pointMode") || "fixed";
 
   if ($("pointStepInput")) {
@@ -539,17 +394,54 @@ function initSettings() {
     $("pointModeSelect").value = pointMode;
   }
 
-  bonusModeEnabled =
-    localStorage.getItem("bonusModeEnabled") === "1";
+  // ---- SAVOL VAQTI ----
+  {
+    const storedTimerRaw = localStorage.getItem("questionTimer");
+    if (storedTimerRaw === null) {
+      userTimer = defaults.timer;
+    } else {
+      const storedTimer = parseInt(storedTimerRaw, 10);
+      userTimer =
+        Number.isFinite(storedTimer) && storedTimer > 0
+          ? Math.min(storedTimer, 300)
+          : defaults.timer;
+    }
+  }
 
-  bonusQuestionCount =
-    parseInt(localStorage.getItem("bonusQuestionCount"), 10) || 3;
+  if ($("timerInput")) {
+    $("timerInput").value = userTimer;
+  }
 
-  bonusMultiplierMode =
-    localStorage.getItem("bonusMultiplierMode") || "2x";
+  // ---- BONUS REJIMI ----
+  {
+    const storedBonusMode = localStorage.getItem("bonusModeEnabled");
+    bonusModeEnabled =
+      storedBonusMode === null
+        ? defaults.bonusModeEnabled
+        : storedBonusMode === "1";
+  }
 
-  streakBonusEnabled =
-    localStorage.getItem("streakBonusEnabled") === "1";
+  {
+    const storedCountRaw = localStorage.getItem("bonusQuestionCount");
+    bonusQuestionCount =
+      storedCountRaw === null
+        ? defaults.bonusQuestionCount
+        : parseInt(storedCountRaw, 10) || defaults.bonusQuestionCount;
+  }
+
+  {
+    const storedMultiplier = localStorage.getItem("bonusMultiplierMode");
+    bonusMultiplierMode =
+      storedMultiplier || defaults.bonusMultiplierMode;
+  }
+
+  {
+    const storedStreak = localStorage.getItem("streakBonusEnabled");
+    streakBonusEnabled =
+      storedStreak === null
+        ? defaults.streakBonusEnabled
+        : storedStreak === "1";
+  }
 
   if ($("bonusModeCheckbox")) {
     $("bonusModeCheckbox").checked = bonusModeEnabled;
@@ -683,7 +575,7 @@ function updatePointSettings() {
   const step = parseInt($("pointStepInput")?.value, 10);
   const mode = $("pointModeSelect")?.value || "fixed";
 
-  if (!Number.isFinite(step) || step < 1) {
+  if (!Number.isFinite(step) || step < 0) {
     return alert("Ball noto'g'ri!");
   }
 
@@ -694,6 +586,13 @@ function updatePointSettings() {
   localStorage.setItem("pointMode", mode);
 
   renderBoard();
+  renderTeams();
+
+  alert(
+    step === 0
+      ? "✅ Saqlandi! Endi o'yinda ball ko'rsatilmaydi — to'g'ri/xato javob statistikasi ko'rinadi."
+      : "✅ Ball sozlamasi saqlandi!"
+  );
 }
 
 window.updatePointSettings = updatePointSettings;
@@ -721,6 +620,8 @@ function updateTimer() {
   if ($("timerInput")) {
     $("timerInput").value = userTimer;
   }
+
+  localStorage.setItem("questionTimer", String(userTimer));
 
   clearInterval(timer);
 }
@@ -1122,8 +1023,29 @@ const sorted = [...participants].sort((a, b) => {
 
 
   // Ikkalasi ham o'yinda bo'lsa:
-  // LIVE BALL bo'yicha
+  // LIVE BALL bo'yicha (yoki ball o'chirilgan
+  // bo'lsa — to'g'ri javoblar soni bo'yicha)
   if (aActive && bActive) {
+
+    if (Number(pointStep) === 0) {
+
+      const teamA = teamsData.find(
+        t => String(t.participantId) === String(a.id)
+      );
+
+      const teamB = teamsData.find(
+        t => String(t.participantId) === String(b.id)
+      );
+
+      const correctA = teamA?.correctCount || 0;
+      const correctB = teamB?.correctCount || 0;
+
+      return (
+        correctB - correctA ||
+        b.wins - a.wins ||
+        a.name.localeCompare(b.name)
+      );
+    }
 
     const scoreA =
       getLiveParticipantScore(a.id);
@@ -1177,6 +1099,15 @@ const sorted = [...participants].sort((a, b) => {
     const live =
       isActive
         ? getLiveParticipantScore(p.id)
+        : null;
+
+    const liveTeam =
+      isActive
+        ? teamsData.find(
+            t =>
+              String(t.participantId) ===
+              String(p.id)
+          )
         : null;
 
 
@@ -1245,12 +1176,22 @@ const sorted = [...participants].sort((a, b) => {
 
         ${
           isActive
-            ? `
-              <div class="participantLiveScore">
-                ${live}
-                <span>ball</span>
-              </div>
-            `
+            ? (
+                Number(pointStep) === 0
+                  ? `
+                    <div class="participantLiveScore participantLiveScoreCW">
+                      ✅ ${liveTeam?.correctCount || 0}
+                      ·
+                      ❌ ${liveTeam?.wrongCount || 0}
+                    </div>
+                  `
+                  : `
+                    <div class="participantLiveScore">
+                      ${live}
+                      <span>ball</span>
+                    </div>
+                  `
+              )
             : ""
         }
 
@@ -1640,9 +1581,22 @@ function renderTeams() {
 
   box.innerHTML = "";
 
+  /*
+   * Ball tizimi o'chirilgan (0)
+   * bo'lsa, reyting to'g'ri javob
+   * soni bo'yicha tuziladi —
+   * ballik poyga o'chadi.
+   */
+  const scoringOff =
+    Number(pointStep) === 0;
+
   const sorted =
     [...teamsData].sort(
-      (a, b) => b.score - a.score
+      (a, b) =>
+        scoringOff
+          ? (b.correctCount || 0) -
+            (a.correctCount || 0)
+          : b.score - a.score
     );
 
   sorted.forEach(
@@ -1678,12 +1632,16 @@ function renderTeams() {
           ${escapeHtml(team.name)}
         </strong>
 
-        <span id="t${team.id}">
+        <span id="t${team.id}" class="${scoringOff ? "hidden" : ""}">
           ${team.score}
         </span>
 
+        <div class="teamStatLine">
+          ✅ ${team.correctCount || 0} · ❌ ${team.wrongCount || 0}
+        </div>
+
         <div class="teamStatus">
-          LIVE SCORE
+          ${scoringOff ? "TO‘G‘RI / XATO" : "LIVE SCORE"}
         </div>
 
         <button
@@ -2174,35 +2132,67 @@ function renderUserTopics() {
   renderExcelTargetOptions();
 }
 
-async function addUserTopic() {
-  const input =
-    $("newUserTopicTitle");
+/*
+ * "SAVOL QO'SHISH" BIRLASHTIRILGAN OQIMI
+ * ---------------------------------------
+ * Ilgari mavzu qo'shish va Excel'dan
+ * savol yuklash ikki alohida blok va ikki
+ * bosqichli jarayon edi. Endi bitta
+ * "Savol qo'shish" bloki orqali:
+ *  - yangi savol kartasi nomi yoziladi
+ *    (yoki eski karta tanlanadi — bu
+ *    "replay"/qayta yuklash bo'ladi),
+ *  - Excel shabloni shu yerdan yuklab
+ *    olinadi va to'ldirilgan fayl shu
+ *    yerdan tanlanadi,
+ *  - "Saqlash" bosilganda karta (agar
+ *    yangi bo'lsa) yaratiladi va Excel
+ *    fayldagi savollar bir zumda unga
+ *    yuklanadi.
+ */
 
-  const title =
-    input?.value?.trim();
+/*
+ * MANTIQ (bitta forma, ikkita natija):
+ *  - "newUserTopicTitle" maydoniga NOM YOZILSA →
+ *    shu nom bilan YANGI savol kartasi yaratiladi
+ *    (pastdagi tanlangan eski karta e'tiborga
+ *    olinmaydi).
+ *  - Nom BO'SH qoldirilib, pastdagi ro'yxatdan
+ *    (userTopicExcelTarget) mavjud karta
+ *    tanlansa → o'sha kartaning savollari Excel
+ *    fayldagilar bilan ALMASHTIRILADI (replace).
+ * Bularning qaysi biri ishlatilishini
+ * saveQuestionCard() aniqlaydi — alohida
+ * "rejim" tugmalari endi kerak emas.
+ */
 
-  if (!title) {
-    return alert(
-      "Mavzu nomini kiriting!"
-    );
-  }
+/*
+ * Faqat bo'sh savol kartasini
+ * yaratadi (nomi bilan). Excel
+ * yuklash alohida qadam sifatida
+ * applyExcelFileToTopic() orqali
+ * amalga oshiriladi.
+ */
+async function createUserTopic(title) {
 
   const perm = await getMyPermissions();
 
   if (!perm.isAdmin) {
 
     if (!perm.canAddTopics) {
-      return showLimitWarning(
+      showLimitWarning(
         "Sizga yangi mavzu qo'shish huquqi administrator tomonidan cheklangan."
       );
+      return null;
     }
 
     const { topicLimit } = await getAppLimits();
 
     if (userTopics.length >= topicLimit) {
-      return showLimitWarning(
+      showLimitWarning(
         `Siz maksimal ${topicLimit} tagacha mavzu qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`
       );
+      return null;
     }
   }
 
@@ -2227,16 +2217,295 @@ async function addUserTopic() {
 
   userTopics.push(newTopic);
 
-  input.value = "";
-
-  renderUserTopics();
-
-  await saveTopics(newTopic.id);
-  await loadOtherTopics();
+  return newTopic;
 }
 
-window.addUserTopic =
-  addUserTopic;
+/*
+ * Tanlangan Excel faylni o'qib,
+ * berilgan topic.questions'ni
+ * TO'LIQ almashtiradi. Saqlash
+ * (Firebase) va render qilishni
+ * chaqiruvchi tomon bajaradi.
+ */
+function applyExcelFileToTopic(topic, file) {
+
+  return new Promise((resolve, reject) => {
+
+    const reader =
+      new FileReader();
+
+    reader.onerror =
+      () => reject(
+        new Error("Faylni o'qib bo'lmadi")
+      );
+
+    reader.onload = e => {
+
+      try {
+
+        const workbook =
+          XLSX.read(
+            new Uint8Array(
+              e.target.result
+            ),
+            {
+              type: "array"
+            }
+          );
+
+        const sheet =
+          workbook.Sheets[
+            workbook.SheetNames[0]
+          ];
+
+        const rows =
+          XLSX.utils.sheet_to_json(
+            sheet,
+            {
+              defval: ""
+            }
+          );
+
+        topic.questions = {
+          0: [],
+          1: [],
+          2: [],
+          3: [],
+          4: []
+        };
+
+        let index = 0;
+
+        rows.forEach(r => {
+
+          const q =
+            r.Question ??
+            r.question ??
+            r.QUESTION ??
+            "";
+
+          const a =
+            r.Answer ??
+            r.answer ??
+            r.ANSWER ??
+            "";
+
+          if (!String(q).trim() || !String(a).trim()) {
+            return;
+          }
+
+          let cat =
+            index % 5;
+
+          const c =
+            Number(
+              r.Category ??
+              r.category ??
+              r.CATEGORY
+            );
+
+          if (
+            c >= 1 &&
+            c <= 5
+          ) {
+            cat = c - 1;
+          }
+
+          /*
+           * 3-4-5 USTUNLARDAGI NOTO'G'RI JAVOBLAR
+           */
+          const wrongAnswers = [
+            r["Wrong Answer 1"],
+            r["Wrong Answer 2"],
+            r["Wrong Answer 3"]
+          ]
+            .map(
+              value =>
+                String(
+                  value ?? ""
+                ).trim()
+            )
+            .filter(Boolean);
+
+          topic.questions[
+            cat
+          ].push({
+
+            q:
+              String(q).trim(),
+
+            a:
+              String(a).trim(),
+
+            wrongAnswers:
+              wrongAnswers
+
+          });
+
+          index++;
+        });
+
+        resolve(topic);
+
+      } catch (err) {
+        reject(err);
+      }
+    };
+
+    reader.readAsArrayBuffer(
+      file
+    );
+
+  });
+}
+
+/*
+ * "Saqlash" tugmasi — yagona
+ * kirish nuqtasi. Rejimga qarab
+ * yangi karta yaratadi yoki eski
+ * kartani tanlaydi, so'ng (agar
+ * fayl tanlangan bo'lsa) savollarni
+ * bir zumda yuklaydi.
+ */
+async function saveQuestionCard() {
+
+  const saveBtn =
+    $("qcSaveBtn");
+
+  const file =
+    $("userTopicExcelInput")
+      ?.files?.[0];
+
+  const titleInput =
+    $("newUserTopicTitle");
+
+  const title =
+    titleInput?.value?.trim();
+
+  let topic = null;
+
+  if (title) {
+
+    // NOM YOZILGAN → yangi savol kartasi
+    topic =
+      await createUserTopic(title);
+
+    if (!topic) return;
+
+    if (titleInput) titleInput.value = "";
+
+  } else {
+
+    // NOM BO'SH → pastda tanlangan eski kartani almashtiramiz
+    const targetId =
+      $("userTopicExcelTarget")
+        ?.value;
+
+    if (!targetId) {
+      return alert(
+        "Yangi karta uchun nom yozing, yoki almashtirish uchun ro'yxatdan mavjud kartani tanlang!"
+      );
+    }
+
+    topic =
+      userTopics.find(
+        t => t.id === targetId
+      );
+
+    if (!topic) {
+      return alert(
+        "Tanlangan savol kartasi topilmadi!"
+      );
+    }
+
+    if (!file) {
+      return alert(
+        "Excel fayl tanlanmadi! Eski kartani almashtirish uchun fayl kerak."
+      );
+    }
+
+    const perm = await getMyPermissions();
+
+    if (
+      !perm.isAdmin &&
+      !perm.canAddTopics
+    ) {
+      return showLimitWarning(
+        "Sizga savol qo'shish/yangilash huquqi administrator tomonidan cheklangan."
+      );
+    }
+
+  }
+
+  if (saveBtn) {
+    saveBtn.disabled = true;
+  }
+
+  try {
+
+    if (file) {
+      await applyExcelFileToTopic(
+        topic,
+        file
+      );
+    }
+
+    questions =
+      questionsObjectToArray(
+        topic.questions
+      );
+
+    currentUserTopicId =
+      topic.id;
+
+    localStorage.setItem(
+      "lastTopicId",
+      topic.id
+    );
+
+    renderUserTopics();
+    renderBoard();
+
+    const saved =
+      await saveTopics(topic.id);
+
+    await loadOtherTopics();
+
+    const fileInput =
+      $("userTopicExcelInput");
+
+    if (fileInput) fileInput.value = "";
+
+    if (saved) {
+      alert(
+        file
+          ? "✅ Savol kartasi va savollar saqlandi!"
+          : "✅ Savol kartasi saqlandi!"
+      );
+    }
+
+  } catch (err) {
+
+    console.warn(
+      "Savol kartasini saqlashda xatolik:",
+      err
+    );
+
+    alert(
+      "Excel faylni o'qib bo'lmadi. Fayl shablon bilan mos ekanini tekshiring."
+    );
+
+  } finally {
+
+    if (saveBtn) {
+      saveBtn.disabled = false;
+    }
+
+  }
+}
+
+window.saveQuestionCard =
+  saveQuestionCard;
 
 function selectUserTopic(
   topicId
@@ -2455,182 +2724,6 @@ function renderExcelTargetOptions() {
       ? prevValue
       : fallback;
 }
-
-async function importExcelForUserTopic() {
-
-  const targetId =
-    $("userTopicExcelTarget")
-      ?.value ||
-    currentUserTopicId;
-
-  if (!targetId) {
-    return alert(
-      "Avval mavzuni tanlang!"
-    );
-  }
-
-  const file =
-    $("userTopicExcelInput")
-      ?.files?.[0];
-
-  if (!file) {
-    return alert(
-      "Excel fayl tanlanmadi!"
-    );
-  }
-
-  const topic =
-    userTopics.find(
-      t =>
-        t.id ===
-        targetId
-    );
-
-  if (!topic) return;
-
-  const perm = await getMyPermissions();
-
-  if (
-    !perm.isAdmin &&
-    !perm.canAddTopics
-  ) {
-    return showLimitWarning(
-      "Sizga savol qo'shish/yangilash huquqi administrator tomonidan cheklangan."
-    );
-  }
-
-  const reader =
-    new FileReader();
-
-  reader.onload =
-    async e => {
-      const workbook =
-        XLSX.read(
-          new Uint8Array(
-            e.target.result
-          ),
-          {
-            type: "array"
-          }
-        );
-
-      const sheet =
-        workbook.Sheets[
-          workbook.SheetNames[0]
-        ];
-
-      const rows =
-        XLSX.utils.sheet_to_json(
-          sheet,
-          {
-            defval: ""
-          }
-        );
-
-      topic.questions = {
-        0: [],
-        1: [],
-        2: [],
-        3: [],
-        4: []
-      };
-
-      let index = 0;
-
-      rows.forEach(r => {
-
-  const q =
-    r.Question ??
-    r.question ??
-    r.QUESTION ??
-    "";
-
-  const a =
-    r.Answer ??
-    r.answer ??
-    r.ANSWER ??
-    "";
-
-  if (!String(q).trim() || !String(a).trim()) {
-    return;
-  }
-
-  let cat =
-    index % 5;
-
-  const c =
-    Number(
-      r.Category ??
-      r.category ??
-      r.CATEGORY
-    );
-
-  if (
-    c >= 1 &&
-    c <= 5
-  ) {
-    cat = c - 1;
-  }
-
-  /*
-   * 3-4-5 USTUNLARDAGI NOTO'G'RI JAVOBLAR
-   */
-  const wrongAnswers = [
-    r["Wrong Answer 1"],
-    r["Wrong Answer 2"],
-    r["Wrong Answer 3"]
-  ]
-    .map(
-      value =>
-        String(
-          value ?? ""
-        ).trim()
-    )
-    .filter(Boolean);
-
-  topic.questions[
-    cat
-  ].push({
-
-    q:
-      String(q).trim(),
-
-    a:
-      String(a).trim(),
-
-    wrongAnswers:
-      wrongAnswers
-
-  });
-
-  index++;
-});
-
-      questions =
-        questionsObjectToArray(
-          topic.questions
-        );
-
-      renderUserTopics();
-      renderBoard();
-
-      const saved =
-        await saveTopics(topic.id);
-
-      if (saved) {
-        alert(
-          "Excel muvaffaqiyatli yuklandi!"
-        );
-      }
-    };
-
-  reader.readAsArrayBuffer(
-    file
-  );
-}
-
-window.importExcelForUserTopic =
-  importExcelForUserTopic;
 
 /* ================= BOARD ================= */
 
@@ -2912,7 +3005,7 @@ function renderIntroRules() {
   if (!box) return;
 
   const step =
-    Number(pointStep) || 100;
+    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
 
   const isSolo =
     !teamsData.length;
@@ -2934,19 +3027,36 @@ function renderIntroRules() {
         </li>
       </ul>
     `
-    : `
+    : step > 0
+      ? `
       <ul class="introRulesList">
         <li>
           ✅ To‘g‘ri javob — <strong>+${step} ball</strong>
         </li>
         <li>
-          ❌ Noto‘g‘ri javob yoki vaqt tugashi — <strong>−${step} ball</strong>
+          ❌ Noto‘g‘ri javob yoki vaqt tugashi — <strong>ball berilmaydi</strong> (ball ayirilmaydi)
         </li>
         <li>
-          🔥 Savol oldida "2x", "3x" kabi belgi bo‘lsa, o‘sha savol uchun ball shuncha marta ko‘payadi
+          🔥 Bonus rejimi yoqilgan bo‘lsa, ba’zi savollar tasodifiy 2X/3X bo‘lib chiqadi
         </li>
         <li>
-          ⏱ Har bir savolga javob berish uchun belgilangan vaqt beriladi, vaqt tugasa ball ayiriladi
+          ⏱ Har bir savolga javob berish uchun belgilangan vaqt beriladi
+        </li>
+      </ul>
+    `
+      : `
+      <ul class="introRulesList">
+        <li>
+          🎯 Ball tizimi o‘chirilgan — natija <strong>to‘g‘ri va xato javoblar statistikasi</strong> bilan ko‘rsatiladi
+        </li>
+        <li>
+          🔀 Barcha savollar tasodifiy tartibda beriladi
+        </li>
+        <li>
+          🔥 Bonus rejimi yoqilgan bo‘lsa, ba’zi savollar tasodifiy bonus bo‘lib chiqadi
+        </li>
+        <li>
+          ⏱ Har bir savolga javob berish uchun belgilangan vaqt beriladi
         </li>
       </ul>
     `;
@@ -3525,7 +3635,7 @@ async function confirmOpenRoom() {
   }
 
   const step =
-    Number(pointStep) || 100;
+    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
 
   /*
    * Mehmon (guest) foydalanuvchi ham nazoratchi
@@ -6307,25 +6417,42 @@ function updateDuelStatsUI() {
 function updateDuelProgressBar() {
 
   const step =
-    Number(pointStep) || 100;
+    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
+
+  /*
+   * Noto'g'ri javob endi ball
+   * ayirmaydi — progress faqat
+   * TO'G'RI javoblarga qarab
+   * hisoblanadi. Ball 0 qilib
+   * o'chirilgan bo'lsa, progress
+   * to'g'ri javob SONI bo'yicha
+   * ishlaydi (honadagi kabi).
+   */
+  const useCountRace =
+    step === 0;
 
   const scoreA =
-    duelStats.a.correct * step -
-    duelStats.a.wrong * step;
+    useCountRace
+      ? duelStats.a.correct
+      : duelStats.a.correct * step;
 
   const scoreB =
-    duelStats.b.correct * step -
-    duelStats.b.wrong * step;
+    useCountRace
+      ? duelStats.b.correct
+      : duelStats.b.correct * step;
 
   const diff =
     scoreA - scoreB;
 
   /*
-   * 5 ball farqida "yo'l"
+   * 5 ball (yoki 5 ta to'g'ri
+   * javob) farqida "yo'l"
    * to'liq to'lgan bo'ladi.
    */
   const maxDiff =
-    step * 5;
+    useCountRace
+      ? 5
+      : step * 5;
 
   const ratio =
     Math.max(
@@ -6419,7 +6546,7 @@ function finishDuel() {
    * ekranlar bilan mos bo'lsin.
    */
   const step =
-    Number(pointStep) || 100;
+    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
 
   const teamA =
     duelPlayers.a;
@@ -6428,9 +6555,12 @@ function finishDuel() {
     duelPlayers.b;
 
   if (teamA) {
+    /*
+     * Noto'g'ri javoblar endi
+     * ball ayirmaydi.
+     */
     teamA.score +=
-      a.correct * step -
-      a.wrong * step;
+      a.correct * step;
 
     teamA.correctCount =
       (teamA.correctCount || 0) +
@@ -6447,8 +6577,7 @@ function finishDuel() {
 
   if (teamB) {
     teamB.score +=
-      b.correct * step -
-      b.wrong * step;
+      b.correct * step;
 
     teamB.correctCount =
       (teamB.correctCount || 0) +
@@ -6698,10 +6827,31 @@ function openTopicQuestion() {
   }
 
   /*
+   * Savol raqami / jami savollar va
+   * hozirgacha javob berilgan savollar
+   * sonini ko'rsatib turamiz.
+   */
+  const progressEl = $("questionProgress");
+
+  if (progressEl) {
+    const totalQuestions =
+      currentTopicQuestions.length;
+
+    const questionNumber =
+      currentTopicQuestionIndex + 1;
+
+    const answeredCount =
+      currentTopicQuestionIndex;
+
+    progressEl.textContent =
+      `${questionNumber}-savol / ${totalQuestions} tadan · ✅ Javob berilgan: ${answeredCount}`;
+  }
+
+  /*
    * Ball tizimi saqlanadi.
    */
   const score =
-    Number(pointStep) || 100;
+    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
 
   /*
    * Eski openQ modal tizimini
@@ -7084,8 +7234,19 @@ function updateTurnIndicator() {
   );
 
   /*
-   * Ball bo'yicha (eng yuqoridan)
-   * saralanadi — jonli reyting
+   * Ballik hisob o'chirilgan (pointStep === 0)
+   * bo'lsa, bu yerda ham ball emas —
+   * to'g'ri/xato javoblar soni ko'rsatiladi,
+   * aks holda hech qachon o'zgarmagan "0"
+   * ko'rinib qolaveradi.
+   */
+  const scoringOff =
+    Number(pointStep) === 0;
+
+  /*
+   * Ball (yoki ballik o'chirilgan bo'lsa —
+   * to'g'ri javoblar) bo'yicha eng
+   * yuqoridan saralanadi — jonli reyting
    * ko'rinishida. Navbatdagi
    * ishtirokchi alohida belgi
    * bilan ajratiladi.
@@ -7093,8 +7254,11 @@ function updateTurnIndicator() {
   const sorted =
     [...teamsData].sort(
       (a, b) =>
-        (b.score || 0) -
-        (a.score || 0)
+        scoringOff
+          ? (b.correctCount || 0) -
+            (a.correctCount || 0)
+          : (b.score || 0) -
+            (a.score || 0)
     );
 
   const cardsHtml = sorted
@@ -7135,7 +7299,11 @@ function updateTurnIndicator() {
             </strong>
 
             <span class="qParticipantScore">
-              ${Number(team.score || 0)} ball
+              ${
+                scoringOff
+                  ? `✅ ${team.correctCount || 0} · ❌ ${team.wrongCount || 0}`
+                  : `${Number(team.score || 0)} ball`
+              }
             </span>
 
           </div>
@@ -7491,11 +7659,18 @@ function handleAnswerSelection(
       }
     });
 
+  /*
+   * Noto'g'ri javob uchun ball
+   * AYIRILMAYDI — faqat to'g'ri
+   * javob ball qo'shadi. Xato/
+   * to'g'ri soni statistikada
+   * alohida hisoblanadi.
+   */
   const points =
     isCorrect
       ? currentValue *
         currentQuestionMultiplier
-      : -currentValue;
+      : 0;
 
   /*
    * KETMA-KET TO'G'RI JAVOB (STREAK)
@@ -7606,9 +7781,12 @@ function handleTimeExpired() {
 
   if (team) {
 
-    team.score -=
-      currentValue;
-
+    /*
+     * Vaqt tugashi ham "xato javob"
+     * bilan bir xil — ball
+     * AYIRILMAYDI, faqat xato
+     * hisoblanadi.
+     */
     team.wrongCount =
       (team.wrongCount || 0) + 1;
 
@@ -7627,7 +7805,7 @@ function handleTimeExpired() {
 
   if (a) {
     a.textContent =
-      `⏰ Vaqt tugadi! −${currentValue} ball`;
+      "⏰ Vaqt tugadi! Ball berilmadi";
 
     a.classList.remove(
       "hidden"
@@ -7653,15 +7831,11 @@ function showAnswerResult(
 
   a.textContent =
     team
-      ? `${
-          isCorrect
-            ? "✅ To‘g‘ri!"
-            : "❌ Xato!"
-        } ${
-          points > 0
-            ? "+"
-            : ""
-        }${points} ball — ${team.name}`
+      ? isCorrect
+        ? `✅ To‘g‘ri! ${
+            points > 0 ? "+" + points + " ball — " : ""
+          }${team.name}`
+        : `❌ Xato! Ball berilmadi — ${team.name}`
       : `${
           isCorrect
             ? "✅ To‘g‘ri!"
@@ -9437,7 +9611,13 @@ document.addEventListener("beks:langchange", () => {
    funksiyalari PIN kod bilan qulflanadi.
 ========================================================= */
 
-let teacherUnlocked = false;
+/*
+ * Standart holat — OCHIQ. Foydalanuvchi
+ * o'zi xohlaganda header/board'dagi 🔒
+ * tugmasini bosib qulflaydi (PIN so'ralmaydi),
+ * qayta ochish uchun esa PIN kerak bo'ladi.
+ */
+let teacherUnlocked = true;
 
 function getTeacherPinKey() {
   return (
@@ -9905,14 +10085,6 @@ onAuthStateChanged(
     startMyMessagesListener();
 
     /*
-     * Live Quiz Arena banneri (orqa fon rasmi + matnlar)
-     * BARCHA foydalanuvchilar (mehmonlar ham) uchun bir
-     * xilda qo'llaniladi — admin uni o'zgartirsa, hamma
-     * shu holatni ko'radi.
-     */
-    loadAndApplyHeroBanner();
-
-    /*
      * Har yangi kirishda (login)
      * hujjat keshi tozalanadi —
      * shunda eski/boshqa
@@ -9988,7 +10160,7 @@ onAuthStateChanged(
 
       guestQuickLaunch = true;
 
-      initSettings();
+      await initSettings();
 
       /*
        * Faqat mavzular RO'YXATI uchun kerak bo'lgan
@@ -10010,7 +10182,7 @@ onAuthStateChanged(
 
       await loadTopicsSafe();
 
-      initSettings();
+      await initSettings();
 
       restoreLastTopic();
 
@@ -10055,19 +10227,6 @@ onAuthStateChanged(
         ) {
           $("adminPanelBtn").classList.remove("hidden");
         }
-
-        /*
-         * "✏️" banner tahrirlash tugmasi ham FAQAT
-         * shu yerda, xuddi boshqaruv paneli tugmasi
-         * kabi — role: "admin" tasdiqlangandan keyin —
-         * ko'rsatiladi.
-         */
-        if (
-          myDoc?.role === "admin" &&
-          $("heroEditBtn")
-        ) {
-          $("heroEditBtn").classList.remove("hidden");
-        }
       } catch (e) {
         console.warn("Admin holatini tekshirishda xatolik:", e);
       }
@@ -10098,6 +10257,26 @@ onAuthStateChanged(
         );
 
         renderTeams();
+      }
+
+      /*
+       * ?timer=NN — index.html'dagi "Play" bosqichida
+       * mehmon o'zi tanlagan savol vaqti (soniya). Faqat
+       * "play" rejimi uchun ishlatiladi; kiritilmagan yoki
+       * noto'g'ri bo'lsa, initSettings() allaqachon
+       * o'rnatgan standart (shaxsiy yoki global) qiymat
+       * o'zgarishsiz qoladi.
+       */
+      if (liveStart === "play") {
+        const timerParam = parseInt(params.get("timer"), 10);
+
+        if (Number.isFinite(timerParam) && timerParam > 0) {
+          userTimer = Math.min(timerParam, 300);
+
+          if ($("timerInput")) {
+            $("timerInput").value = userTimer;
+          }
+        }
       }
 
       openRoomTopicPicker();
