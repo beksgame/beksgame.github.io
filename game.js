@@ -2465,6 +2465,21 @@ async function saveQuestionCard() {
 
     renderUserTopics();
     renderBoard();
+    renderExcelTargetOptions();
+
+    /*
+     * Saqlash tugagach, "eski savolni
+     * tanlash" ro'yxati har doim
+     * bo'sh holatga qaytadi — aks holda
+     * oldingi tanlov "yopishib qolib",
+     * adashtirib yuboradi.
+     */
+    const excelTargetSelect =
+      $("userTopicExcelTarget");
+
+    if (excelTargetSelect) {
+      excelTargetSelect.value = "";
+    }
 
     const saved =
       await saveTopics(topic.id);
@@ -2691,6 +2706,24 @@ function renderExcelTargetOptions() {
 
   select.disabled = false;
 
+  /*
+   * Bo'sh / tanlanmagan variant —
+   * doim birinchi va STANDART holat.
+   * Shu tufayli eski tanlangan mavzu
+   * nomi "yopishib qolmaydi" — foydalanuvchi
+   * ataylab tanlamaguncha bu joy bo'sh turadi,
+   * va adashib tanlab yuborsa shu variantga
+   * qaytib bekor qilishi mumkin.
+   */
+  const blankOpt =
+    document.createElement("option");
+
+  blankOpt.value = "";
+  blankOpt.textContent =
+    "— (tanlanmagan)";
+
+  select.appendChild(blankOpt);
+
   userTopics.forEach(topic => {
 
     const opt =
@@ -2709,20 +2742,10 @@ function renderExcelTargetOptions() {
       t => t.id === prevValue
     );
 
-  const fallback =
-    currentUserTopicId &&
-    userTopics.some(
-      t => t.id === currentUserTopicId
-    )
-      ? currentUserTopicId
-      : userTopics[
-          userTopics.length - 1
-        ].id;
-
   select.value =
     stillExists
       ? prevValue
-      : fallback;
+      : "";
 }
 
 /* ================= BOARD ================= */
@@ -8256,9 +8279,24 @@ function showSoloResultModal() {
          * ochilishi kerak, aks holda ekran bo'sh
          * qolib, faqat sahifani yangilagandagina
          * ro'yxat chiqardi.
+         *
+         * Ro'yxatdan o'tgan foydalanuvchi index.html'dagi
+         * "O'yin boshlash" orqali (?liveStart=play) kelgan
+         * bo'lsa ham xuddi shu "guestQuickLaunchMode"
+         * klassi body'ga qo'shilgan bo'ladi (board bir
+         * zum yalang'och ko'rinmasligi uchun) — lekin bu
+         * klass o'yin tugagach hech qachon olib
+         * tashlanmagani sabab, board (savol kartalari)
+         * doim bo'sh/ko'rinmas bo'lib qolar edi. Endi
+         * bunday foydalanuvchi uchun klass shu yerda
+         * olib tashlanadi, va board qaytadan ko'rinadi.
          */
         if (guestQuickLaunch) {
           openRoomTopicPicker();
+        } else {
+          document.body.classList.remove(
+            "guestQuickLaunchMode"
+          );
         }
       },
       12000
@@ -8396,6 +8434,10 @@ function showWinnerModal(
 
         if (guestQuickLaunch) {
           openRoomTopicPicker();
+        } else {
+          document.body.classList.remove(
+            "guestQuickLaunchMode"
+          );
         }
       },
       12000
@@ -9954,9 +9996,10 @@ $("changePasswordBtn")?.addEventListener(
 
 /*
  * Boshlang'ich holat — sahifa
- * har ochilganda XAVFSIZLIK
- * uchun avtomatik QULFLANGAN
- * holatda boshlanadi.
+ * har ochilganda OCHIQ holatda
+ * boshlanadi (standart holat).
+ * Foydalanuvchi xohlasa, header/board
+ * dagi 🔒 tugmasini bosib o'zi qulflaydi.
  */
 applyLockUI();
 
