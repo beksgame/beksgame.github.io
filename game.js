@@ -1,6 +1,31 @@
 import { auth, db } from "./firebase.js";
-import { signOut, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { doc, setDoc, updateDoc, getDoc, getDocs, collection, writeBatch, deleteDoc, onSnapshot, serverTimestamp, addDoc, query, orderBy, limit, where, deleteField, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+  getDocs,
+  collection,
+  writeBatch,
+  deleteDoc,
+  onSnapshot,
+  serverTimestamp,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+  where,
+  deleteField,
+  Timestamp,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* =========================================================
    BEKS GAME — CLEAN GAME ENGINE
@@ -46,14 +71,11 @@ const TOPIC_CATEGORY_COLORS = [
   "catPink",
   "catAmber",
   "catBlue",
-  "catGreen"
+  "catGreen",
 ];
 
 function getTopicCategory(topic) {
-  const c =
-    (topic?.category || "")
-      .toString()
-      .trim();
+  const c = (topic?.category || "").toString().trim();
 
   return c || DEFAULT_TOPIC_CATEGORY;
 }
@@ -72,10 +94,7 @@ function getTopicCategory(topic) {
 const DEFAULT_TOPIC_SUBJECT = "Umumiy";
 
 function getTopicSubject(topic) {
-  const s =
-    (topic?.subject || "")
-      .toString()
-      .trim();
+  const s = (topic?.subject || "").toString().trim();
 
   return s || DEFAULT_TOPIC_SUBJECT;
 }
@@ -89,9 +108,7 @@ function getTopicSubject(topic) {
 function filterTopicsBySubject(topics, subject) {
   if (!subject) return topics || [];
 
-  return (topics || []).filter(
-    t => getTopicSubject(t) === subject
-  );
+  return (topics || []).filter((t) => getTopicSubject(t) === subject);
 }
 
 /*
@@ -105,10 +122,9 @@ function filterTopicsBySubject(topics, subject) {
  * "Umumiy" keladi.
  */
 function getTopicSubjectStats(topics) {
-
   const map = new Map();
 
-  (topics || []).forEach(topic => {
+  (topics || []).forEach((topic) => {
     const name = getTopicSubject(topic);
     map.set(name, (map.get(name) || 0) + 1);
   });
@@ -116,23 +132,18 @@ function getTopicSubjectStats(topics) {
   const known = categorySettingsState.subjects || [];
 
   const names = [
-    ...known.filter(n => map.has(n)),
-    ...[...map.keys()].filter(
-      n => !known.includes(n) && n !== DEFAULT_TOPIC_SUBJECT
-    ).sort((a, b) => a.localeCompare(b)),
-    ...(map.has(DEFAULT_TOPIC_SUBJECT) ? [DEFAULT_TOPIC_SUBJECT] : [])
+    ...known.filter((n) => map.has(n)),
+    ...[...map.keys()]
+      .filter((n) => !known.includes(n) && n !== DEFAULT_TOPIC_SUBJECT)
+      .sort((a, b) => a.localeCompare(b)),
+    ...(map.has(DEFAULT_TOPIC_SUBJECT) ? [DEFAULT_TOPIC_SUBJECT] : []),
   ];
 
-  return names.map(
-    (name, i) => ({
-      name,
-      count: map.get(name),
-      colorClass:
-        TOPIC_CATEGORY_COLORS[
-          i % TOPIC_CATEGORY_COLORS.length
-        ]
-    })
-  );
+  return names.map((name, i) => ({
+    name,
+    count: map.get(name),
+    colorClass: TOPIC_CATEGORY_COLORS[i % TOPIC_CATEGORY_COLORS.length],
+  }));
 }
 
 /*
@@ -142,45 +153,27 @@ function getTopicSubjectStats(topics) {
  * Natija: [{ name, count, colorClass }]
  */
 function getTopicCategoryStats(topics) {
-
   const map = new Map();
 
-  (topics || []).forEach(topic => {
+  (topics || []).forEach((topic) => {
+    const name = getTopicCategory(topic);
 
-    const name =
-      getTopicCategory(topic);
-
-    map.set(
-      name,
-      (map.get(name) || 0) + 1
-    );
-
+    map.set(name, (map.get(name) || 0) + 1);
   });
 
-  const names =
-    [...map.keys()].sort(
-      (a, b) => {
+  const names = [...map.keys()].sort((a, b) => {
+    if (a === DEFAULT_TOPIC_CATEGORY) return 1;
 
-        if (a === DEFAULT_TOPIC_CATEGORY)
-          return 1;
+    if (b === DEFAULT_TOPIC_CATEGORY) return -1;
 
-        if (b === DEFAULT_TOPIC_CATEGORY)
-          return -1;
+    return a.localeCompare(b);
+  });
 
-        return a.localeCompare(b);
-      }
-    );
-
-  return names.map(
-    (name, i) => ({
-      name,
-      count: map.get(name),
-      colorClass:
-        TOPIC_CATEGORY_COLORS[
-          i % TOPIC_CATEGORY_COLORS.length
-        ]
-    })
-  );
+  return names.map((name, i) => ({
+    name,
+    count: map.get(name),
+    colorClass: TOPIC_CATEGORY_COLORS[i % TOPIC_CATEGORY_COLORS.length],
+  }));
 }
 
 /*
@@ -219,16 +212,12 @@ let selectedRoomPickerSubject = null;
  *                              qo'shish" svichi bu global
  *                              holatni bosib o'tishi mumkin.
  */
-const DEFAULT_SUBJECTS = [
-  "Ingliz tili",
-  "Koreys tili",
-  "Matematika"
-];
+const DEFAULT_SUBJECTS = ["Ingliz tili", "Koreys tili", "Matematika"];
 
 let categorySettingsState = {
   enabled: true,
   subjects: DEFAULT_SUBJECTS,
-  usersCanAddCategoriesDefault: true
+  usersCanAddCategoriesDefault: true,
 };
 
 /*
@@ -241,49 +230,29 @@ let categorySettingsState = {
 let myPermissionsCache = null;
 
 async function loadCategorySettings() {
+  const s = await fetchAppSettingsOnce();
 
-  const s =
-    await fetchAppSettingsOnce();
-
-  const enabled =
-    s?.categoriesEnabled !== false;
+  const enabled = s?.categoriesEnabled !== false;
 
   // Yangi maydon "subjects"; eski hujjatlarda hali
   // "standardCategories" nomi bilan qolgan bo'lishi
   // mumkin — shu ham o'qib qo'llab-quvvatlanadi.
   const rawSubjectsSource =
-    Array.isArray(s?.subjects) && s.subjects.length
-      ? s.subjects
-      : s?.standardCategories;
+    Array.isArray(s?.subjects) && s.subjects.length ? s.subjects : s?.standardCategories;
 
-  const rawList =
-    Array.isArray(rawSubjectsSource)
-      ? rawSubjectsSource
-          .map(c =>
-            (c || "")
-              .toString()
-              .trim()
-          )
-          .filter(Boolean)
-      : [];
+  const rawList = Array.isArray(rawSubjectsSource)
+    ? rawSubjectsSource.map((c) => (c || "").toString().trim()).filter(Boolean)
+    : [];
 
   categorySettingsState = {
     enabled,
-    subjects:
-      rawList.length
-        ? rawList
-        : DEFAULT_SUBJECTS,
-    usersCanAddCategoriesDefault:
-      s?.usersCanAddCategories !== false
+    subjects: rawList.length ? rawList : DEFAULT_SUBJECTS,
+    usersCanAddCategoriesDefault: s?.usersCanAddCategories !== false,
   };
 
-  document.body.classList.toggle(
-    "categoriesDisabled",
-    !enabled
-  );
+  document.body.classList.toggle("categoriesDisabled", !enabled);
 
-  myPermissionsCache =
-    await getMyPermissions();
+  myPermissionsCache = await getMyPermissions();
 
   return categorySettingsState;
 }
@@ -298,13 +267,9 @@ async function loadCategorySettings() {
  * GLOBAL standart holat asosida.
  */
 function canUserAddOwnCategory() {
-
   if (myPermissionsCache?.isAdmin) return true;
 
-  return (
-    myPermissionsCache?.canAddCategories ??
-    categorySettingsState.usersCanAddCategoriesDefault
-  );
+  return myPermissionsCache?.canAddCategories ?? categorySettingsState.usersCanAddCategoriesDefault;
 }
 
 /*
@@ -364,7 +329,7 @@ let roomHostChatSenderId = "host";
  */
 let soloStats = {
   correct: 0,
-  wrong: 0
+  wrong: 0,
 };
 
 /*
@@ -379,12 +344,12 @@ let duelPool = [];
 let duelTotalRounds = 0;
 let duelSidePools = {
   a: [],
-  b: []
+  b: [],
 };
 
 let duelPlayers = {
   a: null,
-  b: null
+  b: null,
 };
 
 let duelRound = {
@@ -396,7 +361,7 @@ let duelRound = {
     index: 0,
     startedAt: 0,
     timer: null,
-    timeLeft: 0
+    timeLeft: 0,
   },
   b: {
     item: null,
@@ -406,16 +371,16 @@ let duelRound = {
     index: 0,
     startedAt: 0,
     timer: null,
-    timeLeft: 0
-  }
+    timeLeft: 0,
+  },
 };
 
 let duelStats = {
   a: { correct: 0, wrong: 0, totalTimeMs: 0 },
-  b: { correct: 0, wrong: 0, totalTimeMs: 0 }
+  b: { correct: 0, wrong: 0, totalTimeMs: 0 },
 };
 
-const $ = id => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 /*
  * JONLI OQIM TO'SIG'I (LIVE FLOW SHIELD)
@@ -436,8 +401,7 @@ const $ = id => document.getElementById(id);
  *                       bekor qilganda) chaqiriladi.
  */
 function showFlowShield() {
-  $("liveFlowShieldModal")
-    ?.classList.add("show");
+  $("liveFlowShieldModal")?.classList.add("show");
 }
 
 function showFlowLoading(text) {
@@ -463,7 +427,10 @@ const clickSound = $("clickSound");
 const winnerSound = $("winnerSound");
 
 function normalizeName(name) {
-  return String(name ?? "").toLowerCase().replace(/\s+/g, "").replace(/[^\w]/g, "");
+  return String(name ?? "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^\w]/g, "");
 }
 
 function escapeHtml(value) {
@@ -506,9 +473,7 @@ function getUserDocRef() {
  * hujjat yoziladi.
  */
 function getUserTopicsCollectionRef() {
-  return currentUserUid && db
-    ? collection(db, "users", currentUserUid, "topics")
-    : null;
+  return currentUserUid && db ? collection(db, "users", currentUserUid, "topics") : null;
 }
 
 /*
@@ -586,10 +551,6 @@ const DEFAULT_PARTICIPANT_LIMIT = 10;
  */
 let _appSettingsFetchPromise = null;
 
-function resetAppSettingsCache() {
-  _appSettingsFetchPromise = null;
-}
-
 async function fetchAppSettingsOnce() {
   if (!_appSettingsFetchPromise) {
     _appSettingsFetchPromise = (async () => {
@@ -616,10 +577,7 @@ async function getAppLimits() {
 
   return {
     topicLimit: toPositiveInt(s?.topicLimit, DEFAULT_TOPIC_LIMIT),
-    participantLimit: toPositiveInt(
-      s?.participantLimit,
-      DEFAULT_PARTICIPANT_LIMIT
-    )
+    participantLimit: toPositiveInt(s?.participantLimit, DEFAULT_PARTICIPANT_LIMIT),
   };
 }
 
@@ -651,12 +609,8 @@ async function getAppDefaults() {
     bonusModeEnabled: s?.bonusModeEnabled === true,
     bonusQuestionCount: toPositiveInt(s?.bonusQuestionCount, 3),
     bonusMultiplierMode:
-      multiplier === "2x" ||
-      multiplier === "3x" ||
-      multiplier === "mixed"
-        ? multiplier
-        : "2x",
-    streakBonusEnabled: s?.streakBonusEnabled === true
+      multiplier === "2x" || multiplier === "3x" || multiplier === "mixed" ? multiplier : "2x",
+    streakBonusEnabled: s?.streakBonusEnabled === true,
   };
 }
 
@@ -669,12 +623,8 @@ async function getMyPermissions() {
       canAddTopics: d?.canAddQuestions !== false,
       canEditTopics: d?.canEditTopics !== false,
       canAddParticipants: d?.canAddParticipants !== false,
-      canSetParticipantImage:
-        d?.canSetParticipantImage !== false,
-      canAddCategories:
-        typeof d?.canAddCategories === "boolean"
-          ? d.canAddCategories
-          : null
+      canSetParticipantImage: d?.canSetParticipantImage !== false,
+      canAddCategories: typeof d?.canAddCategories === "boolean" ? d.canAddCategories : null,
     };
   } catch (e) {
     console.warn("getMyPermissions:", e);
@@ -685,7 +635,7 @@ async function getMyPermissions() {
       canEditTopics: true,
       canAddParticipants: true,
       canSetParticipantImage: true,
-      canAddCategories: null
+      canAddCategories: null,
     };
   }
 }
@@ -697,7 +647,6 @@ function showLimitWarning(message) {
 /* ================= SETTINGS ================= */
 
 async function initSettings() {
-
   const defaults = await getAppDefaults();
 
   // ---- BALL (Ball qadami) ----
@@ -776,23 +725,15 @@ async function initSettings() {
 }
 
 function updateBonusSettings() {
+  bonusModeEnabled = !!$("bonusModeCheckbox")?.checked;
 
-  bonusModeEnabled =
-    !!$("bonusModeCheckbox")?.checked;
+  const count = parseInt($("bonusCountInput")?.value, 10);
 
-  const count =
-    parseInt($("bonusCountInput")?.value, 10);
+  bonusQuestionCount = Number.isFinite(count) && count > 0 ? count : 3;
 
-  bonusQuestionCount =
-    Number.isFinite(count) && count > 0
-      ? count
-      : 3;
+  bonusMultiplierMode = $("bonusMultiplierSelect")?.value || "2x";
 
-  bonusMultiplierMode =
-    $("bonusMultiplierSelect")?.value || "2x";
-
-  streakBonusEnabled =
-    !!$("streakBonusCheckbox")?.checked;
+  streakBonusEnabled = !!$("streakBonusCheckbox")?.checked;
 
   /*
    * ESKI TIZIM BEKOR QILINDI: bu yerdagi o'zgartirish
@@ -810,22 +751,14 @@ function updateBonusSettings() {
    * amal qilishi uchun bonusni qayta
    * taqsimlaymiz.
    */
-  if (
-    Array.isArray(currentTopicQuestions) &&
-    currentTopicQuestions.length
-  ) {
-    assignRandomBonusQuestions(
-      currentTopicQuestions
-    );
+  if (Array.isArray(currentTopicQuestions) && currentTopicQuestions.length) {
+    assignRandomBonusQuestions(currentTopicQuestions);
   }
 
-  alert(
-    "✅ Bonus sozlamalari saqlandi!"
-  );
+  alert("✅ Bonus sozlamalari saqlandi!");
 }
 
-window.updateBonusSettings =
-  updateBonusSettings;
+window.updateBonusSettings = updateBonusSettings;
 
 /*
  * Tanlangan savollar hovuzidan
@@ -836,26 +769,18 @@ window.updateBonusSettings =
  * yoqilgan bo'lsagina ishlaydi.
  */
 function assignRandomBonusQuestions(pool) {
-
   activeBonusQuestions = new Map();
 
   if (!bonusModeEnabled) return;
 
   if (!Array.isArray(pool) || !pool.length) return;
 
-  const indices =
-    shuffleArray(
-      pool.map((_, i) => i)
-    ).slice(
-      0,
-      Math.min(
-        bonusQuestionCount,
-        pool.length
-      )
-    );
+  const indices = shuffleArray(pool.map((_, i) => i)).slice(
+    0,
+    Math.min(bonusQuestionCount, pool.length),
+  );
 
-  indices.forEach(i => {
-
+  indices.forEach((i) => {
     const item = pool[i];
 
     if (!item) return;
@@ -864,16 +789,13 @@ function assignRandomBonusQuestions(pool) {
       bonusMultiplierMode === "3x"
         ? 3
         : bonusMultiplierMode === "mixed"
-          ? (Math.random() < 0.5 ? 2 : 3)
+          ? Math.random() < 0.5
+            ? 2
+            : 3
           : 2;
 
-    activeBonusQuestions.set(
-      item,
-      multiplier
-    );
-
+    activeBonusQuestions.set(item, multiplier);
   });
-
 }
 
 function updatePointSettings() {
@@ -903,7 +825,7 @@ function updatePointSettings() {
   alert(
     step === 0
       ? "✅ Saqlandi! Endi o'yinda ball ko'rsatilmaydi — to'g'ri/xato javob statistikasi ko'rinadi. (Diqqat: bu faqat joriy seans uchun — admin paneldagi standart o'zgarmaydi.)"
-      : "✅ Ball sozlamasi saqlandi! (Diqqat: bu faqat joriy seans uchun — sahifa qayta yuklanganda admin paneldagi standart qiymat qo'llanadi.)"
+      : "✅ Ball sozlamasi saqlandi! (Diqqat: bu faqat joriy seans uchun — sahifa qayta yuklanganda admin paneldagi standart qiymat qo'llanadi.)",
   );
 }
 
@@ -925,10 +847,7 @@ window.updatePointStep = updatePointStep;
 function updateTimer() {
   const value = parseInt($("timerInput")?.value, 10);
 
-  userTimer =
-    Number.isFinite(value) && value > 0
-      ? Math.min(value, 300)
-      : 10;
+  userTimer = Number.isFinite(value) && value > 0 ? Math.min(value, 300) : 10;
 
   if ($("timerInput")) {
     $("timerInput").value = userTimer;
@@ -949,9 +868,7 @@ function toggleQuestionSettings() {
 
   const isClosed = dock.classList.toggle("settingsClosed");
   button.setAttribute("aria-expanded", String(!isClosed));
-  button.textContent = isClosed
-    ? "⚙ Sozlamalarni ochish"
-    : "⚙ Sozlamalarni yopish";
+  button.textContent = isClosed ? "⚙ Sozlamalarni ochish" : "⚙ Sozlamalarni yopish";
 }
 
 window.toggleQuestionSettings = toggleQuestionSettings;
@@ -959,10 +876,7 @@ window.toggleQuestionSettings = toggleQuestionSettings;
 /* ================= PARTICIPANTS ================= */
 
 async function saveParticipants() {
-  localStorage.setItem(
-    PARTICIPANTS_KEY(),
-    JSON.stringify(participants)
-  );
+  localStorage.setItem(PARTICIPANTS_KEY(), JSON.stringify(participants));
 
   /*
    * MEHMON (guest) foydalanuvchilar
@@ -982,7 +896,6 @@ async function saveParticipants() {
   if (!ref) return;
 
   try {
-
     /*
      * Firestore "undefined"
      * qiymatlarni qabul qilmaydi
@@ -990,30 +903,16 @@ async function saveParticipants() {
      * berib, statistika (wins/games)
      * saqlanmay qolishi mumkin edi.
      */
-    const safeParticipants =
-      JSON.parse(
-        JSON.stringify(
-          participants
-        )
-      );
+    const safeParticipants = JSON.parse(JSON.stringify(participants));
 
-    await setDoc(
-      ref,
-      { participants: safeParticipants },
-      { merge: true }
-    );
+    await setDoc(ref, { participants: safeParticipants }, { merge: true });
   } catch (e) {
-    console.error(
-      "Participant Firebase save XATOSI:",
-      e
-    );
+    console.error("Participant Firebase save XATOSI:", e);
   }
 }
 
 async function loadParticipants() {
-  const local = localStorage.getItem(
-    PARTICIPANTS_KEY()
-  );
+  const local = localStorage.getItem(PARTICIPANTS_KEY());
 
   try {
     participants = local ? JSON.parse(local) : [];
@@ -1025,38 +924,31 @@ async function loadParticipants() {
     participants = [];
   }
 
-  participants = participants.map(p => ({
+  participants = participants.map((p) => ({
     id: p.id ?? Date.now() + Math.random(),
     name: String(p.name ?? "Noma'lum"),
     wins: Number(p.wins) || 0,
     games: Number(p.games) || 0,
-    image: p.image || ""
+    image: p.image || "",
   }));
 
   renderParticipants();
 
   try {
-    const data =
-      await fetchUserDocOnce();
+    const data = await fetchUserDocOnce();
 
-    const remote =
-      data
-        ? data.participants
-        : null;
+    const remote = data ? data.participants : null;
 
     if (Array.isArray(remote)) {
-      participants = remote.map(p => ({
+      participants = remote.map((p) => ({
         id: p.id ?? Date.now() + Math.random(),
         name: String(p.name ?? "Noma'lum"),
         wins: Number(p.wins) || 0,
         games: Number(p.games) || 0,
-        image: p.image || ""
+        image: p.image || "",
       }));
 
-      localStorage.setItem(
-        PARTICIPANTS_KEY(),
-        JSON.stringify(participants)
-      );
+      localStorage.setItem(PARTICIPANTS_KEY(), JSON.stringify(participants));
 
       renderParticipants();
     }
@@ -1074,25 +966,16 @@ async function addParticipant() {
 
   if (!name) return;
 
-  if (
-    participants.some(
-      p =>
-        normalizeName(p.name) ===
-        normalizeName(name)
-    )
-  ) {
-    return alert(
-      "Bu ishtirokchi allaqachon mavjud!"
-    );
+  if (participants.some((p) => normalizeName(p.name) === normalizeName(name))) {
+    return alert("Bu ishtirokchi allaqachon mavjud!");
   }
 
   const perm = await getMyPermissions();
 
   if (!perm.isAdmin) {
-
     if (!perm.canAddParticipants) {
       return showLimitWarning(
-        "Sizga yangi ishtirokchi qo'shish huquqi administrator tomonidan cheklangan."
+        "Sizga yangi ishtirokchi qo'shish huquqi administrator tomonidan cheklangan.",
       );
     }
 
@@ -1100,7 +983,7 @@ async function addParticipant() {
 
     if (participants.length >= participantLimit) {
       return showLimitWarning(
-        `Siz maksimal ${participantLimit} tagacha ishtirokchi qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`
+        `Siz maksimal ${participantLimit} tagacha ishtirokchi qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`,
       );
     }
   }
@@ -1110,7 +993,7 @@ async function addParticipant() {
     name,
     wins: 0,
     games: 0,
-    image: ""
+    image: "",
   });
 
   saveParticipants();
@@ -1124,23 +1007,17 @@ function findParticipant(ref) {
 
   return (
     participants.find(
-      p =>
-        String(p.id) === String(ref) ||
-        normalizeName(p.name) ===
-          normalizeName(ref)
+      (p) => String(p.id) === String(ref) || normalizeName(p.name) === normalizeName(ref),
     ) || null
   );
 }
 
-window.editParticipant = async function(oldName) {
+window.editParticipant = async function (oldName) {
   const p = findParticipant(oldName);
 
   if (!p) return;
 
-  const newName = prompt(
-    "Yangi ism:",
-    p.name
-  );
+  const newName = prompt("Yangi ism:", p.name);
 
   if (!newName?.trim()) return;
 
@@ -1154,149 +1031,90 @@ window.editParticipant = async function(oldName) {
 async function deleteParticipantById(id) {
   const p = findParticipant(id);
 
-  if (
-    !p ||
-    !confirm(`"${p.name}" ni o‘chirasizmi?`)
-  ) {
+  if (!p || !confirm(`"${p.name}" ni o‘chirasizmi?`)) {
     return;
   }
 
-  participants = participants.filter(
-    x =>
-      String(x.id) !==
-      String(p.id)
-  );
+  participants = participants.filter((x) => String(x.id) !== String(p.id));
 
   await saveParticipants();
   renderParticipants();
 }
 
 async function resetParticipantStats(id) {
-
-  const p =
-    findParticipant(id);
+  const p = findParticipant(id);
 
   if (!p) return;
 
-  participants =
-    participants.map(x => {
+  participants = participants.map((x) => {
+    if (String(x.id) !== String(p.id)) {
+      return x;
+    }
 
-      if (
-        String(x.id) !==
-        String(p.id)
-      ) {
-        return x;
-      }
-
-      return {
-        ...x,
-        games: 0,
-        wins: 0
-      };
-
-    });
+    return {
+      ...x,
+      games: 0,
+      wins: 0,
+    };
+  });
 
   await saveParticipants();
 
   renderParticipants();
 }
 
-window.resetParticipantStats =
-  resetParticipantStats;
+window.resetParticipantStats = resetParticipantStats;
 
 async function resetAllParticipantsStats() {
-
   if (!participants.length) {
-    alert(
-      "Hozircha ishtirokchi yo‘q."
-    );
+    alert("Hozircha ishtirokchi yo‘q.");
     return;
   }
 
   if (
     !confirm(
-      "Barcha ishtirokchilarning statistikasi (o‘yin/g‘alaba soni) 0 ga tushirilsinmi? Bu amalni orqaga qaytarib bo‘lmaydi!"
+      "Barcha ishtirokchilarning statistikasi (o‘yin/g‘alaba soni) 0 ga tushirilsinmi? Bu amalni orqaga qaytarib bo‘lmaydi!",
     )
   ) {
     return;
   }
 
-  participants =
-    participants.map(
-      x => ({
-        ...x,
-        games: 0,
-        wins: 0
-      })
-    );
+  participants = participants.map((x) => ({
+    ...x,
+    games: 0,
+    wins: 0,
+  }));
 
   await saveParticipants();
 
   renderParticipants();
 
-  alert(
-    "✅ Barcha ishtirokchilar statistikasi tozalandi!"
-  );
+  alert("✅ Barcha ishtirokchilar statistikasi tozalandi!");
 }
 
-window.resetAllParticipantsStats =
-  resetAllParticipantsStats;
+window.resetAllParticipantsStats = resetAllParticipantsStats;
 
-function resizeImageFile(
-  file,
-  maxSize = 180,
-  quality = .78
-) {
+function resizeImageFile(file, maxSize = 180, quality = 0.78) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = e => {
+    reader.onload = (e) => {
       const img = new Image();
 
       img.onload = () => {
-        const scale = Math.min(
-          1,
-          maxSize /
-            Math.max(
-              img.width,
-              img.height
-            )
-        );
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
 
-        const canvas =
-          document.createElement("canvas");
+        const canvas = document.createElement("canvas");
 
-        canvas.width = Math.max(
-          1,
-          Math.round(
-            img.width * scale
-          )
-        );
+        canvas.width = Math.max(1, Math.round(img.width * scale));
 
-        canvas.height = Math.max(
-          1,
-          Math.round(
-            img.height * scale
-          )
-        );
+        canvas.height = Math.max(1, Math.round(img.height * scale));
 
-        const ctx =
-          canvas.getContext("2d");
+        const ctx = canvas.getContext("2d");
 
-        ctx.drawImage(
-          img,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        resolve(
-          canvas.toDataURL(
-            "image/jpeg",
-            quality
-          )
-        );
+        resolve(canvas.toDataURL("image/jpeg", quality));
       };
 
       img.onerror = reject;
@@ -1320,129 +1138,75 @@ function renderParticipants() {
     addTeamWithParticipant() teamsData ichiga
     participantId ni yozadi.
   */
-  const activeIds = new Set(
-  (teamsData || []).map(team =>
-    String(team.participantId)
-  )
-);
+  const activeIds = new Set((teamsData || []).map((team) => String(team.participantId)));
 
-const sorted = [...participants].sort((a, b) => {
+  const sorted = [...participants].sort((a, b) => {
+    const aActive = activeIds.has(String(a.id));
 
-  const aActive =
-    activeIds.has(String(a.id));
+    const bActive = activeIds.has(String(b.id));
 
-  const bActive =
-    activeIds.has(String(b.id));
+    // Ikkalasi ham o'yinda bo'lsa:
+    // LIVE BALL bo'yicha (yoki ball o'chirilgan
+    // bo'lsa — to'g'ri javoblar soni bo'yicha)
+    if (aActive && bActive) {
+      if (Number(pointStep) === 0) {
+        const teamA = teamsData.find((t) => String(t.participantId) === String(a.id));
 
+        const teamB = teamsData.find((t) => String(t.participantId) === String(b.id));
 
-  // Ikkalasi ham o'yinda bo'lsa:
-  // LIVE BALL bo'yicha (yoki ball o'chirilgan
-  // bo'lsa — to'g'ri javoblar soni bo'yicha)
-  if (aActive && bActive) {
+        const correctA = teamA?.correctCount || 0;
+        const correctB = teamB?.correctCount || 0;
 
-    if (Number(pointStep) === 0) {
+        return correctB - correctA || b.wins - a.wins || a.name.localeCompare(b.name);
+      }
 
-      const teamA = teamsData.find(
-        t => String(t.participantId) === String(a.id)
-      );
+      const scoreA = getLiveParticipantScore(a.id);
 
-      const teamB = teamsData.find(
-        t => String(t.participantId) === String(b.id)
-      );
+      const scoreB = getLiveParticipantScore(b.id);
 
-      const correctA = teamA?.correctCount || 0;
-      const correctB = teamB?.correctCount || 0;
-
-      return (
-        correctB - correctA ||
-        b.wins - a.wins ||
-        a.name.localeCompare(b.name)
-      );
+      return scoreB - scoreA || b.wins - a.wins || a.name.localeCompare(b.name);
     }
 
-    const scoreA =
-      getLiveParticipantScore(a.id);
+    // Faqat A o'yinda
+    if (aActive && !bActive) {
+      return -1;
+    }
 
-    const scoreB =
-      getLiveParticipantScore(b.id);
+    // Faqat B o'yinda
+    if (!aActive && bActive) {
+      return 1;
+    }
 
-    return (
-      scoreB - scoreA ||
-      b.wins - a.wins ||
-      a.name.localeCompare(b.name)
-    );
-  }
-
-
-  // Faqat A o'yinda
-  if (aActive && !bActive) {
-    return -1;
-  }
-
-
-  // Faqat B o'yinda
-  if (!aActive && bActive) {
-    return 1;
-  }
-
-
-  // Ikkalasi ham o'yinda EMAS:
-  // eski tizim — WINS bo'yicha
-  return (
-    b.wins - a.wins ||
-    a.name.localeCompare(b.name)
-  );
-});
-
-
-
+    // Ikkalasi ham o'yinda EMAS:
+    // eski tizim — WINS bo'yicha
+    return b.wins - a.wins || a.name.localeCompare(b.name);
+  });
 
   sorted.forEach((p, index) => {
-
     /*
       Participant hozir o'yindami?
     */
-    const isActive =
-      activeIds.has(String(p.id));
-
+    const isActive = activeIds.has(String(p.id));
 
     /*
       Ball faqat o'yindagi participantga tegishli.
     */
-    const live =
-      isActive
-        ? getLiveParticipantScore(p.id)
-        : null;
+    const live = isActive ? getLiveParticipantScore(p.id) : null;
 
-    const liveTeam =
-      isActive
-        ? teamsData.find(
-            t =>
-              String(t.participantId) ===
-              String(p.id)
-          )
-        : null;
+    const liveTeam = isActive
+      ? teamsData.find((t) => String(t.participantId) === String(p.id))
+      : null;
 
+    const winRate = p.games ? Math.round((p.wins / p.games) * 100) : 0;
 
-    const winRate = p.games
-      ? Math.round(
-          (p.wins / p.games) * 100
-        )
-      : 0;
-
-
-    const div =
-      document.createElement("div");
-
+    const div = document.createElement("div");
 
     /*
       ORIGINAL CLASS O'ZGARMAYDI
     */
     div.className = "participant";
 
-    div.dataset.participantId =
-      p.id;
-
+    div.dataset.participantId = p.id;
 
     /*
       Tanlangan participantga mavjud
@@ -1451,7 +1215,6 @@ const sorted = [...participants].sort((a, b) => {
     if (isActive) {
       div.classList.add("active");
     }
-
 
     div.innerHTML = `
       <div class="participantRank">
@@ -1489,22 +1252,20 @@ const sorted = [...participants].sort((a, b) => {
 
         ${
           isActive
-            ? (
-                Number(pointStep) === 0
-                  ? `
+            ? Number(pointStep) === 0
+              ? `
                     <div class="participantLiveScore participantLiveScoreCW">
                       ✅ ${liveTeam?.correctCount || 0}
                       ·
                       ❌ ${liveTeam?.wrongCount || 0}
                     </div>
                   `
-                  : `
+              : `
                     <div class="participantLiveScore">
                       ${live}
                       <span>ball</span>
                     </div>
                   `
-              )
             : ""
         }
 
@@ -1547,7 +1308,6 @@ const sorted = [...participants].sort((a, b) => {
       </div>
     `;
 
-
     /*
       PARTICIPANTNI TANLASH
     */
@@ -1557,168 +1317,115 @@ const sorted = [...participants].sort((a, b) => {
    2-bosish  = O'YINDAN CHIQARISH
 ========================================================= */
 
-div.addEventListener("click", (e) => {
-
-  /* Tahrirlash / birlashtirish / o'chirish
+    div.addEventListener("click", (e) => {
+      /* Tahrirlash / birlashtirish / o'chirish
      tugmalari bosilganda participant tanlanmasin */
-  if (
-    e.target.closest(".editParticipant") ||
-    e.target.closest(".resetParticipantStats") ||
-    e.target.closest(".deleteParticipant")
-  ) {
-    return;
-  }
+      if (
+        e.target.closest(".editParticipant") ||
+        e.target.closest(".resetParticipantStats") ||
+        e.target.closest(".deleteParticipant")
+      ) {
+        return;
+      }
 
+      /* HOZIRGI HOLATNI TO'G'RIDAN-TO'G'RI TEKSHIRAMIZ */
+      const currentTeam = teamsData.find((team) => String(team.participantId) === String(p.id));
 
-  /* HOZIRGI HOLATNI TO'G'RIDAN-TO'G'RI TEKSHIRAMIZ */
-  const currentTeam = teamsData.find(
-    team =>
-      String(team.participantId) ===
-      String(p.id)
-  );
-
-
-  /* =======================================================
+      /* =======================================================
      AGAR O'YINDA BO'LSA
      YANA BOSILDI → TANLOV BEKOR
   ======================================================= */
 
-  if (currentTeam) {
+      if (currentTeam) {
+        removeTeam(currentTeam.id);
 
-    removeTeam(currentTeam.id);
+        return;
+      }
 
-    return;
-  }
-
-
-  /* =======================================================
+      /* =======================================================
      AGAR O'YINDA BO'LMASA
      BOSILDI → TANLASH
   ======================================================= */
 
-  addTeamWithParticipant(p);
-
-});
+      addTeamWithParticipant(p);
+    });
 
     /*
       RASM TANLASH
     */
-    div.querySelector(
-      ".avatarBtn"
-    ).onclick = e => {
-
+    div.querySelector(".avatarBtn").onclick = (e) => {
       e.stopPropagation();
 
-      div.querySelector(
-        ".avatarInput"
-      ).click();
+      div.querySelector(".avatarInput").click();
     };
-
 
     /*
       RASM YUKLASH
     */
-    div.querySelector(
-      ".avatarInput"
-    ).onchange = async e => {
-
+    div.querySelector(".avatarInput").onchange = async (e) => {
       e.stopPropagation();
 
-      const file =
-        e.target.files?.[0];
+      const file = e.target.files?.[0];
 
       if (!file) return;
 
       const perm = await getMyPermissions();
 
-      if (
-        !perm.isAdmin &&
-        !perm.canSetParticipantImage
-      ) {
+      if (!perm.isAdmin && !perm.canSetParticipantImage) {
         e.target.value = "";
 
         return showLimitWarning(
-          "Sizga ishtirokchiga rasm o'rnatish huquqi administrator tomonidan cheklangan."
+          "Sizga ishtirokchiga rasm o'rnatish huquqi administrator tomonidan cheklangan.",
         );
       }
 
       try {
-
-        p.image =
-          await resizeImageFile(file);
+        p.image = await resizeImageFile(file);
 
         await saveParticipants();
 
         renderParticipants();
         renderTeams();
-
       } catch (err) {
-
         console.warn(err);
 
-        alert(
-          "Rasmni yuklashda xato!"
-        );
+        alert("Rasmni yuklashda xato!");
       }
     };
-
 
     /*
       EDIT
     */
-    div.querySelector(
-      ".editParticipant"
-    ).onclick = e => {
-
+    div.querySelector(".editParticipant").onclick = (e) => {
       e.stopPropagation();
 
-      window.editParticipant(
-        p.id
-      );
+      window.editParticipant(p.id);
     };
-
 
     /*
       STATISTIKANI 0 GA TUSHURISH
     */
-    div.querySelector(
-      ".resetParticipantStats"
-    ).onclick = async e => {
-
+    div.querySelector(".resetParticipantStats").onclick = async (e) => {
       e.stopPropagation();
 
-      if (
-        !confirm(
-          `"${p.name}" ning statistikasi (o‘yin/g‘alaba soni) 0 ga tushirilsinmi?`
-        )
-      ) {
+      if (!confirm(`"${p.name}" ning statistikasi (o‘yin/g‘alaba soni) 0 ga tushirilsinmi?`)) {
         return;
       }
 
-      await resetParticipantStats(
-        p.id
-      );
+      await resetParticipantStats(p.id);
     };
-
 
     /*
       DELETE
     */
-    div.querySelector(
-      ".deleteParticipant"
-    ).onclick = e => {
-
+    div.querySelector(".deleteParticipant").onclick = (e) => {
       e.stopPropagation();
 
-      deleteParticipantById(
-        p.id
-      );
+      deleteParticipantById(p.id);
     };
-
 
     box.appendChild(div);
   });
-
 
   updateParticipantsToggleButton();
 }
@@ -1757,84 +1464,50 @@ function avatarData(name) {
     </svg>
   `;
 
-  return (
-    "data:image/svg+xml;charset=UTF-8," +
-    encodeURIComponent(svg)
-  );
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
 }
 
-function getLiveParticipantScore(
-  participantId
-) {
-  const team = teamsData.find(
-    t =>
-      String(t.participantId) ===
-      String(participantId)
-  );
+function getLiveParticipantScore(participantId) {
+  const team = teamsData.find((t) => String(t.participantId) === String(participantId));
 
   return team ? team.score : 0;
 }
 
 function updateParticipantsToggleButton() {
-  const btn =
-    $("toggleParticipantsBtn");
+  const btn = $("toggleParticipantsBtn");
 
-  const box =
-    $("participantsBox");
+  const box = $("participantsBox");
 
   if (!btn || !box) return;
 
-  btn.textContent =
-    box.classList.contains("expanded")
-      ? `👥 ${participants.length} ishtirokchi ▲`
-      : `👥 ${participants.length} ishtirokchi ▼`;
+  btn.textContent = box.classList.contains("expanded")
+    ? `👥 ${participants.length} ishtirokchi ▲`
+    : `👥 ${participants.length} ishtirokchi ▼`;
 }
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-    const btn =
-      $("toggleParticipantsBtn");
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = $("toggleParticipantsBtn");
 
-    const box =
-      $("participantsBox");
+  const box = $("participantsBox");
 
-    btn?.addEventListener(
-      "click",
-      () => {
-        box?.classList.toggle(
-          "expanded"
-        );
+  btn?.addEventListener("click", () => {
+    box?.classList.toggle("expanded");
 
-        updateParticipantsToggleButton();
-      }
-    );
-  }
-);
+    updateParticipantsToggleButton();
+  });
+});
 
 /* ================= TEAMS ================= */
 
 window.addSelectedParticipantToTeam = addTeamWithParticipant;
 
-function addTeamWithParticipant(
-  participant
-) {
+function addTeamWithParticipant(participant) {
   if (!participant?.id) {
-    return alert(
-      "Ishtirokchi ma'lumoti topilmadi!"
-    );
+    return alert("Ishtirokchi ma'lumoti topilmadi!");
   }
 
-  if (
-    teamsData.some(
-      t =>
-        String(t.participantId) ===
-        String(participant.id)
-    )
-  ) {
-    return alert(
-      `"${participant.name}" allaqachon o'yinga qo'shilgan!`
-    );
+  if (teamsData.some((t) => String(t.participantId) === String(participant.id))) {
+    return alert(`"${participant.name}" allaqachon o'yinga qo'shilgan!`);
   }
 
   teamCount += 1;
@@ -1846,7 +1519,7 @@ function addTeamWithParticipant(
     image: participant.image || "",
     score: 0,
     correctCount: 0,
-    wrongCount: 0
+    wrongCount: 0,
   });
 
   renderTeams();
@@ -1854,35 +1527,27 @@ function addTeamWithParticipant(
 }
 
 function addTeam() {
-  const input =
-    $("teamNameInput");
+  const input = $("teamNameInput");
 
-  const name =
-    input?.value?.trim();
+  const name = input?.value?.trim();
 
   if (!name) {
     return addParticipant();
   }
 
-  const p =
-    findParticipant(name);
+  const p = findParticipant(name);
 
   if (p) {
     addTeamWithParticipant(p);
   } else {
-    alert(
-      "Avval ishtirokchini qo‘shing."
-    );
+    alert("Avval ishtirokchini qo‘shing.");
   }
 }
 
 window.addTeam = addTeam;
 
 function removeTeam(id) {
-  teamsData =
-    teamsData.filter(
-      t => t.id !== id
-    );
+  teamsData = teamsData.filter((t) => t.id !== id);
 
   renderTeams();
   renderParticipants();
@@ -1900,44 +1565,28 @@ function renderTeams() {
    * soni bo'yicha tuziladi —
    * ballik poyga o'chadi.
    */
-  const scoringOff =
-    Number(pointStep) === 0;
+  const scoringOff = Number(pointStep) === 0;
 
-  const sorted =
-    [...teamsData].sort(
-      (a, b) =>
-        scoringOff
-          ? (b.correctCount || 0) -
-            (a.correctCount || 0)
-          : b.score - a.score
-    );
+  const sorted = [...teamsData].sort((a, b) =>
+    scoringOff ? (b.correctCount || 0) - (a.correctCount || 0) : b.score - a.score,
+  );
 
-  sorted.forEach(
-    (team, rank) => {
-      const p =
-        findParticipant(
-          team.participantId
-        );
+  sorted.forEach((team, rank) => {
+    const p = findParticipant(team.participantId);
 
-      const div =
-        document.createElement("div");
+    const div = document.createElement("div");
 
-      div.className = "team";
-      div.dataset.teamId =
-        team.id;
+    div.className = "team";
+    div.dataset.teamId = team.id;
 
-      div.innerHTML = `
+    div.innerHTML = `
         <div class="liveRank">
           #${rank + 1}
         </div>
 
         <img
           class="teamAvatar"
-          src="${
-            p?.image ||
-            team.image ||
-            avatarData(team.name)
-          }"
+          src="${p?.image || team.image || avatarData(team.name)}"
           alt=""
         >
 
@@ -1966,16 +1615,13 @@ function renderTeams() {
         </button>
       `;
 
-      div.querySelector(
-        ".closeBtn"
-      ).onclick = e => {
-        e.stopPropagation();
-        removeTeam(team.id);
-      };
+    div.querySelector(".closeBtn").onclick = (e) => {
+      e.stopPropagation();
+      removeTeam(team.id);
+    };
 
-      box.appendChild(div);
-    }
-  );
+    box.appendChild(div);
+  });
 }
 
 /* Compatibility only:
@@ -1983,19 +1629,17 @@ function renderTeams() {
 
 function addScore() {
   console.info(
-    "Manual score boshqaruvi olib tashlangan — ball variant tanlash orqali avtomatik beriladi."
+    "Manual score boshqaruvi olib tashlangan — ball variant tanlash orqali avtomatik beriladi.",
   );
 }
 
 window.addScore = addScore;
 
 function updateTeamScoreUI(team) {
-  const el =
-    $("t" + team.id);
+  const el = $("t" + team.id);
 
   if (el) {
-    el.textContent =
-      team.score;
+    el.textContent = team.score;
   }
 
   renderTeams();
@@ -2006,17 +1650,8 @@ function updateTeamScoreUI(team) {
 /* ================= TOPICS ================= */
 
 function questionsObjectToArray(obj) {
-  if (
-    !obj ||
-    typeof obj !== "object"
-  ) {
-    return [
-      [],
-      [],
-      [],
-      [],
-      []
-    ];
+  if (!obj || typeof obj !== "object") {
+    return [[], [], [], [], []];
   }
 
   /*
@@ -2034,30 +1669,11 @@ function questionsObjectToArray(obj) {
    * ko'rinar edi. Endi ikkala
    * shakl ham qo'llab-quvvatlanadi.
    */
-  if (
-    Array.isArray(obj.shuffled)
-  ) {
-    return [
-      obj.shuffled,
-      [],
-      [],
-      [],
-      []
-    ];
+  if (Array.isArray(obj.shuffled)) {
+    return [obj.shuffled, [], [], [], []];
   }
 
-  return [
-    0,
-    1,
-    2,
-    3,
-    4
-  ].map(
-    i =>
-      Array.isArray(obj[i])
-        ? obj[i]
-        : []
-  );
+  return [0, 1, 2, 3, 4].map((i) => (Array.isArray(obj[i]) ? obj[i] : []));
 }
 
 /*
@@ -2068,26 +1684,16 @@ function questionsObjectToArray(obj) {
  * mavzular/savollar qayta yozilishining oldini oladi.
  */
 async function saveTopics(topicId) {
-  localStorage.setItem(
-    getUserTopicsLSKey(),
-    JSON.stringify(userTopics)
-  );
+  localStorage.setItem(getUserTopicsLSKey(), JSON.stringify(userTopics));
 
-  const colRef =
-    getUserTopicsCollectionRef();
+  const colRef = getUserTopicsCollectionRef();
 
   if (!colRef) return true;
 
-  const topic =
-    topicId
-      ? userTopics.find(t => t.id === topicId)
-      : null;
+  const topic = topicId ? userTopics.find((t) => t.id === topicId) : null;
 
   if (!topic) {
-    console.warn(
-      "saveTopics: topicId ko'rsatilmadi yoki mavzu topilmadi:",
-      topicId
-    );
+    console.warn("saveTopics: topicId ko'rsatilmadi yoki mavzu topilmadi:", topicId);
     return false;
   }
 
@@ -2104,30 +1710,18 @@ async function saveTopics(topicId) {
    * yangi savollar saqlanmay
    * qolishining asosiy sababi edi.
    */
-  const safeTopic =
-    JSON.parse(
-      JSON.stringify(
-        topic
-      )
-    );
+  const safeTopic = JSON.parse(JSON.stringify(topic));
 
   try {
-    await setDoc(
-      doc(colRef, topic.id),
-      safeTopic
-    );
+    await setDoc(doc(colRef, topic.id), safeTopic);
   } catch (e) {
-
-    console.error(
-      "Topics Firebase save XATOSI:",
-      e
-    );
+    console.error("Topics Firebase save XATOSI:", e);
 
     alert(
       "⚠️ Mavzular/savollar serverga saqlanmadi!\n\n" +
-      "Sababi: " +
-      (e?.message || e) +
-      "\n\nInternetni tekshirib, qayta urinib ko‘ring."
+        "Sababi: " +
+        (e?.message || e) +
+        "\n\nInternetni tekshirib, qayta urinib ko‘ring.",
     );
 
     return false;
@@ -2150,15 +1744,9 @@ async function saveTopics(topicId) {
    * kolleksiyani o'qiydi.
    */
   try {
-    await syncSharedTopics(
-      [safeTopic]
-    );
+    await syncSharedTopics([safeTopic]);
   } catch (e) {
-
-    console.error(
-      "sharedTopics sync XATOSI:",
-      e
-    );
+    console.error("sharedTopics sync XATOSI:", e);
 
     /*
      * Shaxsiy mavzu ("users/{uid}/topics/{id}")
@@ -2169,18 +1757,12 @@ async function saveTopics(topicId) {
      * denied) kelib chiqadi — shuning uchun
      * tushunarli, aniq xabar beramiz.
      */
-    if (
-      String(e?.code || "").includes(
-        "permission-denied"
-      )
-    ) {
+    if (String(e?.code || "").includes("permission-denied")) {
       showLimitWarning(
-        "Mavzu shaxsiy ro'yxatingizga saqlandi, lekin uni umumiy (\"boshqa mavzular\") ro'yxatiga chiqarish huquqingiz administrator tomonidan cheklangan."
+        "Mavzu shaxsiy ro'yxatingizga saqlandi, lekin uni umumiy (\"boshqa mavzular\") ro'yxatiga chiqarish huquqingiz administrator tomonidan cheklangan.",
       );
     } else {
-      alert(
-        "⚠️ Mavzu saqlandi, lekin umumiy ro'yxatga sinxronlashda xatolik yuz berdi."
-      );
+      alert("⚠️ Mavzu saqlandi, lekin umumiy ro'yxatga sinxronlashda xatolik yuz berdi.");
     }
 
     return false;
@@ -2189,134 +1771,74 @@ async function saveTopics(topicId) {
   return true;
 }
 
-async function syncSharedTopics(
-  topicsToSync
-) {
-
-  if (
-    !db ||
-    !currentUserUid
-  ) {
+async function syncSharedTopics(topicsToSync) {
+  if (!db || !currentUserUid) {
     return;
   }
 
-  const list =
-    topicsToSync ||
-    JSON.parse(
-      JSON.stringify(
-        userTopics
-      )
-    );
+  const list = topicsToSync || JSON.parse(JSON.stringify(userTopics));
 
   if (!list.length) return;
 
   try {
+    const batch = writeBatch(db);
 
-    const batch =
-      writeBatch(db);
+    const ownerName = auth.currentUser?.displayName || "Noma'lum";
 
-    const ownerName =
-      auth.currentUser
-        ?.displayName ||
-      "Noma'lum";
-
-    list.forEach(t => {
-
+    list.forEach((t) => {
       if (!t.id) return;
 
       batch.set(
-        doc(
-          db,
-          "sharedTopics",
-          t.id
-        ),
+        doc(db, "sharedTopics", t.id),
         {
           ...t,
-          ownerId:
-            currentUserUid,
-          ownerName
+          ownerId: currentUserUid,
+          ownerName,
         },
-        { merge: true }
+        { merge: true },
       );
-
     });
 
     await batch.commit();
-
   } catch (e) {
-
-    console.warn(
-      "sharedTopics sync:",
-      e
-    );
-
+    console.warn("sharedTopics sync:", e);
   }
 }
 
-async function deleteSharedTopic(
-  topicId
-) {
-
+async function deleteSharedTopic(topicId) {
   if (!db || !topicId) return;
 
   try {
-
-    await deleteDoc(
-      doc(
-        db,
-        "sharedTopics",
-        topicId
-      )
-    );
-
+    await deleteDoc(doc(db, "sharedTopics", topicId));
   } catch (e) {
-
-    console.warn(
-      "sharedTopics delete:",
-      e
-    );
-
+    console.warn("sharedTopics delete:", e);
   }
 }
 
 async function loadTopicsSafe() {
   try {
-    const local =
-      localStorage.getItem(
-        getUserTopicsLSKey()
-      );
+    const local = localStorage.getItem(getUserTopicsLSKey());
 
-    userTopics =
-      local
-        ? JSON.parse(local)
-        : [];
+    userTopics = local ? JSON.parse(local) : [];
   } catch {
     userTopics = [];
   }
 
   renderUserTopics();
 
-  const colRef =
-    getUserTopicsCollectionRef();
+  const colRef = getUserTopicsCollectionRef();
 
   if (!colRef) return;
 
   try {
-    const snap =
-      await getDocs(colRef);
+    const snap = await getDocs(colRef);
 
     if (!snap.empty) {
-
-      userTopics =
-        snap.docs.map(
-          d => ({
-            id: d.id,
-            ...d.data()
-          })
-        );
-
+      userTopics = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
     } else {
-
       /*
        * YANGI KOLLEKSIYADA HALI HECH NARSA YO'Q —
        * ESKI "users/{uid}.topics" MASSIV MAYDONIDAN
@@ -2326,13 +1848,9 @@ async function loadTopicsSafe() {
        * butunlay tark etiladi, har bir mavzu ALOHIDA
        * kichik hujjatga ko'chiriladi.
        */
-      const data =
-        await fetchUserDocOnce();
+      const data = await fetchUserDocOnce();
 
-      const legacy =
-        Array.isArray(data?.topics)
-          ? data.topics
-          : [];
+      const legacy = Array.isArray(data?.topics) ? data.topics : [];
 
       if (legacy.length) {
         await migrateLegacyTopics(legacy);
@@ -2340,18 +1858,11 @@ async function loadTopicsSafe() {
       }
     }
 
-    localStorage.setItem(
-      getUserTopicsLSKey(),
-      JSON.stringify(userTopics)
-    );
+    localStorage.setItem(getUserTopicsLSKey(), JSON.stringify(userTopics));
 
     renderUserTopics();
-
   } catch (e) {
-    console.warn(
-      "Topics load:",
-      e
-    );
+    console.warn("Topics load:", e);
   }
 }
 
@@ -2369,70 +1880,40 @@ async function loadTopicsSafe() {
  * bo'laklarga (chunk) bo'lib yoziladi.
  */
 async function migrateLegacyTopics(legacyTopics) {
+  const colRef = getUserTopicsCollectionRef();
 
-  const colRef =
-    getUserTopicsCollectionRef();
-
-  const userRef =
-    getUserDocRef();
+  const userRef = getUserDocRef();
 
   if (!colRef || !userRef) return;
 
   const CHUNK_SIZE = 400;
 
   try {
+    for (let i = 0; i < legacyTopics.length; i += CHUNK_SIZE) {
+      const slice = legacyTopics.slice(i, i + CHUNK_SIZE);
 
-    for (
-      let i = 0;
-      i < legacyTopics.length;
-      i += CHUNK_SIZE
-    ) {
+      const batch = writeBatch(db);
 
-      const slice =
-        legacyTopics.slice(
-          i,
-          i + CHUNK_SIZE
-        );
-
-      const batch =
-        writeBatch(db);
-
-      slice.forEach(t => {
-
+      slice.forEach((t) => {
         if (!t?.id) return;
 
-        const safe =
-          JSON.parse(
-            JSON.stringify(t)
-          );
+        const safe = JSON.parse(JSON.stringify(t));
 
-        batch.set(
-          doc(colRef, t.id),
-          safe
-        );
-
+        batch.set(doc(colRef, t.id), safe);
       });
 
       await batch.commit();
     }
 
-    await updateDoc(
-      userRef,
-      { topics: deleteField() }
-    );
+    await updateDoc(userRef, { topics: deleteField() });
 
     resetUserDocCache();
-
   } catch (e) {
-    console.warn(
-      "Legacy topics migration:",
-      e
-    );
+    console.warn("Legacy topics migration:", e);
   }
 }
 
 function renderUserTopics() {
-
   /*
    * "Mening mavzularim" paneli olib
    * tashlandi — endi mavzular faqat
@@ -2487,15 +1968,11 @@ function renderUserTopics() {
  * amalga oshiriladi.
  */
 async function createUserTopic(title, subject, category) {
-
   const perm = await getMyPermissions();
 
   if (!perm.isAdmin) {
-
     if (!perm.canAddTopics) {
-      showLimitWarning(
-        "Sizga yangi mavzu qo'shish huquqi administrator tomonidan cheklangan."
-      );
+      showLimitWarning("Sizga yangi mavzu qo'shish huquqi administrator tomonidan cheklangan.");
       return null;
     }
 
@@ -2503,41 +1980,30 @@ async function createUserTopic(title, subject, category) {
 
     if (userTopics.length >= topicLimit) {
       showLimitWarning(
-        `Siz maksimal ${topicLimit} tagacha mavzu qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`
+        `Siz maksimal ${topicLimit} tagacha mavzu qo'sha olasiz. Ko'proq kerak bo'lsa, administrator bilan bog'laning.`,
       );
       return null;
     }
   }
 
   const newTopic = {
-    id:
-      "topic_" +
-      Date.now(),
+    id: "topic_" + Date.now(),
 
     title,
 
-    subject:
-      (subject || "")
-        .toString()
-        .trim() ||
-      DEFAULT_TOPIC_SUBJECT,
+    subject: (subject || "").toString().trim() || DEFAULT_TOPIC_SUBJECT,
 
-    category:
-      (category || "")
-        .toString()
-        .trim() ||
-      DEFAULT_TOPIC_CATEGORY,
+    category: (category || "").toString().trim() || DEFAULT_TOPIC_CATEGORY,
 
     questions: {
       0: [],
       1: [],
       2: [],
       3: [],
-      4: []
+      4: [],
     },
 
-    createdAt:
-      Date.now()
+    createdAt: Date.now(),
   };
 
   userTopics.push(newTopic);
@@ -2568,7 +2034,6 @@ async function createUserTopic(title, subject, category) {
 let _xlsxLoadPromise = null;
 
 function loadXlsxLib() {
-
   if (window.XLSX) {
     return Promise.resolve();
   }
@@ -2590,135 +2055,79 @@ function loadXlsxLib() {
 }
 
 function applyExcelFileToTopic(topic, file) {
+  return loadXlsxLib().then(
+    () =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-  return loadXlsxLib().then(() => new Promise((resolve, reject) => {
+        reader.onerror = () => reject(new Error("Faylni o'qib bo'lmadi"));
 
-    const reader =
-      new FileReader();
+        reader.onload = (e) => {
+          try {
+            const workbook = XLSX.read(new Uint8Array(e.target.result), {
+              type: "array",
+            });
 
-    reader.onerror =
-      () => reject(
-        new Error("Faylni o'qib bo'lmadi")
-      );
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    reader.onload = e => {
+            const rows = XLSX.utils.sheet_to_json(sheet, {
+              defval: "",
+            });
 
-      try {
+            topic.questions = {
+              0: [],
+              1: [],
+              2: [],
+              3: [],
+              4: [],
+            };
 
-        const workbook =
-          XLSX.read(
-            new Uint8Array(
-              e.target.result
-            ),
-            {
-              type: "array"
-            }
-          );
+            let index = 0;
 
-        const sheet =
-          workbook.Sheets[
-            workbook.SheetNames[0]
-          ];
+            rows.forEach((r) => {
+              const q = r.Question ?? r.question ?? r.QUESTION ?? "";
 
-        const rows =
-          XLSX.utils.sheet_to_json(
-            sheet,
-            {
-              defval: ""
-            }
-          );
+              const a = r.Answer ?? r.answer ?? r.ANSWER ?? "";
 
-        topic.questions = {
-          0: [],
-          1: [],
-          2: [],
-          3: [],
-          4: []
+              if (!String(q).trim() || !String(a).trim()) {
+                return;
+              }
+
+              let cat = index % 5;
+
+              const c = Number(r.Category ?? r.category ?? r.CATEGORY);
+
+              if (c >= 1 && c <= 5) {
+                cat = c - 1;
+              }
+
+              /*
+               * 3-4-5 USTUNLARDAGI NOTO'G'RI JAVOBLAR
+               */
+              const wrongAnswers = [r["Wrong Answer 1"], r["Wrong Answer 2"], r["Wrong Answer 3"]]
+                .map((value) => String(value ?? "").trim())
+                .filter(Boolean);
+
+              topic.questions[cat].push({
+                q: String(q).trim(),
+
+                a: String(a).trim(),
+
+                wrongAnswers: wrongAnswers,
+              });
+
+              index++;
+            });
+
+            resolve(topic);
+          } catch (err) {
+            reject(err);
+          }
         };
 
-        let index = 0;
-
-        rows.forEach(r => {
-
-          const q =
-            r.Question ??
-            r.question ??
-            r.QUESTION ??
-            "";
-
-          const a =
-            r.Answer ??
-            r.answer ??
-            r.ANSWER ??
-            "";
-
-          if (!String(q).trim() || !String(a).trim()) {
-            return;
-          }
-
-          let cat =
-            index % 5;
-
-          const c =
-            Number(
-              r.Category ??
-              r.category ??
-              r.CATEGORY
-            );
-
-          if (
-            c >= 1 &&
-            c <= 5
-          ) {
-            cat = c - 1;
-          }
-
-          /*
-           * 3-4-5 USTUNLARDAGI NOTO'G'RI JAVOBLAR
-           */
-          const wrongAnswers = [
-            r["Wrong Answer 1"],
-            r["Wrong Answer 2"],
-            r["Wrong Answer 3"]
-          ]
-            .map(
-              value =>
-                String(
-                  value ?? ""
-                ).trim()
-            )
-            .filter(Boolean);
-
-          topic.questions[
-            cat
-          ].push({
-
-            q:
-              String(q).trim(),
-
-            a:
-              String(a).trim(),
-
-            wrongAnswers:
-              wrongAnswers
-
-          });
-
-          index++;
-        });
-
-        resolve(topic);
-
-      } catch (err) {
-        reject(err);
-      }
-    };
-
-    reader.readAsArrayBuffer(
-      file
-    );
-
-  }));
+        reader.readAsArrayBuffer(file);
+      }),
+  );
 }
 
 /*
@@ -2730,50 +2139,34 @@ function applyExcelFileToTopic(topic, file) {
  * bir zumda yuklaydi.
  */
 async function saveQuestionCard() {
+  const saveBtn = $("qcSaveBtn");
 
-  const saveBtn =
-    $("qcSaveBtn");
+  const file = $("userTopicExcelInput")?.files?.[0];
 
-  const file =
-    $("userTopicExcelInput")
-      ?.files?.[0];
+  const titleInput = $("newUserTopicTitle");
 
-  const titleInput =
-    $("newUserTopicTitle");
-
-  const title =
-    titleInput?.value?.trim();
+  const title = titleInput?.value?.trim();
 
   let topic = null;
 
   if (title) {
-
     /*
      * FAN — kategoriyalash yoqilgan
      * bo'lsa, admin belgilagan
      * ro'yxatdan BITTASINI tanlash
      * SHART (erkin matn emas).
      */
-    const subjectInput =
-      $("newUserTopicSubject");
+    const subjectInput = $("newUserTopicSubject");
 
-    let subject =
-      subjectInput?.value?.trim() ||
-      "";
+    let subject = subjectInput?.value?.trim() || "";
 
     if (categorySettingsState.enabled) {
-
-      const subjectOptions =
-        categorySettingsState.subjects;
+      const subjectOptions = categorySettingsState.subjects;
 
       if (!subjectOptions.includes(subject)) {
-        alert(
-          "Iltimos, avval FANni (yo'nalishni) tanlang: " +
-            subjectOptions.join(", ")
-        );
+        alert("Iltimos, avval FANni (yo'nalishni) tanlang: " + subjectOptions.join(", "));
         return;
       }
-
     } else {
       subject = "";
     }
@@ -2792,106 +2185,78 @@ async function saveQuestionCard() {
      * kategoriyalardan biriga mos
      * kelishi shart.
      */
-    const categoryInput =
-      $("newUserTopicCategory");
+    const categoryInput = $("newUserTopicCategory");
 
-    let category =
-      categoryInput?.value?.trim() ||
-      "";
+    let category = categoryInput?.value?.trim() || "";
 
     if (categorySettingsState.enabled) {
-
       if (!canUserAddOwnCategory()) {
+        const options = getTopicCategoryStats(filterTopicsBySubject(userTopics, subject)).map(
+          (c) => c.name,
+        );
 
-        const options =
-          getTopicCategoryStats(
-            filterTopicsBySubject(userTopics, subject)
-          ).map(c => c.name);
-
-        const matched =
-          options.find(
-            o =>
-              o.toLowerCase() ===
-              category.toLowerCase()
-          );
+        const matched = options.find((o) => o.toLowerCase() === category.toLowerCase());
 
         if (category && !matched) {
           alert(
-            "Bunday kategoriya yo'q. \"" + subject + "\" fani ichida faqat quyidagilardan birini tanlang: " +
-              (options.join(", ") || "(hozircha kategoriya yo'q — administratorga murojaat qiling)")
+            "Bunday kategoriya yo'q. \"" +
+              subject +
+              '" fani ichida faqat quyidagilardan birini tanlang: ' +
+              (options.join(", ") ||
+                "(hozircha kategoriya yo'q — administratorga murojaat qiling)"),
           );
           return;
         }
 
         if (!matched && !options.length) {
           alert(
-            "\"" + subject + "\" fani ichida hali kategoriya mavjud emas. Administratorga murojaat qiling."
+            '"' +
+              subject +
+              '" fani ichida hali kategoriya mavjud emas. Administratorga murojaat qiling.',
           );
           return;
         }
 
-        category =
-          matched || options[0] || "";
+        category = matched || options[0] || "";
       }
-
     } else {
       category = "";
     }
 
     // NOM YOZILGAN → yangi savol kartasi
-    topic =
-      await createUserTopic(
-        title,
-        subject,
-        category
-      );
+    topic = await createUserTopic(title, subject, category);
 
     if (!topic) return;
 
     if (titleInput) titleInput.value = "";
     if (categoryInput) categoryInput.value = "";
-
   } else {
-
     // NOM BO'SH → pastda tanlangan eski kartani almashtiramiz
-    const targetId =
-      $("userTopicExcelTarget")
-        ?.value;
+    const targetId = $("userTopicExcelTarget")?.value;
 
     if (!targetId) {
       return alert(
-        "Yangi karta uchun nom yozing, yoki almashtirish uchun ro'yxatdan mavjud kartani tanlang!"
+        "Yangi karta uchun nom yozing, yoki almashtirish uchun ro'yxatdan mavjud kartani tanlang!",
       );
     }
 
-    topic =
-      userTopics.find(
-        t => t.id === targetId
-      );
+    topic = userTopics.find((t) => t.id === targetId);
 
     if (!topic) {
-      return alert(
-        "Tanlangan savol kartasi topilmadi!"
-      );
+      return alert("Tanlangan savol kartasi topilmadi!");
     }
 
     if (!file) {
-      return alert(
-        "Excel fayl tanlanmadi! Eski kartani almashtirish uchun fayl kerak."
-      );
+      return alert("Excel fayl tanlanmadi! Eski kartani almashtirish uchun fayl kerak.");
     }
 
     const perm = await getMyPermissions();
 
-    if (
-      !perm.isAdmin &&
-      !perm.canAddTopics
-    ) {
+    if (!perm.isAdmin && !perm.canAddTopics) {
       return showLimitWarning(
-        "Sizga savol qo'shish/yangilash huquqi administrator tomonidan cheklangan."
+        "Sizga savol qo'shish/yangilash huquqi administrator tomonidan cheklangan.",
       );
     }
-
   }
 
   if (saveBtn) {
@@ -2899,26 +2264,15 @@ async function saveQuestionCard() {
   }
 
   try {
-
     if (file) {
-      await applyExcelFileToTopic(
-        topic,
-        file
-      );
+      await applyExcelFileToTopic(topic, file);
     }
 
-    questions =
-      questionsObjectToArray(
-        topic.questions
-      );
+    questions = questionsObjectToArray(topic.questions);
 
-    currentUserTopicId =
-      topic.id;
+    currentUserTopicId = topic.id;
 
-    localStorage.setItem(
-      "lastTopicId",
-      topic.id
-    );
+    localStorage.setItem("lastTopicId", topic.id);
 
     renderUserTopics();
     renderBoard();
@@ -2931,78 +2285,46 @@ async function saveQuestionCard() {
      * oldingi tanlov "yopishib qolib",
      * adashtirib yuboradi.
      */
-    const excelTargetSelect =
-      $("userTopicExcelTarget");
+    const excelTargetSelect = $("userTopicExcelTarget");
 
     if (excelTargetSelect) {
       excelTargetSelect.value = "";
     }
 
-    const saved =
-      await saveTopics(topic.id);
+    const saved = await saveTopics(topic.id);
 
     await loadOtherTopics();
 
-    const fileInput =
-      $("userTopicExcelInput");
+    const fileInput = $("userTopicExcelInput");
 
     if (fileInput) fileInput.value = "";
 
     if (saved) {
-      alert(
-        file
-          ? "✅ Savol kartasi va savollar saqlandi!"
-          : "✅ Savol kartasi saqlandi!"
-      );
+      alert(file ? "✅ Savol kartasi va savollar saqlandi!" : "✅ Savol kartasi saqlandi!");
     }
-
   } catch (err) {
+    console.warn("Savol kartasini saqlashda xatolik:", err);
 
-    console.warn(
-      "Savol kartasini saqlashda xatolik:",
-      err
-    );
-
-    alert(
-      "Excel faylni o'qib bo'lmadi. Fayl shablon bilan mos ekanini tekshiring."
-    );
-
+    alert("Excel faylni o'qib bo'lmadi. Fayl shablon bilan mos ekanini tekshiring.");
   } finally {
-
     if (saveBtn) {
       saveBtn.disabled = false;
     }
-
   }
 }
 
-window.saveQuestionCard =
-  saveQuestionCard;
+window.saveQuestionCard = saveQuestionCard;
 
-function selectUserTopic(
-  topicId
-) {
-
-  const topic =
-    userTopics.find(
-      t =>
-        t.id === topicId
-    );
+function selectUserTopic(topicId) {
+  const topic = userTopics.find((t) => t.id === topicId);
 
   if (!topic) return;
 
-  currentUserTopicId =
-    topicId;
+  currentUserTopicId = topicId;
 
-  localStorage.setItem(
-    "lastTopicId",
-    topicId
-  );
+  localStorage.setItem("lastTopicId", topicId);
 
-  questions =
-    questionsObjectToArray(
-      topic.questions
-    );
+  questions = questionsObjectToArray(topic.questions);
 
   /*
    * QUESTION BOARD
@@ -3016,138 +2338,91 @@ function selectUserTopic(
   renderUserTopics();
 }
 
-window.selectUserTopic =
-  selectUserTopic;
+window.selectUserTopic = selectUserTopic;
 
 function restoreLastTopic() {
-  const id =
-    localStorage.getItem(
-      "lastTopicId"
-    );
+  const id = localStorage.getItem("lastTopicId");
 
   if (id) {
     selectUserTopic(id);
   }
 }
 
-async function editUserTopicTitle(
-  topicId
-) {
-  const topic =
-    userTopics.find(
-      t => t.id === topicId
-    );
+async function editUserTopicTitle(topicId) {
+  const topic = userTopics.find((t) => t.id === topicId);
 
   if (!topic) return;
 
   const perm = await getMyPermissions();
 
-  if (
-    !perm.isAdmin &&
-    !perm.canEditTopics
-  ) {
+  if (!perm.isAdmin && !perm.canEditTopics) {
     return showLimitWarning(
-      "Sizga mavzularni tahrirlash huquqi administrator tomonidan cheklangan."
+      "Sizga mavzularni tahrirlash huquqi administrator tomonidan cheklangan.",
     );
   }
 
-  const title =
-    prompt(
-      "Yangi mavzu nomi:",
-      topic.title
-    );
+  const title = prompt("Yangi mavzu nomi:", topic.title);
 
   if (!title?.trim()) return;
 
-  topic.title =
-    title.trim();
+  topic.title = title.trim();
 
   if (categorySettingsState.enabled) {
+    const subjectOptions = categorySettingsState.subjects;
 
-    const subjectOptions =
-      categorySettingsState.subjects;
-
-    const subjectAnswer =
-      prompt(
-        `Fan (${subjectOptions.join(", ")}):`,
-        getTopicSubject(topic)
-      );
+    const subjectAnswer = prompt(`Fan (${subjectOptions.join(", ")}):`, getTopicSubject(topic));
 
     if (subjectAnswer !== null) {
+      const trimmedSubject = subjectAnswer.trim();
 
-      const trimmedSubject =
-        subjectAnswer.trim();
-
-      const matchedSubject =
-        subjectOptions.find(
-          o =>
-            o.toLowerCase() ===
-            trimmedSubject.toLowerCase()
-        );
+      const matchedSubject = subjectOptions.find(
+        (o) => o.toLowerCase() === trimmedSubject.toLowerCase(),
+      );
 
       if (trimmedSubject && !matchedSubject) {
-        alert(
-          "Bunday fan yo'q. Faqat quyidagilardan birini tanlang: " +
-            subjectOptions.join(", ")
-        );
+        alert("Bunday fan yo'q. Faqat quyidagilardan birini tanlang: " + subjectOptions.join(", "));
       } else if (matchedSubject) {
         topic.subject = matchedSubject;
       }
     }
 
-    const subjectForCategory =
-      getTopicSubject(topic);
+    const subjectForCategory = getTopicSubject(topic);
 
-    const canFree =
-      canUserAddOwnCategory();
+    const canFree = canUserAddOwnCategory();
 
-    const existingCategoryOptions =
-      getTopicCategoryStats(
-        filterTopicsBySubject(userTopics, subjectForCategory)
-      ).map(c => c.name);
+    const existingCategoryOptions = getTopicCategoryStats(
+      filterTopicsBySubject(userTopics, subjectForCategory),
+    ).map((c) => c.name);
 
-    const hint =
-      canFree
-        ? "(istalgan nom yozing)"
-        : "(\"" + subjectForCategory + "\" fani ichida: " +
-          (existingCategoryOptions.join(", ") || "hozircha yo'q") +
-          ")";
+    const hint = canFree
+      ? "(istalgan nom yozing)"
+      : '("' +
+        subjectForCategory +
+        '" fani ichida: ' +
+        (existingCategoryOptions.join(", ") || "hozircha yo'q") +
+        ")";
 
-    const category =
-      prompt(
-        `Kategoriya ${hint}:`,
-        getTopicCategory(topic)
-      );
+    const category = prompt(`Kategoriya ${hint}:`, getTopicCategory(topic));
 
     if (category !== null) {
-
-      const trimmed =
-        category.trim();
+      const trimmed = category.trim();
 
       if (canFree) {
-
-        topic.category =
-          trimmed ||
-          DEFAULT_TOPIC_CATEGORY;
-
+        topic.category = trimmed || DEFAULT_TOPIC_CATEGORY;
       } else {
-
-        const matched =
-          existingCategoryOptions.find(
-            o =>
-              o.toLowerCase() ===
-              trimmed.toLowerCase()
-          );
+        const matched = existingCategoryOptions.find(
+          (o) => o.toLowerCase() === trimmed.toLowerCase(),
+        );
 
         if (trimmed && !matched) {
           alert(
-            "Bunday kategoriya yo'q. \"" + subjectForCategory + "\" fani ichida faqat quyidagilardan birini tanlang: " +
-              (existingCategoryOptions.join(", ") || "(hozircha yo'q)")
+            "Bunday kategoriya yo'q. \"" +
+              subjectForCategory +
+              '" fani ichida faqat quyidagilardan birini tanlang: ' +
+              (existingCategoryOptions.join(", ") || "(hozircha yo'q)"),
           );
         } else {
-          topic.category =
-            matched ||
-            DEFAULT_TOPIC_CATEGORY;
+          topic.category = matched || DEFAULT_TOPIC_CATEGORY;
         }
       }
     }
@@ -3158,53 +2433,30 @@ async function editUserTopicTitle(
   await saveTopics(topicId);
 }
 
-window.editUserTopicTitle =
-  editUserTopicTitle;
+window.editUserTopicTitle = editUserTopicTitle;
 
-async function deleteUserTopic(
-  topicId
-) {
-  if (
-    !confirm(
-      "Mavzu o‘chirilsinmi?"
-    )
-  ) {
+async function deleteUserTopic(topicId) {
+  if (!confirm("Mavzu o‘chirilsinmi?")) {
     return;
   }
 
-  userTopics =
-    userTopics.filter(
-      t => t.id !== topicId
-    );
+  userTopics = userTopics.filter((t) => t.id !== topicId);
 
-  if (
-    currentUserTopicId ===
-    topicId
-  ) {
-    currentUserTopicId =
-      null;
+  if (currentUserTopicId === topicId) {
+    currentUserTopicId = null;
   }
 
   renderUserTopics();
 
-  localStorage.setItem(
-    getUserTopicsLSKey(),
-    JSON.stringify(userTopics)
-  );
+  localStorage.setItem(getUserTopicsLSKey(), JSON.stringify(userTopics));
 
-  const colRef =
-    getUserTopicsCollectionRef();
+  const colRef = getUserTopicsCollectionRef();
 
   if (colRef) {
     try {
-      await deleteDoc(
-        doc(colRef, topicId)
-      );
+      await deleteDoc(doc(colRef, topicId));
     } catch (e) {
-      console.warn(
-        "Topic delete:",
-        e
-      );
+      console.warn("Topic delete:", e);
     }
   }
 
@@ -3216,34 +2468,25 @@ async function deleteUserTopic(
    * holda boshqalarga hali ham
    * ko'rinaveradi.
    */
-  await deleteSharedTopic(
-    topicId
-  );
+  await deleteSharedTopic(topicId);
 }
 
-window.deleteUserTopic =
-  deleteUserTopic;
+window.deleteUserTopic = deleteUserTopic;
 
 function renderExcelTargetOptions() {
-
-  const select =
-    $("userTopicExcelTarget");
+  const select = $("userTopicExcelTarget");
 
   if (!select) return;
 
-  const prevValue =
-    select.value;
+  const prevValue = select.value;
 
   select.innerHTML = "";
 
   if (!userTopics.length) {
-
-    const opt =
-      document.createElement("option");
+    const opt = document.createElement("option");
 
     opt.value = "";
-    opt.textContent =
-      "Avval mavzu yarating";
+    opt.textContent = "Avval mavzu yarating";
 
     select.appendChild(opt);
 
@@ -3263,37 +2506,25 @@ function renderExcelTargetOptions() {
    * va adashib tanlab yuborsa shu variantga
    * qaytib bekor qilishi mumkin.
    */
-  const blankOpt =
-    document.createElement("option");
+  const blankOpt = document.createElement("option");
 
   blankOpt.value = "";
-  blankOpt.textContent =
-    "— (tanlanmagan)";
+  blankOpt.textContent = "— (tanlanmagan)";
 
   select.appendChild(blankOpt);
 
-  userTopics.forEach(topic => {
-
-    const opt =
-      document.createElement("option");
+  userTopics.forEach((topic) => {
+    const opt = document.createElement("option");
 
     opt.value = topic.id;
-    opt.textContent =
-      topic.title;
+    opt.textContent = topic.title;
 
     select.appendChild(opt);
-
   });
 
-  const stillExists =
-    userTopics.some(
-      t => t.id === prevValue
-    );
+  const stillExists = userTopics.some((t) => t.id === prevValue);
 
-  select.value =
-    stillExists
-      ? prevValue
-      : "";
+  select.value = stillExists ? prevValue : "";
 }
 
 /* ================= BOARD ================= */
@@ -3311,26 +2542,14 @@ function renderExcelTargetOptions() {
  * ro'yxat) chizadi — board va
  * room-picker uchun umumiy.
  */
-function renderCategorySidebar(
-  container,
-  categories,
-  selected,
-  onSelect
-) {
-
+function renderCategorySidebar(container, categories, selected, onSelect) {
   if (!container) return;
 
-  const totalCount =
-    categories.reduce(
-      (sum, c) => sum + c.count,
-      0
-    );
+  const totalCount = categories.reduce((sum, c) => sum + c.count, 0);
 
   const allChip = `
     <div
-      class="categoryChip catAllChip${
-        !selected ? " active" : ""
-      }"
+      class="categoryChip catAllChip${!selected ? " active" : ""}"
       data-cat=""
     >
       <span>Barchasi</span>
@@ -3340,34 +2559,25 @@ function renderCategorySidebar(
 
   const chips = categories
     .map(
-      c => `
+      (c) => `
         <div
-          class="categoryChip ${c.colorClass}${
-            selected === c.name
-              ? " active"
-              : ""
-          }"
+          class="categoryChip ${c.colorClass}${selected === c.name ? " active" : ""}"
           data-cat="${escapeHtml(c.name)}"
         >
           <span>${escapeHtml(c.name)}</span>
           <small>${c.count}</small>
         </div>
-      `
+      `,
     )
     .join("");
 
-  container.innerHTML =
-    allChip + chips;
+  container.innerHTML = allChip + chips;
 
-  container
-    .querySelectorAll(".categoryChip")
-    .forEach(chip => {
-      chip.onclick = () => {
-        onSelect(
-          chip.dataset.cat || null
-        );
-      };
-    });
+  container.querySelectorAll(".categoryChip").forEach((chip) => {
+    chip.onclick = () => {
+      onSelect(chip.dataset.cat || null);
+    };
+  });
 }
 
 /*
@@ -3378,70 +2588,42 @@ function renderCategorySidebar(
  * bo'lsa) kategoriya maydonini
  * avtomatik shu bilan to'ldiradi.
  */
-function focusAddTopicPanel(
-  presetCategory,
-  presetSubject
-) {
+function focusAddTopicPanel(presetCategory, presetSubject) {
+  const dock = document.querySelector(".controlDockWide");
 
-  const dock =
-    document.querySelector(
-      ".controlDockWide"
-    );
-
-  if (
-    dock &&
-    dock.classList.contains(
-      "settingsClosed"
-    )
-  ) {
+  if (dock && dock.classList.contains("settingsClosed")) {
     toggleQuestionSettings();
   }
 
-  const titleInput =
-    $("newUserTopicTitle");
+  const titleInput = $("newUserTopicTitle");
 
-  const subjectSelect =
-    $("newUserTopicSubject");
+  const subjectSelect = $("newUserTopicSubject");
 
-  const categoryInput =
-    $("newUserTopicCategory");
+  const categoryInput = $("newUserTopicCategory");
 
-  if (
-    subjectSelect &&
-    presetSubject &&
-    categorySettingsState.subjects.includes(presetSubject)
-  ) {
+  if (subjectSelect && presetSubject && categorySettingsState.subjects.includes(presetSubject)) {
     subjectSelect.value = presetSubject;
     renderTopicCategoryOptions();
   }
 
   if (categoryInput) {
-    categoryInput.value =
-      presetCategory || "";
+    categoryInput.value = presetCategory || "";
   }
 
   titleInput?.scrollIntoView({
     behavior: "smooth",
-    block: "center"
+    block: "center",
   });
 
   titleInput?.focus();
 }
 
-window.focusAddTopicPanel =
-  focusAddTopicPanel;
+window.focusAddTopicPanel = focusAddTopicPanel;
 
-function appendAddTopicCard(
-  board,
-  presetCategory,
-  presetSubject
-) {
+function appendAddTopicCard(board, presetCategory, presetSubject) {
+  const addCard = document.createElement("div");
 
-  const addCard =
-    document.createElement("div");
-
-  addCard.className =
-    "topicBoardCard topicBoardAddCard";
+  addCard.className = "topicBoardCard topicBoardAddCard";
 
   const labelParts = [];
 
@@ -3455,20 +2637,13 @@ function appendAddTopicCard(
     <div class="topicBoardInfo">
       <strong>Yangi mavzu</strong>
       <span>
-        ${
-          labelParts.length
-            ? escapeHtml(labelParts.join(" / ")) + " uchun"
-            : "Savol qo‘shish"
-        }
+        ${labelParts.length ? escapeHtml(labelParts.join(" / ")) + " uchun" : "Savol qo‘shish"}
       </span>
     </div>
   `;
 
   addCard.onclick = () => {
-    focusAddTopicPanel(
-      presetCategory,
-      presetSubject
-    );
+    focusAddTopicPanel(presetCategory, presetSubject);
   };
 
   board.appendChild(addCard);
@@ -3484,33 +2659,24 @@ function appendAddTopicCard(
  * qo'yiladi.
  */
 function renderTopicSubjectOptions() {
-
-  const select =
-    $("newUserTopicSubject");
+  const select = $("newUserTopicSubject");
 
   if (!select) return;
 
-  const subjects =
-    categorySettingsState.subjects;
+  const subjects = categorySettingsState.subjects;
 
   const prevValue = select.value;
 
   select.innerHTML = subjects
-    .map(
-      s =>
-        `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`
-    )
+    .map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`)
     .join("");
 
   const preferred =
-    selectedBoardSubject &&
-    subjects.includes(selectedBoardSubject)
+    selectedBoardSubject && subjects.includes(selectedBoardSubject)
       ? selectedBoardSubject
-      : (
-          subjects.includes(prevValue)
-            ? prevValue
-            : subjects[0] || ""
-        );
+      : subjects.includes(prevValue)
+        ? prevValue
+        : subjects[0] || "";
 
   select.value = preferred;
 
@@ -3533,37 +2699,25 @@ function renderTopicSubjectOptions() {
  * (saveQuestionCard ichida).
  */
 function renderTopicCategoryOptions() {
-
-  const list =
-    $("topicCategoryOptions");
+  const list = $("topicCategoryOptions");
 
   if (!list) return;
 
-  const subject =
-    $("newUserTopicSubject")?.value || "";
+  const subject = $("newUserTopicSubject")?.value || "";
 
-  const names =
-    getTopicCategoryStats(
-      filterTopicsBySubject(userTopics, subject)
-    ).map(c => c.name);
+  const names = getTopicCategoryStats(filterTopicsBySubject(userTopics, subject)).map(
+    (c) => c.name,
+  );
 
-  list.innerHTML = names
-    .map(
-      name =>
-        `<option value="${escapeHtml(name)}"></option>`
-    )
-    .join("");
+  list.innerHTML = names.map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
 }
 
 function renderBoard() {
-
   const board = $("board");
 
-  const subBox =
-    $("boardSubjectList");
+  const subBox = $("boardSubjectList");
 
-  const catBox =
-    $("boardCategoryList");
+  const catBox = $("boardCategoryList");
 
   if (!board) return;
 
@@ -3572,11 +2726,7 @@ function renderBoard() {
   renderTopicSubjectOptions();
   renderTopicCategoryOptions();
 
-  if (
-    !Array.isArray(userTopics) ||
-    !userTopics.length
-  ) {
-
+  if (!Array.isArray(userTopics) || !userTopics.length) {
     if (subBox) subBox.innerHTML = "";
     if (catBox) catBox.innerHTML = "";
 
@@ -3596,12 +2746,9 @@ function renderBoard() {
    * BIRINCHI CHIQADI (createdAt
    * bo'yicha kamayish tartibida).
    */
-  const sortedTopics =
-    [...userTopics].sort(
-      (a, b) =>
-        (Number(b.createdAt) || 0) -
-        (Number(a.createdAt) || 0)
-    );
+  const sortedTopics = [...userTopics].sort(
+    (a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0),
+  );
 
   /*
    * FANLAR VA KATEGORIYALAR —
@@ -3617,49 +2764,28 @@ function renderBoard() {
   let subjectFilteredTopics = sortedTopics;
 
   if (!categorySettingsState.enabled) {
-
     selectedBoardSubject = null;
     selectedBoardCategory = null;
 
     if (subBox) subBox.innerHTML = "";
     if (catBox) catBox.innerHTML = "";
-
   } else {
+    const subjects = getTopicSubjectStats(sortedTopics);
 
-    const subjects =
-      getTopicSubjectStats(
-        sortedTopics
-      );
-
-    if (
-      selectedBoardSubject &&
-      !subjects.some(
-        s => s.name === selectedBoardSubject
-      )
-    ) {
+    if (selectedBoardSubject && !subjects.some((s) => s.name === selectedBoardSubject)) {
       selectedBoardSubject = null;
       selectedBoardCategory = null;
     }
 
-    renderCategorySidebar(
-      subBox,
-      subjects,
-      selectedBoardSubject,
-      name => {
-        selectedBoardSubject = name;
-        selectedBoardCategory = null;
-        renderBoard();
-      }
-    );
+    renderCategorySidebar(subBox, subjects, selectedBoardSubject, (name) => {
+      selectedBoardSubject = name;
+      selectedBoardCategory = null;
+      renderBoard();
+    });
 
-    subjectFilteredTopics =
-      filterTopicsBySubject(
-        sortedTopics,
-        selectedBoardSubject
-      );
+    subjectFilteredTopics = filterTopicsBySubject(sortedTopics, selectedBoardSubject);
 
     if (!selectedBoardSubject) {
-
       /*
        * "Barchasi" (hech qanday fan
        * tanlanmagan) holatda kategoriya
@@ -3673,32 +2799,17 @@ function renderBoard() {
       selectedBoardCategory = null;
 
       if (catBox) catBox.innerHTML = "";
-
     } else {
+      const categories = getTopicCategoryStats(subjectFilteredTopics);
 
-      const categories =
-        getTopicCategoryStats(
-          subjectFilteredTopics
-        );
-
-      if (
-        selectedBoardCategory &&
-        !categories.some(
-          c => c.name === selectedBoardCategory
-        )
-      ) {
+      if (selectedBoardCategory && !categories.some((c) => c.name === selectedBoardCategory)) {
         selectedBoardCategory = null;
       }
 
-      renderCategorySidebar(
-        catBox,
-        categories,
-        selectedBoardCategory,
-        name => {
-          selectedBoardCategory = name;
-          renderBoard();
-        }
-      );
+      renderCategorySidebar(catBox, categories, selectedBoardCategory, (name) => {
+        selectedBoardCategory = name;
+        renderBoard();
+      });
     }
   }
 
@@ -3708,31 +2819,14 @@ function renderBoard() {
    * o'rniga qo'shilgan qidiruv
    * maydoni shu yerda ishlatiladi.
    */
-  const searchTerm =
-    (
-      $("boardTopicSearch")
-        ?.value || ""
-    )
-      .trim()
-      .toLowerCase();
+  const searchTerm = ($("boardTopicSearch")?.value || "").trim().toLowerCase();
 
-  let visibleTopics =
-    searchTerm
-      ? subjectFilteredTopics.filter(
-          t =>
-            (t.title || "")
-              .toLowerCase()
-              .includes(searchTerm)
-        )
-      : subjectFilteredTopics;
+  let visibleTopics = searchTerm
+    ? subjectFilteredTopics.filter((t) => (t.title || "").toLowerCase().includes(searchTerm))
+    : subjectFilteredTopics;
 
   if (selectedBoardCategory) {
-    visibleTopics =
-      visibleTopics.filter(
-        t =>
-          getTopicCategory(t) ===
-          selectedBoardCategory
-      );
+    visibleTopics = visibleTopics.filter((t) => getTopicCategory(t) === selectedBoardCategory);
   }
 
   if (!visibleTopics.length) {
@@ -3742,43 +2836,24 @@ function renderBoard() {
       </div>
     `;
 
-    appendAddTopicCard(
-      board,
-      selectedBoardCategory,
-      selectedBoardSubject
-    );
+    appendAddTopicCard(board, selectedBoardCategory, selectedBoardSubject);
 
     return;
   }
 
-  visibleTopics.forEach(topic => {
+  visibleTopics.forEach((topic) => {
+    const card = document.createElement("div");
 
-    const card =
-      document.createElement("div");
+    card.className = "topicBoardCard";
 
-    card.className =
-      "topicBoardCard";
-
-    if (
-      topic.id ===
-      currentUserTopicId
-    ) {
+    if (topic.id === currentUserTopicId) {
       card.classList.add("selected");
     }
 
-    const total =
-      Object.values(
-        topic.questions || {}
-      ).reduce(
-        (sum, category) =>
-          sum +
-          (
-            Array.isArray(category)
-              ? category.length
-              : 0
-          ),
-        0
-      );
+    const total = Object.values(topic.questions || {}).reduce(
+      (sum, category) => sum + (Array.isArray(category) ? category.length : 0),
+      0,
+    );
 
     card.innerHTML = `
       <div class="topicBoardIcon">
@@ -3794,7 +2869,10 @@ function renderBoard() {
         <span>
           ${total} ta savol${
             categorySettingsState.enabled
-              ? " · " + escapeHtml(getTopicSubject(topic)) + " / " + escapeHtml(getTopicCategory(topic))
+              ? " · " +
+                escapeHtml(getTopicSubject(topic)) +
+                " / " +
+                escapeHtml(getTopicCategory(topic))
               : ""
           }
         </span>
@@ -3823,48 +2901,36 @@ function renderBoard() {
     `;
 
     card.onclick = () => {
-
-      openTopicIntro(
-        topic
-      );
-
+      openTopicIntro(topic);
     };
 
-    const editBtn =
-      card.querySelector(".editBtn");
+    const editBtn = card.querySelector(".editBtn");
 
     if (editBtn) {
-      editBtn.onclick = e => {
+      editBtn.onclick = (e) => {
         e.stopPropagation();
         editUserTopicTitle(topic.id);
       };
     }
 
-    const deleteBtn =
-      card.querySelector(".deleteBtn");
+    const deleteBtn = card.querySelector(".deleteBtn");
 
     if (deleteBtn) {
-      deleteBtn.onclick = e => {
+      deleteBtn.onclick = (e) => {
         e.stopPropagation();
         deleteUserTopic(topic.id);
       };
     }
 
     board.appendChild(card);
-
   });
 
-  appendAddTopicCard(
-    board,
-    selectedBoardCategory,
-    selectedBoardSubject
-  );
+  appendAddTopicCard(board, selectedBoardCategory, selectedBoardSubject);
 }
 
 /* ================= TOPIC INTRO / PLAY MODAL ================= */
 
 function openTopicIntro(topic) {
-
   if (!topic) return;
 
   if (gameFinalized) return;
@@ -3893,44 +2959,32 @@ function openTopicIntro(topic) {
 
   pendingIntroTopic = topic;
 
-  const titleEl =
-    $("introTopicTitle");
+  const titleEl = $("introTopicTitle");
 
   if (titleEl) {
-    titleEl.textContent =
-      topic.title ||
-      "O‘yin haqida";
+    titleEl.textContent = topic.title || "O‘yin haqida";
   }
 
   renderIntroParticipants();
   renderIntroRules();
 
-  const modal =
-    $("topicIntroModal");
+  const modal = $("topicIntroModal");
 
   if (modal) {
+    modal.style.display = "flex";
 
-    modal.style.display =
-      "flex";
-
-    modal.classList.add(
-      "show"
-    );
-
+    modal.classList.add("show");
   }
 }
 
 function renderIntroParticipants() {
-
-  const box =
-    $("introParticipants");
+  const box = $("introParticipants");
 
   if (!box) return;
 
   box.innerHTML = "";
 
   if (!teamsData.length) {
-
     box.innerHTML = `
       <span class="introEmpty">
         Hozircha ishtirokchi yo‘q
@@ -3940,21 +2994,15 @@ function renderIntroParticipants() {
     return;
   }
 
-  teamsData.forEach(team => {
+  teamsData.forEach((team) => {
+    const card = document.createElement("div");
 
-    const card =
-      document.createElement("div");
-
-    card.className =
-      "introParticipantCard";
+    card.className = "introParticipantCard";
 
     card.innerHTML = `
       <img
         class="introAvatar"
-        src="${
-          team.image ||
-          avatarData(team.name)
-        }"
+        src="${team.image || avatarData(team.name)}"
         alt=""
       >
       <span>
@@ -3963,22 +3011,17 @@ function renderIntroParticipants() {
     `;
 
     box.appendChild(card);
-
   });
 }
 
 function renderIntroRules() {
-
-  const box =
-    $("introRules");
+  const box = $("introRules");
 
   if (!box) return;
 
-  const step =
-    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
+  const step = Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100;
 
-  const isSolo =
-    !teamsData.length;
+  const isSolo = !teamsData.length;
 
   box.innerHTML = isSolo
     ? `
@@ -4033,19 +3076,12 @@ function renderIntroRules() {
 }
 
 function closeTopicIntroModal(cancelling = true) {
-
-  const modal =
-    $("topicIntroModal");
+  const modal = $("topicIntroModal");
 
   if (modal) {
+    modal.style.display = "none";
 
-    modal.style.display =
-      "none";
-
-    modal.classList.remove(
-      "show"
-    );
-
+    modal.classList.remove("show");
   }
 
   pendingIntroTopic = null;
@@ -4063,25 +3099,18 @@ function closeTopicIntroModal(cancelling = true) {
   }
 }
 
-window.closeTopicIntroModal =
-  closeTopicIntroModal;
+window.closeTopicIntroModal = closeTopicIntroModal;
 
 function confirmStartTopicGame() {
-
   if (!pendingIntroTopic) return;
 
-  const topic =
-    pendingIntroTopic;
+  const topic = pendingIntroTopic;
 
   closeTopicIntroModal(false);
 
-  selectUserTopic(
-    topic.id
-  );
+  selectUserTopic(topic.id);
 
-  startTopicGame(
-    topic
-  );
+  startTopicGame(topic);
 }
 
 /* =========================================================
@@ -4096,80 +3125,53 @@ function createGuestDuelTeam(name) {
     image: "",
     score: 0,
     correctCount: 0,
-    wrongCount: 0
+    wrongCount: 0,
   };
 }
 
 function confirmStartDuel() {
-
   if (!pendingIntroTopic) return;
 
   let playerA = null;
   let playerB = null;
 
   if (teamsData.length === 2) {
-
     playerA = teamsData[0];
     playerB = teamsData[1];
-
   } else if (teamsData.length === 1) {
-
     /*
      * 1 ta ishtirokchi tanlangan —
      * ikkinchisi avtomatik
      * mehmon sifatida qo'shiladi.
      */
     playerA = teamsData[0];
-    playerB =
-      createGuestDuelTeam(
-        "Ishtirokchi 2"
-      );
-
+    playerB = createGuestDuelTeam("Ishtirokchi 2");
   } else if (teamsData.length === 0) {
-
     /*
      * Ishtirokchi tanlanmagan —
      * ikkalasi ham avtomatik
      * "Ishtirokchi 1"/"Ishtirokchi 2"
      * nomi bilan boshlanadi.
      */
-    playerA =
-      createGuestDuelTeam(
-        "Ishtirokchi 1"
-      );
+    playerA = createGuestDuelTeam("Ishtirokchi 1");
 
-    playerB =
-      createGuestDuelTeam(
-        "Ishtirokchi 2"
-      );
-
+    playerB = createGuestDuelTeam("Ishtirokchi 2");
   } else {
-
-    alert(
-      "Duel uchun 2 ta ishtirokchi tanlang (yoki hech kimni tanlamang)!"
-    );
+    alert("Duel uchun 2 ta ishtirokchi tanlang (yoki hech kimni tanlamang)!");
 
     return;
   }
 
-  const topic =
-    pendingIntroTopic;
+  const topic = pendingIntroTopic;
 
   closeTopicIntroModal(false);
 
-  selectUserTopic(
-    topic.id
-  );
+  selectUserTopic(topic.id);
 
-  startDuel(
-    topic,
-    playerA,
-    playerB
-  );
+  startDuel(topic, playerA, playerB);
 }
 
-window.confirmStartDuel =
-  confirmStartDuel;
+window.confirmStartDuel = confirmStartDuel;
 
 /* =========================================================
    XONA REJIMI (LIVE ROOM) — "Kahoot uslubi"
@@ -4199,20 +3201,10 @@ let pendingRoomTopic = null;
  */
 let roomHostMode = "student";
 
-const ROOM_OPTION_CLASSES = [
-  "optA",
-  "optB",
-  "optC",
-  "optD"
-];
+const ROOM_OPTION_CLASSES = ["optA", "optB", "optC", "optD"];
 
 function generateRoomCodeCandidate() {
-  return String(
-    Math.floor(
-      100000 +
-      Math.random() * 900000
-    )
-  );
+  return String(Math.floor(100000 + Math.random() * 900000));
 }
 
 /* ---------- 1-QADAM: ISM VA VAQTNI BELGILASH ----------
@@ -4223,44 +3215,27 @@ function generateRoomCodeCandidate() {
 ------------------------------------------------------------ */
 
 function setRoomHostMode(mode) {
+  roomHostMode = mode === "teacher" ? "teacher" : "student";
 
-  roomHostMode =
-    mode === "teacher"
-      ? "teacher"
-      : "student";
+  const studentBtn = $("roomModeStudentBtn");
+  const teacherBtn = $("roomModeTeacherBtn");
 
-  const studentBtn =
-    $("roomModeStudentBtn");
-  const teacherBtn =
-    $("roomModeTeacherBtn");
+  studentBtn?.classList.toggle("active", roomHostMode === "student");
 
-  studentBtn?.classList.toggle(
-    "active",
-    roomHostMode === "student"
-  );
+  teacherBtn?.classList.toggle("active", roomHostMode === "teacher");
 
-  teacherBtn?.classList.toggle(
-    "active",
-    roomHostMode === "teacher"
-  );
-
-  const nameHint =
-    $("roomSetupNameHint");
-  const nameLabel =
-    $("roomSetupNameLabel");
-  const nameInput =
-    $("roomSetupName");
+  const nameHint = $("roomSetupNameHint");
+  const nameLabel = $("roomSetupNameLabel");
+  const nameInput = $("roomSetupName");
 
   if (roomHostMode === "teacher") {
-
     /*
      * Nazoratchi (teacher) rejimida xona egasi o'zi
      * o'ynamaydi — ism umuman kerak emas, shu sabab
      * butun ism maydoni yashiriladi.
      */
     if (nameHint) {
-      nameHint.textContent =
-        "Siz faqat xonani nazorat qilasiz — ism kiritish shart emas.";
+      nameHint.textContent = "Siz faqat xonani nazorat qilasiz — ism kiritish shart emas.";
       nameHint.style.display = "block";
     }
 
@@ -4272,9 +3247,7 @@ function setRoomHostMode(mode) {
       nameInput.style.display = "none";
       nameInput.required = false;
     }
-
   } else {
-
     if (nameHint) {
       nameHint.textContent =
         "Siz ham o‘yinchi sifatida ishtirok etasiz — shuning uchun ismingizni kiriting.";
@@ -4283,8 +3256,7 @@ function setRoomHostMode(mode) {
 
     if (nameLabel) {
       nameLabel.style.display = "block";
-      nameLabel.textContent =
-        "Sizning ismingiz";
+      nameLabel.textContent = "Sizning ismingiz";
     }
 
     if (nameInput) {
@@ -4294,39 +3266,23 @@ function setRoomHostMode(mode) {
   }
 }
 
-window.setRoomHostMode =
-  setRoomHostMode;
+window.setRoomHostMode = setRoomHostMode;
 
-$("roomModeStudentBtn")
-  ?.addEventListener(
-    "click",
-    () =>
-      setRoomHostMode("student")
-  );
+$("roomModeStudentBtn")?.addEventListener("click", () => setRoomHostMode("student"));
 
-$("roomModeTeacherBtn")
-  ?.addEventListener(
-    "click",
-    () =>
-      setRoomHostMode("teacher")
-  );
+$("roomModeTeacherBtn")?.addEventListener("click", () => setRoomHostMode("teacher"));
 
 function openRoomSetup() {
-
   if (!pendingIntroTopic) return;
 
-  pendingRoomTopic =
-    pendingIntroTopic;
+  pendingRoomTopic = pendingIntroTopic;
 
   closeTopicIntroModal(false);
 
-  const nameInput =
-    $("roomSetupName");
+  const nameInput = $("roomSetupName");
 
   if (nameInput) {
-    nameInput.value =
-      auth.currentUser
-        ?.displayName || "";
+    nameInput.value = auth.currentUser?.displayName || "";
   }
 
   /*
@@ -4335,8 +3291,7 @@ function openRoomSetup() {
    * yoki nazoratchi) ochishi mumkin — login qilib kirgan
    * holatdan farqi bo'lmasligi kerak.
    */
-  const modeRow =
-    $("roomModeRow");
+  const modeRow = $("roomModeRow");
 
   if (modeRow) {
     modeRow.style.display = "block";
@@ -4344,32 +3299,22 @@ function openRoomSetup() {
 
   setRoomHostMode("student");
 
-  const modal =
-    $("roomSetupModal");
+  const modal = $("roomSetupModal");
 
   if (modal) {
-    modal.style.display =
-      "flex";
+    modal.style.display = "flex";
   }
 
-  setTimeout(
-    () =>
-      nameInput?.focus(),
-    50
-  );
+  setTimeout(() => nameInput?.focus(), 50);
 }
 
-window.openRoomSetup =
-  openRoomSetup;
+window.openRoomSetup = openRoomSetup;
 
 function closeRoomSetupModal(viaConfirm = false) {
-
-  const modal =
-    $("roomSetupModal");
+  const modal = $("roomSetupModal");
 
   if (modal) {
-    modal.style.display =
-      "none";
+    modal.style.display = "none";
   }
 
   /*
@@ -4386,22 +3331,17 @@ function closeRoomSetupModal(viaConfirm = false) {
   }
 }
 
-window.closeRoomSetupModal =
-  closeRoomSetupModal;
+window.closeRoomSetupModal = closeRoomSetupModal;
 
 /* ---------- 2-QADAM: XONANI YARATISH ---------- */
 
 async function confirmOpenRoom() {
-
-  const topic =
-    pendingRoomTopic;
+  const topic = pendingRoomTopic;
 
   if (!topic) return;
 
   if (!db || !currentUserUid) {
-    alert(
-      "Xona ochish uchun internetga ulanish va tizimga kirish kerak."
-    );
+    alert("Xona ochish uchun internetga ulanish va tizimga kirish kerak.");
     return;
   }
 
@@ -4409,111 +3349,56 @@ async function confirmOpenRoom() {
    * Nazoratchi (teacher) rejimida xona egasi o'zi
    * o'ynamaydi — shu sabab ism kiritish shart emas.
    */
-  const isTeacherModeCandidate =
-    roomHostMode === "teacher";
+  const isTeacherModeCandidate = roomHostMode === "teacher";
 
-  const hostName =
-    (
-      $("roomSetupName")
-        ?.value || ""
-    ).trim();
+  const hostName = ($("roomSetupName")?.value || "").trim();
 
   if (!isTeacherModeCandidate && !hostName) {
-    alert(
-      "Ismingizni kiriting!"
-    );
+    alert("Ismingizni kiriting!");
     return;
   }
 
-  const roundSeconds =
-    Math.min(
-      120,
-      Math.max(
-        5,
-        Number(
-          $("roomSetupTimer")
-            ?.value
-        ) || 10
-      )
-    );
+  const roundSeconds = Math.min(120, Math.max(5, Number($("roomSetupTimer")?.value) || 10));
 
   let pool = [];
 
-  Object.values(
-    topic.questions || {}
-  ).forEach(category => {
-
+  Object.values(topic.questions || {}).forEach((category) => {
     if (!Array.isArray(category)) {
       return;
     }
 
-    category.forEach(item => {
+    category.forEach((item) => {
       if (item) pool.push(item);
     });
-
   });
 
   if (pool.length < 2) {
-    alert(
-      "Xona uchun mavzuda kamida 2 ta savol bo‘lishi kerak!"
-    );
+    alert("Xona uchun mavzuda kamida 2 ta savol bo‘lishi kerak!");
     return;
   }
 
-  pool =
-    shuffleArray(pool).slice(
-      0,
-      50
-    );
+  pool = shuffleArray(pool).slice(0, 50);
 
-  questions =
-    questionsObjectToArray(
-      topic.questions
-    );
+  questions = questionsObjectToArray(topic.questions);
 
-  const preparedQuestions =
-    pool
-      .map(item => {
+  const preparedQuestions = pool
+    .map((item) => {
+      const correctAnswer = String(item.a ?? item.answer ?? "").trim();
 
-        const correctAnswer =
-          String(
-            item.a ??
-            item.answer ??
-            ""
-          ).trim();
+      const qText = String(item.q ?? item.question ?? "").trim();
 
-        const qText =
-          String(
-            item.q ??
-            item.question ??
-            ""
-          ).trim();
+      const options = buildAnswerOptions(correctAnswer, item);
 
-        const options =
-          buildAnswerOptions(
-            correctAnswer,
-            item
-          );
-
-        return {
-          q: qText,
-          options,
-          correct:
-            correctAnswer
-        };
-
-      })
-      .filter(
-        q =>
-          q.q &&
-          q.correct &&
-          q.options.length >= 2
-      );
+      return {
+        q: qText,
+        options,
+        correct: correctAnswer,
+      };
+    })
+    .filter((q) => q.q && q.correct && q.options.length >= 2);
 
   if (preparedQuestions.length < 2) {
-    alert(
-      "Savollarni tayyorlashda xatolik — mavzuda yetarli javob variantlari yo‘q."
-    );
+    alert("Savollarni tayyorlashda xatolik — mavzuda yetarli javob variantlari yo‘q.");
     return;
   }
 
@@ -4548,37 +3433,18 @@ async function confirmOpenRoom() {
    */
   let code = null;
 
-  for (
-    let i = 0;
-    i < 10;
-    i++
-  ) {
-
-    const candidate =
-      generateRoomCodeCandidate();
+  for (let i = 0; i < 10; i++) {
+    const candidate = generateRoomCodeCandidate();
 
     try {
-
-      const snap =
-        await getDoc(
-          doc(
-            db,
-            "rooms",
-            candidate
-          )
-        );
+      const snap = await getDoc(doc(db, "rooms", candidate));
 
       if (!snap.exists()) {
         code = candidate;
         break;
       }
-
     } catch (e) {
-
-      console.warn(
-        "room code check:",
-        e
-      );
+      console.warn("room code check:", e);
       // Tasdiqlanmagan kodni ISHLATMAYMIZ — keyingi
       // urinishga o'tamiz.
     }
@@ -4587,7 +3453,7 @@ async function confirmOpenRoom() {
   if (!code) {
     hideFlowShield();
     alert(
-      "Xona kodi yaratib bo‘lmadi (internet aloqasi beqaror bo‘lishi mumkin), qayta urinib ko‘ring."
+      "Xona kodi yaratib bo‘lmadi (internet aloqasi beqaror bo‘lishi mumkin), qayta urinib ko‘ring.",
     );
     return;
   }
@@ -4600,34 +3466,17 @@ async function confirmOpenRoom() {
    * boshlanadi.
    */
   try {
-
-    const stalePlayersSnap =
-      await getDocs(
-        collection(
-          db,
-          "rooms",
-          code,
-          "players"
-        )
-      );
+    const stalePlayersSnap = await getDocs(collection(db, "rooms", code, "players"));
 
     if (!stalePlayersSnap.empty) {
-
       const batch = writeBatch(db);
 
-      stalePlayersSnap.docs.forEach(
-        d => batch.delete(d.ref)
-      );
+      stalePlayersSnap.docs.forEach((d) => batch.delete(d.ref));
 
       await batch.commit();
     }
-
   } catch (e) {
-
-    console.warn(
-      "stale players cleanup:",
-      e
-    );
+    console.warn("stale players cleanup:", e);
   }
 
   /*
@@ -4651,142 +3500,85 @@ async function confirmOpenRoom() {
    * (teacher) rejimida xona ochishi mumkin — login
    * qilgan foydalanuvchi bilan bir xil imkoniyat.
    */
-  const isTeacherMode =
-    roomHostMode === "teacher";
+  const isTeacherMode = roomHostMode === "teacher";
 
-  myHostPlayerId =
-    isTeacherMode
-      ? null
-      : "host_" +
-        Date.now() +
-        "_" +
-        Math.random()
-          .toString(36)
-          .slice(2, 8);
+  myHostPlayerId = isTeacherMode
+    ? null
+    : "host_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
 
   try {
-
-    await setDoc(
-      doc(
-        db,
-        "rooms",
-        code
-      ),
-      {
-        hostUid:
-          currentUserUid,
-        hostPlayerId:
-          myHostPlayerId,
-        hostMode:
-          isTeacherMode
-            ? "teacher"
-            : "student",
-        status: "lobby",
-        roundId: 1,
-        /*
-         * SINXRON REJIM: xonadagi HAMMA uchun BITTA
-         * umumiy joriy savol bo'ladi. Har bir o'yinchi
-         * o'z-o'zicha ilgarilamaydi — hammasi javob
-         * berganda yoki vaqt tugaganda xona egasi
-         * (host) currentIndex'ni bittaga oshiradi.
-         */
-        currentIndex: 0,
-        questionStartedAt: null,
-        roundSeconds,
-        pointStep: step,
-        topicTitle:
-          topic.title ||
-          "Mavzu",
-        questions:
-          preparedQuestions,
-        totalQuestions:
-          preparedQuestions.length,
-        createdAt:
-          Date.now(),
-        /*
-         * XONALAR CHEKSIZ TO'PLANIB QOLMASLIGI UCHUN:
-         * bu maydon Firestore'ning o'zining "TTL
-         * (Time To Live)" siyosati bilan ishlatiladi —
-         * shunda hujjat muddati o'tgach, Firestore
-         * uni SERVER TOMONIDA o'zi avtomatik o'chiradi,
-         * hech qanday qurilma ochiq turishi shart emas.
-         * (Firebase Console → Firestore → TTL siyosati
-         * "rooms" kolleksiyasi uchun "expiresAt"
-         * maydoniga ulanishi kerak — bir martalik sozlash.)
-         */
-        expiresAt:
-          Timestamp.fromMillis(
-            Date.now() + 24 * 60 * 60 * 1000
-          )
-      }
-    );
+    await setDoc(doc(db, "rooms", code), {
+      hostUid: currentUserUid,
+      hostPlayerId: myHostPlayerId,
+      hostMode: isTeacherMode ? "teacher" : "student",
+      status: "lobby",
+      roundId: 1,
+      /*
+       * SINXRON REJIM: xonadagi HAMMA uchun BITTA
+       * umumiy joriy savol bo'ladi. Har bir o'yinchi
+       * o'z-o'zicha ilgarilamaydi — hammasi javob
+       * berganda yoki vaqt tugaganda xona egasi
+       * (host) currentIndex'ni bittaga oshiradi.
+       */
+      currentIndex: 0,
+      questionStartedAt: null,
+      roundSeconds,
+      pointStep: step,
+      topicTitle: topic.title || "Mavzu",
+      questions: preparedQuestions,
+      totalQuestions: preparedQuestions.length,
+      createdAt: Date.now(),
+      /*
+       * XONALAR CHEKSIZ TO'PLANIB QOLMASLIGI UCHUN:
+       * bu maydon Firestore'ning o'zining "TTL
+       * (Time To Live)" siyosati bilan ishlatiladi —
+       * shunda hujjat muddati o'tgach, Firestore
+       * uni SERVER TOMONIDA o'zi avtomatik o'chiradi,
+       * hech qanday qurilma ochiq turishi shart emas.
+       * (Firebase Console → Firestore → TTL siyosati
+       * "rooms" kolleksiyasi uchun "expiresAt"
+       * maydoniga ulanishi kerak — bir martalik sozlash.)
+       */
+      expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
+    });
 
     if (!isTeacherMode) {
-
-      await setDoc(
-        doc(
-          db,
-          "rooms",
-          code,
-          "players",
-          myHostPlayerId
-        ),
-        {
-          uid:
-            currentUserUid,
-          name: hostName,
-          /*
-           * BALLIK REJIM YO'Q — reyting nechta to'g'ri
-           * javob va qancha tez javob berilgani bo'yicha
-           * hisoblanadi.
-           */
-          correctCount: 0,
-          wrongCount: 0,
-          totalTimeMs: 0,
-          roundId: 1,
-          answeredIndex: -1,
-          finishedRound: false,
-          lastAnswerChoice:
-            null,
-          lastAnswerCorrect:
-            null,
-          joinedAt:
-            Date.now(),
-          isHost: true
-        }
-      );
-
+      await setDoc(doc(db, "rooms", code, "players", myHostPlayerId), {
+        uid: currentUserUid,
+        name: hostName,
+        /*
+         * BALLIK REJIM YO'Q — reyting nechta to'g'ri
+         * javob va qancha tez javob berilgani bo'yicha
+         * hisoblanadi.
+         */
+        correctCount: 0,
+        wrongCount: 0,
+        totalTimeMs: 0,
+        roundId: 1,
+        answeredIndex: -1,
+        finishedRound: false,
+        lastAnswerChoice: null,
+        lastAnswerCorrect: null,
+        joinedAt: Date.now(),
+        isHost: true,
+      });
     }
-
   } catch (e) {
-
     hideFlowShield();
 
-    console.error(
-      "Xona yaratishda xatolik:",
-      e
-    );
+    console.error("Xona yaratishda xatolik:", e);
 
-    alert(
-      "⚠️ Xona yaratilmadi: " +
-      (e?.message || e)
-    );
+    alert("⚠️ Xona yaratilmadi: " + (e?.message || e));
 
     return;
-
   }
 
   roomCode = code;
   pendingRoomTopic = null;
 
-  roomHostChatSenderId = isTeacherMode
-    ? "host_teacher"
-    : myHostPlayerId;
+  roomHostChatSenderId = isTeacherMode ? "host_teacher" : myHostPlayerId;
 
-  roomHostChatName =
-    (!isTeacherMode && hostName) ||
-    auth.currentUser?.displayName ||
-    "Nazoratchi";
+  roomHostChatName = (!isTeacherMode && hostName) || auth.currentUser?.displayName || "Nazoratchi";
 
   openRoomHostView();
   subscribeRoomDoc();
@@ -4798,100 +3590,72 @@ async function confirmOpenRoom() {
   }
 }
 
-window.confirmOpenRoom =
-  confirmOpenRoom;
+window.confirmOpenRoom = confirmOpenRoom;
 
 /* ---------- HAVOLANI NUSXALASH ---------- */
 
 function copyRoomJoinLink(btn) {
-
-  const input =
-    $("roomJoinLinkInput");
+  const input = $("roomJoinLinkInput");
 
   if (!input) return;
 
   input.select();
   input.setSelectionRange(0, 99999);
 
-  const finish = ok => {
+  const finish = (ok) => {
     if (!ok || !btn) return;
 
-    const original =
-      btn.textContent;
+    const original = btn.textContent;
 
-    btn.textContent =
-      "✅ Nusxalandi!";
+    btn.textContent = "✅ Nusxalandi!";
 
     setTimeout(() => {
-      btn.textContent =
-        original;
+      btn.textContent = original;
     }, 1500);
   };
 
-  if (
+  if (navigator.clipboard?.writeText) {
     navigator.clipboard
-      ?.writeText
-  ) {
-    navigator.clipboard
-      .writeText(
-        input.value
-      )
+      .writeText(input.value)
       .then(() => finish(true))
       .catch(() => {
         try {
-          document.execCommand(
-            "copy"
-          );
+          document.execCommand("copy");
           finish(true);
         } catch {
-          alert(
-            "Nusxalab bo‘lmadi — havolani qo‘lda tanlab, nusxalang."
-          );
+          alert("Nusxalab bo‘lmadi — havolani qo‘lda tanlab, nusxalang.");
         }
       });
   } else {
     try {
-      document.execCommand(
-        "copy"
-      );
+      document.execCommand("copy");
       finish(true);
     } catch {
-      alert(
-        "Nusxalab bo‘lmadi — havolani qo‘lda tanlab, nusxalang."
-      );
+      alert("Nusxalab bo‘lmadi — havolani qo‘lda tanlab, nusxalang.");
     }
   }
 }
 
-window.copyRoomJoinLink =
-  copyRoomJoinLink;
+window.copyRoomJoinLink = copyRoomJoinLink;
 
 /* ---------- JONLI TINGLASH ---------- */
 
 function subscribeRoomDoc() {
-
   if (!roomCode) return;
 
   roomUnsubDoc?.();
 
   roomUnsubDoc = onSnapshot(
-    doc(
-      db,
-      "rooms",
-      roomCode
-    ),
-    snap => {
-
+    doc(db, "rooms", roomCode),
+    (snap) => {
       if (!snap.exists()) {
         roomData = null;
         return;
       }
 
-      const prevRoundId =
-        roomData?.roundId;
+      const prevRoundId = roomData?.roundId;
 
-      roomData =
-        snap.data();
+      roomData = snap.data();
 
       /*
        * XATOLIK TUZATILDI: avval bu tekshiruv faqat
@@ -4911,177 +3675,107 @@ function subscribeRoomDoc() {
         hostPlayerData &&
         prevRoundId != null &&
         roomData.roundId !== prevRoundId &&
-        hostPlayerData.roundId !==
-          roomData.roundId
+        hostPlayerData.roundId !== roomData.roundId
       ) {
         resetHostRoundProgress();
       } else {
         renderRoomHostView();
         maybeAutoAdvance();
       }
-
     },
-    e =>
-      console.warn(
-        "room doc listen:",
-        e
-      )
+    (e) => console.warn("room doc listen:", e),
   );
 }
 
 function subscribeRoomPlayers() {
-
   if (!roomCode) return;
 
   roomUnsubPlayers?.();
 
   roomUnsubPlayers = onSnapshot(
-    collection(
-      db,
-      "rooms",
-      roomCode,
-      "players"
-    ),
-    snap => {
-
-      roomPlayers =
-        snap.docs.map(
-          d => ({
-            id: d.id,
-            ...d.data()
-          })
-        );
+    collection(db, "rooms", roomCode, "players"),
+    (snap) => {
+      roomPlayers = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
 
       renderRoomHostView();
       maybeAutoAdvance();
-
     },
-    e =>
-      console.warn(
-        "room players listen:",
-        e
-      )
+    (e) => console.warn("room players listen:", e),
   );
 }
 
 function subscribeHostPlayerDoc() {
-
-  if (
-    !roomCode ||
-    !myHostPlayerId
-  ) {
+  if (!roomCode || !myHostPlayerId) {
     return;
   }
 
   hostPlayerUnsub?.();
 
   hostPlayerUnsub = onSnapshot(
-    doc(
-      db,
-      "rooms",
-      roomCode,
-      "players",
-      myHostPlayerId
-    ),
-    snap => {
+    doc(db, "rooms", roomCode, "players", myHostPlayerId),
+    (snap) => {
+      const prevRoundId = hostPlayerData?.roundId;
 
-      const prevRoundId =
-        hostPlayerData
-          ?.roundId;
-
-      hostPlayerData =
-        snap.exists()
-          ? snap.data()
-          : null;
+      hostPlayerData = snap.exists() ? snap.data() : null;
 
       if (
         roomData &&
         hostPlayerData &&
-        hostPlayerData.roundId !==
-          roomData.roundId &&
+        hostPlayerData.roundId !== roomData.roundId &&
         prevRoundId != null
       ) {
         resetHostRoundProgress();
       } else {
         renderRoomHostView();
       }
-
     },
-    e =>
-      console.warn(
-        "host player listen:",
-        e
-      )
+    (e) => console.warn("host player listen:", e),
   );
 }
 
 async function resetHostRoundProgress() {
-
   hostCurrentTimerIndex = -1;
 
   try {
-
-    await updateDoc(
-      doc(
-        db,
-        "rooms",
-        roomCode,
-        "players",
-        myHostPlayerId
-      ),
-      {
-        roundId:
-          roomData.roundId,
-        answeredIndex: -1,
-        finishedRound: false,
-        correctCount: 0,
-        wrongCount: 0,
-        totalTimeMs: 0,
-        lastAnswerChoice:
-          null,
-        lastAnswerCorrect:
-          null
-      }
-    );
-
+    await updateDoc(doc(db, "rooms", roomCode, "players", myHostPlayerId), {
+      roundId: roomData.roundId,
+      answeredIndex: -1,
+      finishedRound: false,
+      correctCount: 0,
+      wrongCount: 0,
+      totalTimeMs: 0,
+      lastAnswerChoice: null,
+      lastAnswerCorrect: null,
+    });
   } catch (e) {
-
-    console.warn(
-      "host round reset:",
-      e
-    );
-
+    console.warn("host round reset:", e);
   }
 }
 
 /* ---------- OYNANI OCHISH / YOPISH ---------- */
 
 function openRoomHostView() {
-
-  const modal =
-    $("roomHostModal");
+  const modal = $("roomHostModal");
 
   if (modal) {
-    modal.style.display =
-      "flex";
+    modal.style.display = "flex";
   }
 
   hideFlowShield();
 }
 
 function hideRoomHostViewOnly() {
-
-  const modal =
-    $("roomHostModal");
+  const modal = $("roomHostModal");
 
   if (modal) {
-    modal.style.display =
-      "none";
+    modal.style.display = "none";
   }
 }
 
 function closeRoomHostView() {
-
   roomUnsubDoc?.();
   roomUnsubPlayers?.();
   hostPlayerUnsub?.();
@@ -5098,12 +3792,10 @@ function closeRoomHostView() {
   hostAdvancing = false;
   roomWinnerModalShownFor = null;
 
-  const modal =
-    $("roomHostModal");
+  const modal = $("roomHostModal");
 
   if (modal) {
-    modal.style.display =
-      "none";
+    modal.style.display = "none";
   }
 
   /*
@@ -5113,9 +3805,7 @@ function closeRoomHostView() {
    * baribir index.html'ga qaytariladi).
    */
   if (!guestQuickLaunch) {
-    document.body.classList.remove(
-      "guestQuickLaunchMode"
-    );
+    document.body.classList.remove("guestQuickLaunchMode");
   }
 
   roomCode = null;
@@ -5140,48 +3830,20 @@ function closeRoomHostView() {
  * quyidagi avtomatik tozalash (cleanup) chaqiradi.
  */
 async function deleteRoomAndPlayers(codeToDelete) {
-
   if (!codeToDelete) return;
 
   try {
+    const playersSnap = await getDocs(collection(db, "rooms", codeToDelete, "players"));
 
-    const playersSnap =
-      await getDocs(
-        collection(
-          db,
-          "rooms",
-          codeToDelete,
-          "players"
-        )
-      );
+    const batch = writeBatch(db);
 
-    const batch =
-      writeBatch(db);
+    playersSnap.docs.forEach((d) => batch.delete(d.ref));
 
-    playersSnap.docs.forEach(
-      d =>
-        batch.delete(
-          d.ref
-        )
-    );
-
-    batch.delete(
-      doc(
-        db,
-        "rooms",
-        codeToDelete
-      )
-    );
+    batch.delete(doc(db, "rooms", codeToDelete));
 
     await batch.commit();
-
   } catch (e) {
-
-    console.warn(
-      "room cleanup:",
-      e
-    );
-
+    console.warn("room cleanup:", e);
   }
 }
 
@@ -5213,42 +3875,30 @@ async function deleteRoomAndPlayers(codeToDelete) {
 const ROOM_STALE_MS = 12 * 60 * 60 * 1000; // 12 soat
 
 async function cleanupStaleRoomsOnce() {
-
   if (!db) return;
 
   try {
+    const staleBefore = Date.now() - ROOM_STALE_MS;
 
-    const staleBefore =
-      Date.now() - ROOM_STALE_MS;
+    const staleQuery = query(
+      collection(db, "rooms"),
+      where("createdAt", "<", staleBefore),
+      limit(15),
+    );
 
-    const staleQuery =
-      query(
-        collection(db, "rooms"),
-        where("createdAt", "<", staleBefore),
-        limit(15)
-      );
-
-    const snap =
-      await getDocs(staleQuery);
+    const snap = await getDocs(staleQuery);
 
     if (snap.empty) return;
 
     for (const roomDoc of snap.docs) {
       await deleteRoomAndPlayers(roomDoc.id);
     }
-
   } catch (e) {
-
-    console.warn(
-      "stale rooms cleanup:",
-      e
-    );
-
+    console.warn("stale rooms cleanup:", e);
   }
 }
 
 async function endRoomAndDelete() {
-
   if (!roomCode) {
     closeRoomHostView();
 
@@ -5259,93 +3909,51 @@ async function endRoomAndDelete() {
     return;
   }
 
-  if (
-    !confirm(
-      "Xonani yopasizmi? Barcha ma’lumotlar o‘chiriladi."
-    )
-  ) {
+  if (!confirm("Xonani yopasizmi? Barcha ma’lumotlar o‘chiriladi.")) {
     return;
   }
 
-  const codeToDelete =
-    roomCode;
+  const codeToDelete = roomCode;
 
   closeRoomHostView();
 
-  await deleteRoomAndPlayers(
-    codeToDelete
-  );
+  await deleteRoomAndPlayers(codeToDelete);
 
   if (guestQuickLaunch) {
     window.location.href = "index.html";
   }
 }
 
-window.endRoomAndDelete =
-  endRoomAndDelete;
+window.endRoomAndDelete = endRoomAndDelete;
 
 /* ---------- O'YINNI BOSHLASH (birinchi raund) ---------- */
 
 async function hostStartRoom() {
-
-  if (
-    !roomCode ||
-    !roomData
-  ) {
+  if (!roomCode || !roomData) {
     return;
   }
 
   try {
-
-    await updateDoc(
-      doc(
-        db,
-        "rooms",
-        roomCode
-      ),
-      {
-        status: "playing",
-        currentIndex: 0,
-        questionStartedAt:
-          Date.now()
-      }
-    );
-
+    await updateDoc(doc(db, "rooms", roomCode), {
+      status: "playing",
+      currentIndex: 0,
+      questionStartedAt: Date.now(),
+    });
   } catch (e) {
-
-    console.warn(
-      "start room:",
-      e
-    );
-
+    console.warn("start room:", e);
   }
 }
 
-window.hostStartRoom =
-  hostStartRoom;
+window.hostStartRoom = hostStartRoom;
 
 /* ---------- BOSHQA MAVZU TANLAB DAVOM ETTIRISH ---------- */
-
-function allRoomPlayersFinished() {
-
-  if (!roomPlayers.length) return true;
-
-  return roomPlayers.every(
-    p => !!p.finishedRound
-  );
-}
 
 /* ---------- SINXRON OQIM: HAMMA JAVOB BERGANMI? ---------- */
 
 function allActivePlayersAnsweredIndex(idx) {
-
   if (!roomPlayers.length) return false;
 
-  return roomPlayers.every(
-    p =>
-      (Number(p.answeredIndex) ?? -1) >=
-      idx
-  );
+  return roomPlayers.every((p) => (Number(p.answeredIndex) ?? -1) >= idx);
 }
 
 let hostAdvancing = false;
@@ -5359,7 +3967,6 @@ let hostAdvancing = false;
  * xonaning "soatini" boshqaradi.
  */
 async function hostAdvanceRoom(fromIndex) {
-
   if (!roomCode || !roomData) return;
   if (hostAdvancing) return;
   if (roomData.currentIndex !== fromIndex) return;
@@ -5369,33 +3976,20 @@ async function hostAdvanceRoom(fromIndex) {
   clearHostLocalTimer();
 
   const nextIndex = fromIndex + 1;
-  const isDone =
-    nextIndex >= roomData.totalQuestions;
+  const isDone = nextIndex >= roomData.totalQuestions;
 
   try {
-
     await updateDoc(
-      doc(
-        db,
-        "rooms",
-        roomCode
-      ),
+      doc(db, "rooms", roomCode),
       isDone
         ? { status: "finished" }
         : {
             currentIndex: nextIndex,
-            questionStartedAt:
-              Date.now()
-          }
+            questionStartedAt: Date.now(),
+          },
     );
-
   } catch (e) {
-
-    console.warn(
-      "room advance:",
-      e
-    );
-
+    console.warn("room advance:", e);
   }
 
   hostAdvancing = false;
@@ -5412,7 +4006,6 @@ async function hostAdvanceRoom(fromIndex) {
  * ravishda amalga oshadi.
  */
 function hostForceAdvanceRound() {
-
   if (!roomData) return;
   if (roomData.status !== "playing") return;
 
@@ -5421,8 +4014,7 @@ function hostForceAdvanceRound() {
   hostAdvanceRoom(idx);
 }
 
-window.hostForceAdvanceRound =
-  hostForceAdvanceRound;
+window.hostForceAdvanceRound = hostForceAdvanceRound;
 
 /*
  * Har safar o'yinchilar ro'yxati yoki xona hujjati
@@ -5431,7 +4023,6 @@ window.hostForceAdvanceRound =
  * savolga (yoki yakunga) o'tkazamiz.
  */
 function maybeAutoAdvance() {
-
   if (!roomData) return;
   if (roomData.status !== "playing") return;
 
@@ -5443,7 +4034,6 @@ function maybeAutoAdvance() {
 }
 
 function startRoomTopicSwap() {
-
   if (!roomCode) return;
 
   /*
@@ -5474,11 +4064,9 @@ function startRoomTopicSwap() {
   openRoomTopicPicker();
 }
 
-window.startRoomTopicSwap =
-  startRoomTopicSwap;
+window.startRoomTopicSwap = startRoomTopicSwap;
 
 function cancelRoomTopicSwap() {
-
   roomTopicSwapMode = false;
 
   setRoomSwapBanner(false);
@@ -5488,22 +4076,17 @@ function cancelRoomTopicSwap() {
   }
 }
 
-window.cancelRoomTopicSwap =
-  cancelRoomTopicSwap;
+window.cancelRoomTopicSwap = cancelRoomTopicSwap;
 
 function setRoomSwapBanner(show) {
-
-  const banner =
-    $("roomSwapBanner");
+  const banner = $("roomSwapBanner");
 
   if (banner) {
-    banner.style.display =
-      show ? "flex" : "none";
+    banner.style.display = show ? "flex" : "none";
   }
 }
 
 async function swapRoomTopic(topic) {
-
   roomTopicSwapMode = false;
 
   setRoomSwapBanner(false);
@@ -5515,156 +4098,87 @@ async function swapRoomTopic(topic) {
 
   let pool = [];
 
-  Object.values(
-    topic.questions || {}
-  ).forEach(category => {
-
+  Object.values(topic.questions || {}).forEach((category) => {
     if (!Array.isArray(category)) {
       return;
     }
 
-    category.forEach(item => {
+    category.forEach((item) => {
       if (item) pool.push(item);
     });
-
   });
 
   if (pool.length < 2) {
-
-    alert(
-      "Bu mavzuda kamida 2 ta savol bo‘lishi kerak!"
-    );
+    alert("Bu mavzuda kamida 2 ta savol bo‘lishi kerak!");
 
     openRoomHostView();
 
     return;
-
   }
 
-  pool =
-    shuffleArray(pool).slice(
-      0,
-      50
-    );
+  pool = shuffleArray(pool).slice(0, 50);
 
-  questions =
-    questionsObjectToArray(
-      topic.questions
-    );
+  questions = questionsObjectToArray(topic.questions);
 
-  const preparedQuestions =
-    pool
-      .map(item => {
+  const preparedQuestions = pool
+    .map((item) => {
+      const correctAnswer = String(item.a ?? item.answer ?? "").trim();
 
-        const correctAnswer =
-          String(
-            item.a ??
-            item.answer ??
-            ""
-          ).trim();
+      const qText = String(item.q ?? item.question ?? "").trim();
 
-        const qText =
-          String(
-            item.q ??
-            item.question ??
-            ""
-          ).trim();
+      const options = buildAnswerOptions(correctAnswer, item);
 
-        const options =
-          buildAnswerOptions(
-            correctAnswer,
-            item
-          );
-
-        return {
-          q: qText,
-          options,
-          correct:
-            correctAnswer
-        };
-
-      })
-      .filter(
-        q =>
-          q.q &&
-          q.correct &&
-          q.options.length >= 2
-      );
+      return {
+        q: qText,
+        options,
+        correct: correctAnswer,
+      };
+    })
+    .filter((q) => q.q && q.correct && q.options.length >= 2);
 
   if (preparedQuestions.length < 2) {
-
-    alert(
-      "Savollarni tayyorlashda xatolik."
-    );
+    alert("Savollarni tayyorlashda xatolik.");
 
     openRoomHostView();
 
     return;
-
   }
 
-  const newRoundId =
-    (roomData?.roundId || 1) +
-    1;
+  const newRoundId = (roomData?.roundId || 1) + 1;
 
   showFlowLoading("Mavzu almashtirilmoqda...");
 
   try {
-
     hostAdvancing = false;
 
-    await updateDoc(
-      doc(
-        db,
-        "rooms",
-        roomCode
-      ),
-      {
-        topicTitle:
-          topic.title ||
-          "Mavzu",
-        questions:
-          preparedQuestions,
-        totalQuestions:
-          preparedQuestions.length,
-        roundId: newRoundId,
-        currentIndex: 0,
-        /*
-         * MUHIM (XATOLIK TUZATILDI): bu yerda "status"
-         * yangilanmagani uchun, agar oldingi raund
-         * "finished" bo'lgan bo'lsa, yangi mavzu/savollar
-         * yozilgan bo'lsa ham xona STATUS'i hamon
-         * "finished" bo'lib qolar edi. Natijada yangi
-         * raund savollari umuman ochilmasdan, xona yana
-         * bir zumda "yakunlandi" holatida ko'rinar edi.
-         * Endi status har doim "playing"ga qaytariladi.
-         */
-        status: "playing",
-        questionStartedAt:
-          Date.now(),
-        /*
-         * Xona hali FAOL ishlatilyapti — TTL muddatini
-         * yana 24 soatga uzaytiramiz.
-         */
-        expiresAt:
-          Timestamp.fromMillis(
-            Date.now() + 24 * 60 * 60 * 1000
-          )
-      }
-    );
-
+    await updateDoc(doc(db, "rooms", roomCode), {
+      topicTitle: topic.title || "Mavzu",
+      questions: preparedQuestions,
+      totalQuestions: preparedQuestions.length,
+      roundId: newRoundId,
+      currentIndex: 0,
+      /*
+       * MUHIM (XATOLIK TUZATILDI): bu yerda "status"
+       * yangilanmagani uchun, agar oldingi raund
+       * "finished" bo'lgan bo'lsa, yangi mavzu/savollar
+       * yozilgan bo'lsa ham xona STATUS'i hamon
+       * "finished" bo'lib qolar edi. Natijada yangi
+       * raund savollari umuman ochilmasdan, xona yana
+       * bir zumda "yakunlandi" holatida ko'rinar edi.
+       * Endi status har doim "playing"ga qaytariladi.
+       */
+      status: "playing",
+      questionStartedAt: Date.now(),
+      /*
+       * Xona hali FAOL ishlatilyapti — TTL muddatini
+       * yana 24 soatga uzaytiramiz.
+       */
+      expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
+    });
   } catch (e) {
+    console.error("Mavzu almashtirishda xatolik:", e);
 
-    console.error(
-      "Mavzu almashtirishda xatolik:",
-      e
-    );
-
-    alert(
-      "⚠️ Mavzu almashtirilmadi: " +
-      (e?.message || e)
-    );
-
+    alert("⚠️ Mavzu almashtirilmadi: " + (e?.message || e));
   }
 
   openRoomHostView();
@@ -5673,41 +4187,24 @@ async function swapRoomTopic(topic) {
 /* ---------- TAYMER (host uchun, mustaqil) ---------- */
 
 function startHostLocalTimer(startedAt) {
-
   clearHostLocalTimer();
 
-  const duration =
-    Number(
-      roomData.roundSeconds
-    ) || 10;
+  const duration = Number(roomData.roundSeconds) || 10;
 
-  const idxAtStart =
-    roomData.currentIndex || 0;
+  const idxAtStart = roomData.currentIndex || 0;
 
   const tick = () => {
+    const elapsed = (Date.now() - startedAt) / 1000;
 
-    const elapsed =
-      (Date.now() - startedAt) /
-      1000;
+    const left = Math.max(0, Math.ceil(duration - elapsed));
 
-    const left =
-      Math.max(
-        0,
-        Math.ceil(
-          duration - elapsed
-        )
-      );
-
-    const ring =
-      $("roomTimerRing");
+    const ring = $("roomTimerRing");
 
     if (ring) {
-      ring.textContent =
-        left;
+      ring.textContent = left;
     }
 
     if (left <= 0) {
-
       clearHostLocalTimer();
 
       /*
@@ -5726,30 +4223,16 @@ function startHostLocalTimer(startedAt) {
        * shunchaki qayta boshlanadi (kutish davom etadi).
        */
       if (!roomPlayers.length) {
-
         (async () => {
           try {
-            await updateDoc(
-              doc(
-                db,
-                "rooms",
-                roomCode
-              ),
-              {
-                questionStartedAt:
-                  Date.now()
-              }
-            );
+            await updateDoc(doc(db, "rooms", roomCode), {
+              questionStartedAt: Date.now(),
+            });
           } catch (e) {
-            console.warn(
-              "timer restart (empty room):",
-              e
-            );
+            console.warn("timer restart (empty room):", e);
           }
 
-          startHostLocalTimer(
-            Date.now()
-          );
+          startHostLocalTimer(Date.now());
         })();
 
         return;
@@ -5767,33 +4250,24 @@ function startHostLocalTimer(startedAt) {
       if (
         roomHostMode === "student" &&
         hostPlayerData &&
-        (hostPlayerData.answeredIndex ?? -1) <
-          idxAtStart &&
+        (hostPlayerData.answeredIndex ?? -1) < idxAtStart &&
         !hostAdvanceLock
       ) {
         hostSubmitAnswer(null);
       }
 
       hostAdvanceRoom(idxAtStart);
-
     }
-
   };
 
   tick();
 
-  hostLocalTimer = setInterval(
-    tick,
-    250
-  );
+  hostLocalTimer = setInterval(tick, 250);
 }
 
 function clearHostLocalTimer() {
-
   if (hostLocalTimer) {
-    clearInterval(
-      hostLocalTimer
-    );
+    clearInterval(hostLocalTimer);
   }
 
   hostLocalTimer = null;
@@ -5802,12 +4276,7 @@ function clearHostLocalTimer() {
 /* ---------- JAVOB BERISH (host o'zi ham o'ynaydi) ---------- */
 
 async function hostSubmitAnswer(choiceText) {
-
-  if (
-    hostAdvanceLock ||
-    !hostPlayerData ||
-    !roomData
-  ) {
+  if (hostAdvanceLock || !hostPlayerData || !roomData) {
     return;
   }
 
@@ -5815,129 +4284,63 @@ async function hostSubmitAnswer(choiceText) {
 
   clearHostLocalTimer();
 
-  document
-    .querySelectorAll(
-      "#roomAnswerButtons .qOptionBtn"
-    )
-    .forEach(
-      b => (b.disabled = true)
-    );
+  document.querySelectorAll("#roomAnswerButtons .qOptionBtn").forEach((b) => (b.disabled = true));
 
-  const idx =
-    roomData.currentIndex || 0;
+  const idx = roomData.currentIndex || 0;
 
-  const q =
-    roomData.questions[idx];
+  const q = roomData.questions[idx];
 
-  const isCorrect =
-    choiceText != null &&
-    choiceText === q.correct;
+  const isCorrect = choiceText != null && choiceText === q.correct;
 
-  const roundMs =
-    (Number(
-      roomData.roundSeconds
-    ) || 10) * 1000;
+  const roundMs = (Number(roomData.roundSeconds) || 10) * 1000;
 
-  const responseMs =
-    Math.min(
-      Date.now() -
-        (roomData.questionStartedAt ||
-          Date.now()),
-      roundMs
-    );
+  const responseMs = Math.min(Date.now() - (roomData.questionStartedAt || Date.now()), roundMs);
 
-  const isDone =
-    idx >=
-    roomData.totalQuestions - 1;
+  const isDone = idx >= roomData.totalQuestions - 1;
 
   const updatedLocal = {
     ...hostPlayerData,
 
-    correctCount:
-      (Number(
-        hostPlayerData.correctCount
-      ) || 0) +
-      (isCorrect ? 1 : 0),
+    correctCount: (Number(hostPlayerData.correctCount) || 0) + (isCorrect ? 1 : 0),
 
-    wrongCount:
-      (Number(
-        hostPlayerData.wrongCount
-      ) || 0) +
-      (isCorrect ? 0 : 1),
+    wrongCount: (Number(hostPlayerData.wrongCount) || 0) + (isCorrect ? 0 : 1),
 
-    totalTimeMs:
-      (Number(
-        hostPlayerData.totalTimeMs
-      ) || 0) + responseMs,
+    totalTimeMs: (Number(hostPlayerData.totalTimeMs) || 0) + responseMs,
 
     answeredIndex: idx,
 
-    finishedRound: isDone
+    finishedRound: isDone,
   };
 
-  hostPlayerData =
-    updatedLocal;
+  hostPlayerData = updatedLocal;
 
-  showHostRevealLocal(
-    isCorrect,
-    q.correct
-  );
+  showHostRevealLocal(isCorrect, q.correct);
 
   try {
-
-    await updateDoc(
-      doc(
-        db,
-        "rooms",
-        roomCode,
-        "players",
-        myHostPlayerId
-      ),
-      {
-        correctCount:
-          updatedLocal.correctCount,
-        wrongCount:
-          updatedLocal.wrongCount,
-        totalTimeMs:
-          updatedLocal.totalTimeMs,
-        answeredIndex:
-          updatedLocal.answeredIndex,
-        finishedRound:
-          updatedLocal.finishedRound,
-        lastAnswerChoice:
-          choiceText,
-        lastAnswerCorrect:
-          isCorrect
-      }
-    );
-
+    await updateDoc(doc(db, "rooms", roomCode, "players", myHostPlayerId), {
+      correctCount: updatedLocal.correctCount,
+      wrongCount: updatedLocal.wrongCount,
+      totalTimeMs: updatedLocal.totalTimeMs,
+      answeredIndex: updatedLocal.answeredIndex,
+      finishedRound: updatedLocal.finishedRound,
+      lastAnswerChoice: choiceText,
+      lastAnswerCorrect: isCorrect,
+    });
   } catch (e) {
-
-    console.warn(
-      "host javob saqlash:",
-      e
-    );
-
+    console.warn("host javob saqlash:", e);
   }
 }
 
 function showHostRevealLocal(isCorrect, correctText) {
-
   hostShowingReveal = true;
 
-  const box =
-    $("roomHostContent");
+  const box = $("roomHostContent");
 
   if (box) {
-
     box.innerHTML = `
       <div class="roomRevealBox">
 
-        <div class="revealMark ${
-          isCorrect
-            ? "isCorrect"
-            : "isWrong"
-        }">
+        <div class="revealMark ${isCorrect ? "isCorrect" : "isWrong"}">
           ${isCorrect ? "✅" : "❌"}
         </div>
 
@@ -5952,7 +4355,6 @@ function showHostRevealLocal(isCorrect, correctText) {
 
       </div>
     `;
-
   }
 
   setTimeout(() => {
@@ -5983,39 +4385,22 @@ function rankRoomPlayers(players) {
 /* ---------- JONLI REYTING (faqat yakunda to'liq ko'rsatiladi) ---------- */
 
 function renderRoomLiveLeaderboardInto(containerId) {
-
-  const el =
-    $(containerId);
+  const el = $(containerId);
 
   if (!el) return;
 
-  const sorted =
-    rankRoomPlayers(roomPlayers);
+  const sorted = rankRoomPlayers(roomPlayers);
 
   el.innerHTML = sorted
     .map(
       (p, i) => `
-        <div class="roomLeaderRow${
-          p.id === myHostPlayerId
-            ? " isRoomWinner"
-            : ""
-        }">
-          <span>${
-            i === 0
-              ? "🏆"
-              : "#" + (i + 1)
-          }</span>
-          <strong>${escapeHtml(p.name)}${
-        p.isHost ? " 👑" : ""
-      }</strong>
+        <div class="roomLeaderRow${p.id === myHostPlayerId ? " isRoomWinner" : ""}">
+          <span>${i === 0 ? "🏆" : "#" + (i + 1)}</span>
+          <strong>${escapeHtml(p.name)}${p.isHost ? " 👑" : ""}</strong>
           <span class="roomLeaderScore">✅${p.correctCount || 0} · ❌${p.wrongCount || 0}</span>
-          <span class="roomLeaderMark">${
-            p.finishedRound
-              ? "✅"
-              : "⏳"
-          }</span>
+          <span class="roomLeaderMark">${p.finishedRound ? "✅" : "⏳"}</span>
         </div>
-      `
+      `,
     )
     .join("");
 }
@@ -6028,7 +4413,6 @@ function renderRoomLiveLeaderboardInto(containerId) {
 ------------------------------------------------------ */
 
 function renderRoomQuestionParticipants(containerId, idx) {
-
   const el = $(containerId);
 
   if (!el) return;
@@ -6039,13 +4423,10 @@ function renderRoomQuestionParticipants(containerId, idx) {
   }
 
   el.innerHTML = roomPlayers
-    .map(p => {
-      const answered =
-        (Number(p.answeredIndex) ?? -1) >= idx;
+    .map((p) => {
+      const answered = (Number(p.answeredIndex) ?? -1) >= idx;
 
-      return `<span class="roomPlayerChip${
-        answered ? " answered" : ""
-      }">${escapeHtml(p.name)}${
+      return `<span class="roomPlayerChip${answered ? " answered" : ""}">${escapeHtml(p.name)}${
         p.isHost ? " 👑" : ""
       } ${answered ? "✅" : "⏳"}</span>`;
     })
@@ -6055,24 +4436,15 @@ function renderRoomQuestionParticipants(containerId, idx) {
 /* ---------- EKRANLARNI CHIZISH ---------- */
 
 function renderRoomHostView() {
-
-  const box =
-    $("roomHostContent");
+  const box = $("roomHostContent");
 
   if (!box || !roomData) return;
 
-  updateRoomChatVisibility(
-    roomData.status
-  );
+  updateRoomChatVisibility(roomData.status);
 
   if (hostShowingReveal) return;
 
-  const joinUrl =
-    new URL(
-      "index.html?code=" +
-        roomCode,
-      window.location.href
-    ).href;
+  const joinUrl = new URL("index.html?code=" + roomCode, window.location.href).href;
 
   /*
    * XONA KODI/HAVOLASI ENDI FAQAT LOBBY (o'yin
@@ -6081,10 +4453,7 @@ function renderRoomHostView() {
    * allaqachon qo'shilib bo'lgan.
    */
   if (roomData.status === "lobby") {
-    renderRoomLobbyView(
-      box,
-      joinUrl
-    );
+    renderRoomLobbyView(box, joinUrl);
     return;
   }
 
@@ -6093,8 +4462,7 @@ function renderRoomHostView() {
     return;
   }
 
-  const idx =
-    roomData.currentIndex || 0;
+  const idx = roomData.currentIndex || 0;
 
   /*
    * Xona egasi qaysi rejimda bo'lishidan (o'qituvchi
@@ -6111,10 +4479,7 @@ function renderRoomHostView() {
    * shuningdek kim javob berganini kuzatadi.
    */
   if (roomHostMode === "teacher") {
-    renderTeacherMonitorView(
-      box,
-      idx
-    );
+    renderTeacherMonitorView(box, idx);
     return;
   }
 
@@ -6123,10 +4488,7 @@ function renderRoomHostView() {
     return;
   }
 
-  if (
-    hostPlayerData.roundId !==
-    roomData.roundId
-  ) {
+  if (hostPlayerData.roundId !== roomData.roundId) {
     box.innerHTML = `<div class="roomLoadingNote">Yangi mavzu tayyorlanmoqda...</div>`;
     return;
   }
@@ -6137,10 +4499,7 @@ function renderRoomHostView() {
    * kutadi (savol/variantlar hali ko'rinadi, lekin
    * bosib bo'lmaydi).
    */
-  if (
-    (hostPlayerData.answeredIndex ?? -1) >=
-    idx
-  ) {
+  if ((hostPlayerData.answeredIndex ?? -1) >= idx) {
     renderHostWaitingView(box, idx);
     return;
   }
@@ -6149,19 +4508,13 @@ function renderRoomHostView() {
 }
 
 function ensureHostTimerRunning(idx) {
-
   if (hostCurrentTimerIndex !== idx) {
-
     hostCurrentTimerIndex = idx;
     hostAdvanceLock = false;
 
-    const startedAt =
-      roomData.questionStartedAt ||
-      Date.now();
+    const startedAt = roomData.questionStartedAt || Date.now();
 
-    startHostLocalTimer(
-      startedAt
-    );
+    startHostLocalTimer(startedAt);
   }
 }
 
@@ -6174,18 +4527,11 @@ function ensureHostTimerRunning(idx) {
 ------------------------------------------------------ */
 
 function renderTeacherMonitorView(box, idx) {
-
-  const q =
-    roomData.questions?.[idx];
+  const q = roomData.questions?.[idx];
 
   if (!q) return;
 
-  const answeredCount =
-    roomPlayers.filter(
-      p =>
-        (Number(p.answeredIndex) ?? -1) >=
-        idx
-    ).length;
+  const answeredCount = roomPlayers.filter((p) => (Number(p.answeredIndex) ?? -1) >= idx).length;
 
   box.innerHTML = `
     <div class="roomQuestionHead">
@@ -6197,17 +4543,14 @@ function renderTeacherMonitorView(box, idx) {
     <div class="roomQuestionText">${escapeHtml(q.q || "")}</div>
 
     <div class="roomAnswerButtons" id="roomAnswerButtons">
-      ${
-        (q.options || [])
-          .map(
-            (opt, i) =>
-              `<button type="button" disabled class="qOptionBtn ${
-                ROOM_OPTION_CLASSES[i] ||
-                "optA"
-              }">${escapeHtml(opt)}</button>`
-          )
-          .join("")
-      }
+      ${(q.options || [])
+        .map(
+          (opt, i) =>
+            `<button type="button" disabled class="qOptionBtn ${
+              ROOM_OPTION_CLASSES[i] || "optA"
+            }">${escapeHtml(opt)}</button>`,
+        )
+        .join("")}
     </div>
 
     <div class="roomLiveMini">
@@ -6228,20 +4571,13 @@ function renderTeacherMonitorView(box, idx) {
     </div>
   `;
 
-  renderRoomQuestionParticipants(
-    "roomHostParticipants",
-    idx
-  );
+  renderRoomQuestionParticipants("roomHostParticipants", idx);
 
-  renderRoomLiveLeaderboardInto(
-    "roomHostLiveLeaderboardPlaying"
-  );
+  renderRoomLiveLeaderboardInto("roomHostLiveLeaderboardPlaying");
 }
 
 function renderHostWaitingView(box, idx) {
-
-  const q =
-    roomData.questions?.[idx];
+  const q = roomData.questions?.[idx];
 
   if (!q) return;
 
@@ -6255,21 +4591,14 @@ function renderHostWaitingView(box, idx) {
     <div class="roomQuestionText">${escapeHtml(q.q || "")}</div>
 
     <div class="roomAnswerButtons" id="roomAnswerButtons">
-      ${
-        (q.options || [])
-          .map(
-            (opt, i) =>
-              `<button type="button" disabled class="qOptionBtn ${
-                ROOM_OPTION_CLASSES[i] ||
-                "optA"
-              }${
-                opt === hostPlayerData.lastAnswerChoice
-                  ? " chosen"
-                  : ""
-              }">${escapeHtml(opt)}</button>`
-          )
-          .join("")
-      }
+      ${(q.options || [])
+        .map(
+          (opt, i) =>
+            `<button type="button" disabled class="qOptionBtn ${ROOM_OPTION_CLASSES[i] || "optA"}${
+              opt === hostPlayerData.lastAnswerChoice ? " chosen" : ""
+            }">${escapeHtml(opt)}</button>`,
+        )
+        .join("")}
     </div>
 
     <div class="roomWaitingNote">✅ Javobingiz qabul qilindi — boshqalarni kutmoqdamiz...</div>
@@ -6291,14 +4620,9 @@ function renderHostWaitingView(box, idx) {
     </div>
   `;
 
-  renderRoomQuestionParticipants(
-    "roomHostParticipants",
-    idx
-  );
+  renderRoomQuestionParticipants("roomHostParticipants", idx);
 
-  renderRoomLiveLeaderboardInto(
-    "roomHostLiveLeaderboardPlaying"
-  );
+  renderRoomLiveLeaderboardInto("roomHostLiveLeaderboardPlaying");
 }
 
 /* ---------- XONA YAKUNLANDI — G'OLIB VA TO'LIQ REYTING ---------- */
@@ -6306,9 +4630,7 @@ function renderHostWaitingView(box, idx) {
 let roomWinnerModalShownFor = null;
 
 function renderRoomWinnerView(box) {
-
-  const ranked =
-    rankRoomPlayers(roomPlayers);
+  const ranked = rankRoomPlayers(roomPlayers);
 
   box.innerHTML = `
     <div class="roomFinishedTitle">🏁 Xona yakunlandi!</div>
@@ -6327,20 +4649,12 @@ function renderRoomWinnerView(box) {
     </div>
   `;
 
-  renderRoomLiveLeaderboardInto(
-    "roomHostLiveLeaderboard"
-  );
+  renderRoomLiveLeaderboardInto("roomHostLiveLeaderboard");
 
-  const bannerKey =
-    roomCode + ":" + roomData.roundId;
+  const bannerKey = roomCode + ":" + roomData.roundId;
 
-  if (
-    roomWinnerModalShownFor !==
-      bannerKey &&
-    ranked.length
-  ) {
-    roomWinnerModalShownFor =
-      bannerKey;
+  if (roomWinnerModalShownFor !== bannerKey && ranked.length) {
+    roomWinnerModalShownFor = bannerKey;
 
     showRoomWinnerModal(ranked);
   }
@@ -6352,7 +4666,6 @@ function renderRoomWinnerView(box) {
  * (taxta/solo o'yin uchun ishlatiladigan) foydalanadi.
  */
 function showRoomWinnerModal(ranked) {
-
   const modal = $("winnerModal");
   const text = $("winnerText");
   const rest = $("restWinners");
@@ -6387,7 +4700,7 @@ function showRoomWinnerModal(ranked) {
             ${((Number(p.totalTimeMs) || 0) / 1000).toFixed(1)}s
           </span>
         </div>
-      `
+      `,
     )
     .join("");
 
@@ -6410,103 +4723,63 @@ function showRoomWinnerModal(ranked) {
 ========================================================= */
 
 function updateRoomChatVisibility(status) {
-
   const chatBox = $("roomChatBox");
 
   if (!chatBox) return;
 
-  const shouldShow =
-    status === "lobby" ||
-    status === "finished";
+  const shouldShow = status === "lobby" || status === "finished";
 
-  chatBox.classList.toggle(
-    "hidden",
-    !shouldShow
-  );
+  chatBox.classList.toggle("hidden", !shouldShow);
 }
 
 function subscribeRoomHostChat() {
-
   roomChatUnsub?.();
 
   roomChatUnsub = onSnapshot(
-    query(
-      collection(
-        db,
-        "rooms",
-        roomCode,
-        "messages"
-      ),
-      orderBy("createdAt", "asc"),
-      limit(200)
-    ),
-    snap => {
-      roomChatMessages =
-        snap.docs.map(d => ({
-          id: d.id,
-          ...d.data()
-        }));
+    query(collection(db, "rooms", roomCode, "messages"), orderBy("createdAt", "asc"), limit(200)),
+    (snap) => {
+      roomChatMessages = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
 
       renderRoomHostChatMessages();
     },
-    e =>
-      console.warn(
-        "host chat listen:",
-        e
-      )
+    (e) => console.warn("host chat listen:", e),
   );
 }
 
 async function sendRoomHostChatMessage(text) {
-
   const trimmed = (text || "").trim();
 
   if (!trimmed || !roomCode) return;
 
   try {
-    await addDoc(
-      collection(
-        db,
-        "rooms",
-        roomCode,
-        "messages"
-      ),
-      {
-        text: trimmed.slice(0, 300),
-        name: roomHostChatName || "Nazoratchi",
-        senderId: roomHostChatSenderId,
-        isHost: true,
-        createdAt: Date.now()
-      }
-    );
+    await addDoc(collection(db, "rooms", roomCode, "messages"), {
+      text: trimmed.slice(0, 300),
+      name: roomHostChatName || "Nazoratchi",
+      senderId: roomHostChatSenderId,
+      isHost: true,
+      createdAt: Date.now(),
+    });
   } catch (e) {
     console.warn("host chat send:", e);
   }
 }
 
 function renderRoomHostChatMessages() {
-
   const el = $("roomChatMessages");
 
   if (!el) return;
 
   el.innerHTML = roomChatMessages
-    .map(m => {
-
-      const isMe =
-        m.senderId ===
-        roomHostChatSenderId;
+    .map((m) => {
+      const isMe = m.senderId === roomHostChatSenderId;
 
       return `
-        <div class="chatBubble${
-          isMe ? " isMe" : ""
-        }${m.isHost ? " isHost" : ""}">
-          <span class="chatBubbleName">${escapeHtml(
-            m.name || "—"
-          )}${m.isHost ? " 👑" : ""}</span>
-          <span class="chatBubbleText">${escapeHtml(
-            m.text || ""
-          )}</span>
+        <div class="chatBubble${isMe ? " isMe" : ""}${m.isHost ? " isHost" : ""}">
+          <span class="chatBubbleName">${escapeHtml(m.name || "—")}${m.isHost ? " 👑" : ""}</span>
+          <span class="chatBubbleText">${escapeHtml(m.text || "")}</span>
         </div>
       `;
     })
@@ -6516,7 +4789,6 @@ function renderRoomHostChatMessages() {
 }
 
 function submitRoomHostChat() {
-
   const input = $("roomChatInput");
 
   if (!input) return;
@@ -6526,19 +4798,13 @@ function submitRoomHostChat() {
   input.value = "";
 }
 
-$("roomChatSendBtn")?.addEventListener(
-  "click",
-  submitRoomHostChat
-);
+$("roomChatSendBtn")?.addEventListener("click", submitRoomHostChat);
 
-$("roomChatInput")?.addEventListener(
-  "keydown",
-  e => {
-    if (e.key === "Enter") {
-      submitRoomHostChat();
-    }
+$("roomChatInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    submitRoomHostChat();
   }
-);
+});
 
 /*
  * XONA EGASI ISHTIROKCHINI CHIQARISHI:
@@ -6547,40 +4813,23 @@ $("roomChatInput")?.addEventListener(
  * yoki ishtirok etishni to'xtatgan bo'lsa.
  */
 async function kickRoomPlayer(playerId) {
-
   if (!roomCode || !playerId) return;
 
-  if (
-    !confirm(
-      "Bu ishtirokchini xonadan chiqarasizmi?"
-    )
-  ) {
+  if (!confirm("Bu ishtirokchini xonadan chiqarasizmi?")) {
     return;
   }
 
   try {
-    await deleteDoc(
-      doc(
-        db,
-        "rooms",
-        roomCode,
-        "players",
-        playerId
-      )
-    );
+    await deleteDoc(doc(db, "rooms", roomCode, "players", playerId));
   } catch (e) {
     console.warn("kick player:", e);
-    alert(
-      "Xatolik: " +
-        (e?.message || e)
-    );
+    alert("Xatolik: " + (e?.message || e));
   }
 }
 
 window.kickRoomPlayer = kickRoomPlayer;
 
 function renderRoomLobbyView(box, joinUrl) {
-
   box.innerHTML = `
     <div class="roomCodeDisplay">
       <span class="roomCodeLabel">XONA KODI</span>
@@ -6620,7 +4869,7 @@ function renderRoomLobbyView(box, joinUrl) {
           roomPlayers.length
             ? roomPlayers
                 .map(
-                  p =>
+                  (p) =>
                     `<span class="roomPlayerChip lobbyChip" data-player-id="${escapeHtml(p.id)}">
                       ${escapeHtml(p.name)}${p.isHost ? " 👑" : ""}
                       ${
@@ -6628,7 +4877,7 @@ function renderRoomLobbyView(box, joinUrl) {
                           ? ""
                           : `<button type="button" class="roomPlayerKickBtn" data-kick-id="${escapeHtml(p.id)}" title="Ishtirokchini chiqarish">✕</button>`
                       }
-                    </span>`
+                    </span>`,
                 )
                 .join("")
             : `<span class="introEmpty">Hali hech kim qo‘shilmadi...</span>`
@@ -6642,25 +4891,18 @@ function renderRoomLobbyView(box, joinUrl) {
     </div>
   `;
 
-  box
-    .querySelectorAll(".roomPlayerKickBtn")
-    .forEach(btn => {
-      btn.onclick = e => {
-        e.stopPropagation();
-        kickRoomPlayer(btn.dataset.kickId);
-      };
-    });
+  box.querySelectorAll(".roomPlayerKickBtn").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      kickRoomPlayer(btn.dataset.kickId);
+    };
+  });
 }
 
 function renderRoomQuestionView(box, idxParam) {
+  const idx = idxParam ?? roomData.currentIndex ?? 0;
 
-  const idx =
-    idxParam ??
-    roomData.currentIndex ??
-    0;
-
-  const q =
-    roomData.questions?.[idx];
+  const q = roomData.questions?.[idx];
 
   if (!q) return;
 
@@ -6674,17 +4916,14 @@ function renderRoomQuestionView(box, idxParam) {
     <div class="roomQuestionText">${escapeHtml(q.q || "")}</div>
 
     <div class="roomAnswerButtons" id="roomAnswerButtons">
-      ${
-        (q.options || [])
-          .map(
-            (opt, i) =>
-              `<button type="button" class="qOptionBtn ${
-                ROOM_OPTION_CLASSES[i] ||
-                "optA"
-              }" data-opt="${escapeHtml(opt)}">${escapeHtml(opt)}</button>`
-          )
-          .join("")
-      }
+      ${(q.options || [])
+        .map(
+          (opt, i) =>
+            `<button type="button" class="qOptionBtn ${
+              ROOM_OPTION_CLASSES[i] || "optA"
+            }" data-opt="${escapeHtml(opt)}">${escapeHtml(opt)}</button>`,
+        )
+        .join("")}
     </div>
 
     <div class="roomLiveMini">
@@ -6704,25 +4943,13 @@ function renderRoomQuestionView(box, idxParam) {
     </div>
   `;
 
-  box
-    .querySelectorAll(
-      "#roomAnswerButtons .qOptionBtn"
-    )
-    .forEach(btn => {
-      btn.onclick = () =>
-        hostSubmitAnswer(
-          btn.dataset.opt
-        );
-    });
+  box.querySelectorAll("#roomAnswerButtons .qOptionBtn").forEach((btn) => {
+    btn.onclick = () => hostSubmitAnswer(btn.dataset.opt);
+  });
 
-  renderRoomQuestionParticipants(
-    "roomHostParticipants",
-    idx
-  );
+  renderRoomQuestionParticipants("roomHostParticipants", idx);
 
-  renderRoomLiveLeaderboardInto(
-    "roomHostLiveLeaderboardPlaying"
-  );
+  renderRoomLiveLeaderboardInto("roomHostLiveLeaderboardPlaying");
 }
 
 /* ---------- JONLI REYTING SARLAVHASI + ULASHISH TUGMASI ---------- */
@@ -6739,12 +4966,11 @@ function roomLiveMiniHeaderHtml(label) {
 /* ---------- JONLI REYTINGNI RASM QILIB ULASHISH ---------- */
 
 function wrapHostCanvasText(ctx, text, maxWidth) {
-
   const words = String(text || "").split(" ");
   const lines = [];
   let line = "";
 
-  words.forEach(word => {
+  words.forEach((word) => {
     const test = line ? line + " " + word : word;
 
     if (ctx.measureText(test).width > maxWidth && line) {
@@ -6761,19 +4987,14 @@ function wrapHostCanvasText(ctx, text, maxWidth) {
 }
 
 async function buildLeaderboardImageBlob() {
-
-  const sorted =
-    rankRoomPlayers(roomPlayers);
+  const sorted = rankRoomPlayers(roomPlayers);
 
   const ROW_H = 74;
   const TOP = 210;
   const BOTTOM = 70;
 
   const W = 720;
-  const H =
-    TOP +
-    Math.max(sorted.length, 1) * ROW_H +
-    BOTTOM;
+  const H = TOP + Math.max(sorted.length, 1) * ROW_H + BOTTOM;
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
@@ -6811,12 +5032,8 @@ async function buildLeaderboardImageBlob() {
   if (roomData?.topicTitle) {
     ctx.fillStyle = "#9eacc0";
     ctx.font = "700 17px Inter, Arial, sans-serif";
-    const topicLines = wrapHostCanvasText(
-      ctx,
-      roomData.topicTitle,
-      W - 140
-    );
-    topicLines.slice(0, 1).forEach(line => {
+    const topicLines = wrapHostCanvasText(ctx, roomData.topicTitle, W - 140);
+    topicLines.slice(0, 1).forEach((line) => {
       ctx.fillText(line, W / 2, 135);
     });
   }
@@ -6825,7 +5042,6 @@ async function buildLeaderboardImageBlob() {
   const rowW = W - 100;
 
   sorted.forEach((p, i) => {
-
     const y = TOP + i * ROW_H;
     const rowH = ROW_H - 14;
     const radius = 16;
@@ -6858,72 +5074,44 @@ async function buildLeaderboardImageBlob() {
     ctx.textAlign = "left";
     ctx.fillStyle = i === 0 ? "#20d9ff" : "#8fa3b9";
     ctx.font = "900 26px Inter, Arial, sans-serif";
-    ctx.fillText(
-      i === 0 ? "🏆" : "#" + (i + 1),
-      rowX + 22,
-      centerY
-    );
+    ctx.fillText(i === 0 ? "🏆" : "#" + (i + 1), rowX + 22, centerY);
 
     ctx.fillStyle = "#f1f6fb";
     ctx.font = "800 24px Inter, Arial, sans-serif";
-    const nameLines = wrapHostCanvasText(
-      ctx,
-      p.name || "—",
-      rowW - 220
-    );
+    const nameLines = wrapHostCanvasText(ctx, p.name || "—", rowW - 220);
     ctx.fillText(nameLines[0] || "—", rowX + 90, centerY);
 
     ctx.textAlign = "right";
     ctx.fillStyle = "#67e8f9";
     ctx.font = "900 26px Inter, Arial, sans-serif";
-    ctx.fillText(
-      "✅" + (p.correctCount || 0),
-      rowX + rowW - 24,
-      centerY
-    );
+    ctx.fillText("✅" + (p.correctCount || 0), rowX + rowW - 24, centerY);
   });
 
   ctx.textAlign = "center";
   ctx.fillStyle = "#5c6c82";
   ctx.font = "700 14px Inter, Arial, sans-serif";
-  ctx.fillText(
-    "Xona kodi: " + (roomCode || "—"),
-    W / 2,
-    H - 28
-  );
+  ctx.fillText("Xona kodi: " + (roomCode || "—"), W / 2, H - 28);
 
-  return await new Promise(resolve => {
-    canvas.toBlob(blob => resolve(blob), "image/png");
+  return await new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/png");
   });
 }
 
 async function shareLeaderboardImage() {
-
   try {
-
     const blob = await buildLeaderboardImageBlob();
 
     if (!blob) throw new Error("Rasm yaratilmadi");
 
-    const file = new File(
-      [blob],
-      "reyting.png",
-      { type: "image/png" }
-    );
+    const file = new File([blob], "reyting.png", { type: "image/png" });
 
-    if (
-      navigator.canShare &&
-      navigator.canShare({ files: [file] })
-    ) {
-
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
         title: "Beks Game — jonli reyting",
-        text: "Jonli xona reytingi!"
+        text: "Jonli xona reytingi!",
       });
-
     } else {
-
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -6932,25 +5120,18 @@ async function shareLeaderboardImage() {
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
-
     }
-
   } catch (e) {
-
     if (e?.name !== "AbortError") {
       console.warn("Reytingni ulashishda xato:", e);
       alert("Rasmni ulashib bo‘lmadi: " + (e?.message || e));
     }
-
   }
 }
 
-window.shareLeaderboardImage =
-  shareLeaderboardImage;
-
+window.shareLeaderboardImage = shareLeaderboardImage;
 
 function startDuel(topic, playerA, playerB) {
-
   if (!topic) return;
 
   /*
@@ -6960,27 +5141,20 @@ function startDuel(topic, playerA, playerB) {
    */
   let pool = [];
 
-  Object.values(
-    topic.questions || {}
-  ).forEach(category => {
-
+  Object.values(topic.questions || {}).forEach((category) => {
     if (!Array.isArray(category)) {
       return;
     }
 
-    category.forEach(item => {
+    category.forEach((item) => {
       if (item) pool.push(item);
     });
-
   });
 
   if (pool.length < 2) {
-
     hideFlowShield();
 
-    alert(
-      "Duel uchun mavzuda kamida 2 ta savol bo‘lishi kerak!"
-    );
+    alert("Duel uchun mavzuda kamida 2 ta savol bo‘lishi kerak!");
 
     return;
   }
@@ -6997,22 +5171,19 @@ function startDuel(topic, playerA, playerB) {
   duelPool = pool;
   duelSidePools = {
     a: pool.filter((_, index) => index % 2 === 0),
-    b: pool.filter((_, index) => index % 2 === 1)
+    b: pool.filter((_, index) => index % 2 === 1),
   };
 
-  duelTotalRounds = Math.max(
-    duelSidePools.a.length,
-    duelSidePools.b.length
-  );
+  duelTotalRounds = Math.max(duelSidePools.a.length, duelSidePools.b.length);
 
   duelPlayers = {
     a: playerA || teamsData[0],
-    b: playerB || teamsData[1]
+    b: playerB || teamsData[1],
   };
 
   duelStats = {
     a: { correct: 0, wrong: 0, totalTimeMs: 0 },
-    b: { correct: 0, wrong: 0, totalTimeMs: 0 }
+    b: { correct: 0, wrong: 0, totalTimeMs: 0 },
   };
 
   duelActive = true;
@@ -7022,51 +5193,34 @@ function startDuel(topic, playerA, playerB) {
   /*
    * Ishtirokchilar ma'lumotlari
    */
-  const pa =
-    findParticipant(
-      duelPlayers.a.participantId
-    );
+  const pa = findParticipant(duelPlayers.a.participantId);
 
-  const pb =
-    findParticipant(
-      duelPlayers.b.participantId
-    );
+  const pb = findParticipant(duelPlayers.b.participantId);
 
   if ($("duelAImg")) {
-    $("duelAImg").src =
-      pa?.image ||
-      duelPlayers.a.image ||
-      avatarData(duelPlayers.a.name);
+    $("duelAImg").src = pa?.image || duelPlayers.a.image || avatarData(duelPlayers.a.name);
   }
 
   if ($("duelBImg")) {
-    $("duelBImg").src =
-      pb?.image ||
-      duelPlayers.b.image ||
-      avatarData(duelPlayers.b.name);
+    $("duelBImg").src = pb?.image || duelPlayers.b.image || avatarData(duelPlayers.b.name);
   }
 
   if ($("duelAName")) {
-    $("duelAName").textContent =
-      duelPlayers.a.name;
+    $("duelAName").textContent = duelPlayers.a.name;
   }
 
   if ($("duelBName")) {
-    $("duelBName").textContent =
-      duelPlayers.b.name;
+    $("duelBName").textContent = duelPlayers.b.name;
   }
 
   if ($("duelRoundTotal")) {
-    $("duelRoundTotal").textContent =
-      duelTotalRounds;
+    $("duelRoundTotal").textContent = duelTotalRounds;
   }
 
-  const modal =
-    $("duelModal");
+  const modal = $("duelModal");
 
   if (modal) {
-    modal.style.display =
-      "flex";
+    modal.style.display = "flex";
   }
 
   hideFlowShield();
@@ -7075,7 +5229,6 @@ function startDuel(topic, playerA, playerB) {
 }
 
 function renderDuelRound() {
-
   if (!duelActive) return;
 
   duelRound = {
@@ -7083,19 +5236,18 @@ function renderDuelRound() {
       ...duelRound.a,
       index: 0,
       answered: false,
-      finished: false
+      finished: false,
     },
     b: {
       ...duelRound.b,
       index: 0,
       answered: false,
-      finished: false
-    }
+      finished: false,
+    },
   };
 
   if ($("duelRoundNow")) {
-    $("duelRoundNow").textContent =
-      1;
+    $("duelRoundNow").textContent = 1;
   }
 
   renderDuelSideRound("a");
@@ -7114,9 +5266,7 @@ function renderDuelSideRound(side) {
   }
 
   duelRound[side].item = item;
-  duelRound[side].correct = String(
-    item.a ?? item.answer ?? ""
-  ).trim();
+  duelRound[side].correct = String(item.a ?? item.answer ?? "").trim();
   duelRound[side].answered = false;
   duelRound[side].startedAt = Date.now();
 
@@ -7125,81 +5275,41 @@ function renderDuelSideRound(side) {
 }
 
 function renderDuelSide(side, item) {
+  const qBox = $(side === "a" ? "duelAQText" : "duelBQText");
 
-  const qBox =
-    $(
-      side === "a"
-        ? "duelAQText"
-        : "duelBQText"
-    );
-
-  const optBox =
-    $(
-      side === "a"
-        ? "duelAAnswers"
-        : "duelBAnswers"
-    );
+  const optBox = $(side === "a" ? "duelAAnswers" : "duelBAnswers");
 
   if (!qBox || !optBox) return;
 
-  qBox.textContent =
-    item.q ??
-    item.question ??
-    "";
+  qBox.textContent = item.q ?? item.question ?? "";
 
-  const correct =
-    duelRound[side].correct;
+  const correct = duelRound[side].correct;
 
-  const options =
-    buildAnswerOptions(
-      correct,
-      item
-    );
+  const options = buildAnswerOptions(correct, item);
 
   optBox.innerHTML = "";
 
-  options.forEach(
-    (answer, i) => {
+  options.forEach((answer, i) => {
+    const btn = document.createElement("button");
 
-      const btn =
-        document.createElement(
-          "button"
-        );
+    btn.type = "button";
+    btn.className = "answerOption duelAnswerBtn";
 
-      btn.type = "button";
-      btn.className =
-        "answerOption duelAnswerBtn";
+    btn.dataset.answer = answer;
 
-      btn.dataset.answer =
-        answer;
-
-      btn.innerHTML = `
+    btn.innerHTML = `
         <span class="answerLetter">
-          ${String.fromCharCode(
-            65 + i
-          )}
+          ${String.fromCharCode(65 + i)}
         </span>
         <span class="answerText"></span>
       `;
 
-      btn.querySelector(
-        ".answerText"
-      ).textContent =
-        answer;
+    btn.querySelector(".answerText").textContent = answer;
 
-      btn.onclick = () =>
-        handleDuelAnswer(
-          side,
-          btn,
-          answer,
-          correct
-        );
+    btn.onclick = () => handleDuelAnswer(side, btn, answer, correct);
 
-      optBox.appendChild(
-        btn
-      );
-    }
-  );
+    optBox.appendChild(btn);
+  });
 }
 
 function startDuelSideTimer(side) {
@@ -7207,9 +5317,7 @@ function startDuelSideTimer(side) {
 
   duelRound[side].timeLeft = userTimer || 10;
 
-  const timerId = side === "a"
-    ? "duelATimer"
-    : "duelBTimer";
+  const timerId = side === "a" ? "duelATimer" : "duelBTimer";
   const el = $(timerId);
 
   if (el) {
@@ -7222,10 +5330,7 @@ function startDuelSideTimer(side) {
     duelRound[side].timeLeft--;
 
     if (el) {
-      el.textContent = Math.max(
-        0,
-        duelRound[side].timeLeft
-      );
+      el.textContent = Math.max(0, duelRound[side].timeLeft);
     }
 
     if (duelRound[side].timeLeft <= 0) {
@@ -7235,93 +5340,42 @@ function startDuelSideTimer(side) {
   }, 1000);
 }
 
-function handleDuelAnswer(
-  side,
-  button,
-  selected,
-  correct
-) {
-
-  if (
-    !duelActive ||
-    duelRound[side].answered
-  ) {
+function handleDuelAnswer(side, button, selected, correct) {
+  if (!duelActive || duelRound[side].answered) {
     return;
   }
 
-  const isCorrect =
-    String(selected).trim() ===
-    String(correct).trim();
+  const isCorrect = String(selected).trim() === String(correct).trim();
 
-  const optBox =
-    $(
-      side === "a"
-        ? "duelAAnswers"
-        : "duelBAnswers"
-    );
+  const optBox = $(side === "a" ? "duelAAnswers" : "duelBAnswers");
 
-  optBox
-    ?.querySelectorAll(
-      ".duelAnswerBtn"
-    )
-    .forEach(btn => {
+  optBox?.querySelectorAll(".duelAnswerBtn").forEach((btn) => {
+    btn.disabled = true;
 
-      btn.disabled = true;
+    const value = String(btn.dataset.answer ?? "").trim();
 
-      const value =
-        String(
-          btn.dataset.answer ??
-          ""
-        ).trim();
+    if (value === String(correct).trim()) {
+      btn.classList.add("correct");
+    }
 
-      if (
-        value ===
-        String(correct).trim()
-      ) {
-        btn.classList.add(
-          "correct"
-        );
-      }
+    if (btn === button && !isCorrect) {
+      btn.classList.add("wrong");
+    }
+  });
 
-      if (
-        btn === button &&
-        !isCorrect
-      ) {
-        btn.classList.add(
-          "wrong"
-        );
-      }
-
-    });
-
-  resolveDuelSide(
-    side,
-    isCorrect,
-    false
-  );
+  resolveDuelSide(side, isCorrect, false);
 }
 
-function resolveDuelSide(
-  side,
-  isCorrect,
-  timedOut
-) {
-
+function resolveDuelSide(side, isCorrect, timedOut) {
   if (duelRound[side].answered) {
     return;
   }
 
-  duelRound[side].answered =
-    true;
+  duelRound[side].answered = true;
 
-  const timeMs =
-    timedOut
-      ? (userTimer || 10) * 1000
-      : Date.now() -
-        duelRound[side].startedAt;
+  const timeMs = timedOut ? (userTimer || 10) * 1000 : Date.now() - duelRound[side].startedAt;
 
-  duelStats[side].totalTimeMs +=
-    timeMs;
+  duelStats[side].totalTimeMs += timeMs;
 
   if (isCorrect) {
     duelStats[side].correct++;
@@ -7335,46 +5389,22 @@ function resolveDuelSide(
    * ko'rsatib qo'yamiz.
    */
   if (timedOut) {
+    const optBox = $(side === "a" ? "duelAAnswers" : "duelBAnswers");
 
-    const optBox =
-      $(
-        side === "a"
-          ? "duelAAnswers"
-          : "duelBAnswers"
-      );
+    optBox?.querySelectorAll(".duelAnswerBtn").forEach((btn) => {
+      btn.disabled = true;
 
-    optBox
-      ?.querySelectorAll(
-        ".duelAnswerBtn"
-      )
-      .forEach(btn => {
+      const value = String(btn.dataset.answer ?? "").trim();
 
-        btn.disabled = true;
-
-        const value =
-          String(
-            btn.dataset.answer ??
-            ""
-          ).trim();
-
-        if (
-          value ===
-          duelRound[side].correct
-        ) {
-          btn.classList.add(
-            "correct"
-          );
-        }
-
-      });
+      if (value === duelRound[side].correct) {
+        btn.classList.add("correct");
+      }
+    });
   }
 
   updateDuelStatsUI();
 
-  setTimeout(
-    () => advanceDuelSide(side),
-    1000
-  );
+  setTimeout(() => advanceDuelSide(side), 1000);
 }
 
 function advanceDuelSide(side) {
@@ -7382,18 +5412,12 @@ function advanceDuelSide(side) {
 
   duelRound[side].index++;
 
-  if (
-    duelRound[side].index >=
-    duelSidePools[side].length
-  ) {
+  if (duelRound[side].index >= duelSidePools[side].length) {
     duelRound[side].finished = true;
     clearInterval(duelRound[side].timer);
     clearDuelSideUI(side);
 
-    if (
-      duelRound.a.finished &&
-      duelRound.b.finished
-    ) {
+    if (duelRound.a.finished && duelRound.b.finished) {
       finishDuel();
     }
 
@@ -7403,10 +5427,7 @@ function advanceDuelSide(side) {
   renderDuelSideRound(side);
 
   if ($("duelRoundNow")) {
-    $("duelRoundNow").textContent = Math.max(
-      duelRound.a.index,
-      duelRound.b.index
-    ) + 1;
+    $("duelRoundNow").textContent = Math.max(duelRound.a.index, duelRound.b.index) + 1;
   }
 }
 
@@ -7419,34 +5440,27 @@ function clearDuelSideUI(side) {
 }
 
 function updateDuelStatsUI() {
-
   if ($("duelACorrect")) {
-    $("duelACorrect").textContent =
-      duelStats.a.correct;
+    $("duelACorrect").textContent = duelStats.a.correct;
   }
 
   if ($("duelAWrong")) {
-    $("duelAWrong").textContent =
-      duelStats.a.wrong;
+    $("duelAWrong").textContent = duelStats.a.wrong;
   }
 
   if ($("duelBCorrect")) {
-    $("duelBCorrect").textContent =
-      duelStats.b.correct;
+    $("duelBCorrect").textContent = duelStats.b.correct;
   }
 
   if ($("duelBWrong")) {
-    $("duelBWrong").textContent =
-      duelStats.b.wrong;
+    $("duelBWrong").textContent = duelStats.b.wrong;
   }
 
   updateDuelProgressBar();
 }
 
 function updateDuelProgressBar() {
-
-  const step =
-    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
+  const step = Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100;
 
   /*
    * Noto'g'ri javob endi ball
@@ -7457,88 +5471,54 @@ function updateDuelProgressBar() {
    * to'g'ri javob SONI bo'yicha
    * ishlaydi (honadagi kabi).
    */
-  const useCountRace =
-    step === 0;
+  const useCountRace = step === 0;
 
-  const scoreA =
-    useCountRace
-      ? duelStats.a.correct
-      : duelStats.a.correct * step;
+  const scoreA = useCountRace ? duelStats.a.correct : duelStats.a.correct * step;
 
-  const scoreB =
-    useCountRace
-      ? duelStats.b.correct
-      : duelStats.b.correct * step;
+  const scoreB = useCountRace ? duelStats.b.correct : duelStats.b.correct * step;
 
-  const diff =
-    scoreA - scoreB;
+  const diff = scoreA - scoreB;
 
   /*
    * 5 ball (yoki 5 ta to'g'ri
    * javob) farqida "yo'l"
    * to'liq to'lgan bo'ladi.
    */
-  const maxDiff =
-    useCountRace
-      ? 5
-      : step * 5;
+  const maxDiff = useCountRace ? 5 : step * 5;
 
-  const ratio =
-    Math.max(
-      -1,
-      Math.min(
-        1,
-        diff / maxDiff
-      )
-    );
+  const ratio = Math.max(-1, Math.min(1, diff / maxDiff));
 
-  const percent =
-    Math.abs(ratio) * 50;
+  const percent = Math.abs(ratio) * 50;
 
-  const fillA =
-    $("duelProgressFillA");
+  const fillA = $("duelProgressFillA");
 
-  const fillB =
-    $("duelProgressFillB");
+  const fillB = $("duelProgressFillB");
 
-  const pctA =
-    ratio > 0
-      ? percent
-      : 0;
+  const pctA = ratio > 0 ? percent : 0;
 
-  const pctB =
-    ratio < 0
-      ? percent
-      : 0;
+  const pctB = ratio < 0 ? percent : 0;
 
   if (fillA) {
-    fillA.style.height =
-      pctA + "%";
-    fillA.style.width =
-      pctA + "%";
+    fillA.style.height = pctA + "%";
+    fillA.style.width = pctA + "%";
   }
 
   if (fillB) {
-    fillB.style.height =
-      pctB + "%";
-    fillB.style.width =
-      pctB + "%";
+    fillB.style.height = pctB + "%";
+    fillB.style.width = pctB + "%";
   }
 }
 
 function finishDuel() {
-
   duelActive = false;
 
   clearInterval(duelRound.a.timer);
   clearInterval(duelRound.b.timer);
 
-  const modal =
-    $("duelModal");
+  const modal = $("duelModal");
 
   if (modal) {
-    modal.style.display =
-      "none";
+    modal.style.display = "none";
   }
 
   /*
@@ -7553,19 +5533,9 @@ function finishDuel() {
   let winnerSide = null;
 
   if (a.correct !== b.correct) {
-    winnerSide =
-      a.correct > b.correct
-        ? "a"
-        : "b";
-  } else if (
-    a.totalTimeMs !==
-    b.totalTimeMs
-  ) {
-    winnerSide =
-      a.totalTimeMs <
-      b.totalTimeMs
-        ? "a"
-        : "b";
+    winnerSide = a.correct > b.correct ? "a" : "b";
+  } else if (a.totalTimeMs !== b.totalTimeMs) {
+    winnerSide = a.totalTimeMs < b.totalTimeMs ? "a" : "b";
   }
 
   /*
@@ -7574,89 +5544,58 @@ function finishDuel() {
    * statistikalar boshqa
    * ekranlar bilan mos bo'lsin.
    */
-  const step =
-    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
+  const step = Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100;
 
-  const teamA =
-    duelPlayers.a;
+  const teamA = duelPlayers.a;
 
-  const teamB =
-    duelPlayers.b;
+  const teamB = duelPlayers.b;
 
   if (teamA) {
     /*
      * Noto'g'ri javoblar endi
      * ball ayirmaydi.
      */
-    teamA.score +=
-      a.correct * step;
+    teamA.score += a.correct * step;
 
-    teamA.correctCount =
-      (teamA.correctCount || 0) +
-      a.correct;
+    teamA.correctCount = (teamA.correctCount || 0) + a.correct;
 
-    teamA.wrongCount =
-      (teamA.wrongCount || 0) +
-      a.wrong;
+    teamA.wrongCount = (teamA.wrongCount || 0) + a.wrong;
 
-    updateTeamScoreUI(
-      teamA
-    );
+    updateTeamScoreUI(teamA);
   }
 
   if (teamB) {
-    teamB.score +=
-      b.correct * step;
+    teamB.score += b.correct * step;
 
-    teamB.correctCount =
-      (teamB.correctCount || 0) +
-      b.correct;
+    teamB.correctCount = (teamB.correctCount || 0) + b.correct;
 
-    teamB.wrongCount =
-      (teamB.wrongCount || 0) +
-      b.wrong;
+    teamB.wrongCount = (teamB.wrongCount || 0) + b.wrong;
 
-    updateTeamScoreUI(
-      teamB
-    );
+    updateTeamScoreUI(teamB);
   }
 
-  showDuelResult(
-    winnerSide,
-    a,
-    b
-  );
+  showDuelResult(winnerSide, a, b);
 }
 
-function showDuelResult(
-  winnerSide,
-  a,
-  b
-) {
-
-  const box =
-    $("duelResultContent");
+function showDuelResult(winnerSide, a, b) {
+  const box = $("duelResultContent");
 
   if (!box) return;
 
-  const nameA =
-    duelPlayers.a?.name || "A";
+  const nameA = duelPlayers.a?.name || "A";
 
-  const nameB =
-    duelPlayers.b?.name || "B";
+  const nameB = duelPlayers.b?.name || "B";
 
-  const secA =
-    (a.totalTimeMs / 1000).toFixed(1);
+  const secA = (a.totalTimeMs / 1000).toFixed(1);
 
-  const secB =
-    (b.totalTimeMs / 1000).toFixed(1);
+  const secB = (b.totalTimeMs / 1000).toFixed(1);
 
   const winnerText =
     winnerSide === "a"
       ? `🏆 ${escapeHtml(nameA)} g‘olib!`
       : winnerSide === "b"
-      ? `🏆 ${escapeHtml(nameB)} g‘olib!`
-      : "🤝 Durrang!";
+        ? `🏆 ${escapeHtml(nameB)} g‘olib!`
+        : "🤝 Durrang!";
 
   box.innerHTML = `
     <div class="duelResultWinner">
@@ -7665,21 +5604,13 @@ function showDuelResult(
 
     <div class="duelResultGrid">
 
-      <div class="duelResultCard${
-        winnerSide === "a"
-          ? " isDuelWinner"
-          : ""
-      }">
+      <div class="duelResultCard${winnerSide === "a" ? " isDuelWinner" : ""}">
         <strong>${escapeHtml(nameA)}</strong>
         <span>✅ ${a.correct} to‘g‘ri &nbsp; ❌ ${a.wrong} xato</span>
         <span>⏱ ${secA} soniya</span>
       </div>
 
-      <div class="duelResultCard${
-        winnerSide === "b"
-          ? " isDuelWinner"
-          : ""
-      }">
+      <div class="duelResultCard${winnerSide === "b" ? " isDuelWinner" : ""}">
         <strong>${escapeHtml(nameB)}</strong>
         <span>✅ ${b.correct} to‘g‘ri &nbsp; ❌ ${b.wrong} xato</span>
         <span>⏱ ${secB} soniya</span>
@@ -7688,33 +5619,26 @@ function showDuelResult(
     </div>
   `;
 
-  const modal =
-    $("duelResultModal");
+  const modal = $("duelResultModal");
 
   if (modal) {
-    modal.style.display =
-      "flex";
+    modal.style.display = "flex";
   }
 
   playWinSound();
 }
 
 function closeDuelResultModal() {
-
-  const modal =
-    $("duelResultModal");
+  const modal = $("duelResultModal");
 
   if (modal) {
-    modal.style.display =
-      "none";
+    modal.style.display = "none";
   }
 }
 
-window.closeDuelResultModal =
-  closeDuelResultModal;
+window.closeDuelResultModal = closeDuelResultModal;
 
 function exitDuel() {
-
   if (guestQuickLaunch) {
     window.location.href = "index.html";
     return;
@@ -7725,28 +5649,21 @@ function exitDuel() {
   clearInterval(duelRound.a.timer);
   clearInterval(duelRound.b.timer);
 
-  const modal =
-    $("duelModal");
+  const modal = $("duelModal");
 
   if (modal) {
-    modal.style.display =
-      "none";
+    modal.style.display = "none";
   }
 }
 
 function startTopicGame(topic) {
-
   if (!topic) return;
 
   if (gameFinalized) return;
 
-  currentUserTopicId =
-    topic.id;
+  currentUserTopicId = topic.id;
 
-  localStorage.setItem(
-    "lastTopicId",
-    topic.id
-  );
+  localStorage.setItem("lastTopicId", topic.id);
 
   /*
    * Tanlangan mavzudagi barcha
@@ -7754,31 +5671,22 @@ function startTopicGame(topic) {
    */
   currentTopicQuestions = [];
 
-  Object.values(
-    topic.questions || {}
-  ).forEach(category => {
-
+  Object.values(topic.questions || {}).forEach((category) => {
     if (!Array.isArray(category)) {
       return;
     }
 
-    category.forEach(item => {
-
+    category.forEach((item) => {
       if (item) {
         currentTopicQuestions.push(item);
       }
-
     });
-
   });
 
   if (!currentTopicQuestions.length) {
-
     hideFlowShield();
 
-    alert(
-      "Bu mavzuda savollar mavjud emas!"
-    );
+    alert("Bu mavzuda savollar mavjud emas!");
 
     return;
   }
@@ -7787,10 +5695,7 @@ function startTopicGame(topic) {
    * Har o'yinda savollar
    * tasodifiy tartibda beriladi.
    */
-  currentTopicQuestions =
-    shuffleArray(
-      currentTopicQuestions
-    );
+  currentTopicQuestions = shuffleArray(currentTopicQuestions);
 
   /*
    * Bonus rejimi (admin panelidan yoqilgan bo'lsa)
@@ -7798,9 +5703,7 @@ function startTopicGame(topic) {
    * qo'yadi — bu ADMIN boshqaradigan yagona bonus
    * manbai.
    */
-  assignRandomBonusQuestions(
-    currentTopicQuestions
-  );
+  assignRandomBonusQuestions(currentTopicQuestions);
 
   /*
    * Streak (ketma-ket to'g'ri javob)
@@ -7816,7 +5719,7 @@ function startTopicGame(topic) {
    */
   soloStats = {
     correct: 0,
-    wrong: 0
+    wrong: 0,
   };
 
   /*
@@ -7828,9 +5731,7 @@ function startTopicGame(topic) {
    * Eski answer-options tizimi
    * uchun questionsni ham yangilaymiz.
    */
-  questions = [
-    currentTopicQuestions
-  ];
+  questions = [currentTopicQuestions];
 
   /*
    * Birinchi savol
@@ -7839,20 +5740,13 @@ function startTopicGame(topic) {
 }
 
 function openTopicQuestion() {
-
-  if (
-    !currentTopicQuestions.length
-  ) {
+  if (!currentTopicQuestions.length) {
     return;
   }
 
-  const item =
-    currentTopicQuestions[
-      currentTopicQuestionIndex
-    ];
+  const item = currentTopicQuestions[currentTopicQuestionIndex];
 
   if (!item) {
-
     declareWinner();
 
     return;
@@ -7866,24 +5760,19 @@ function openTopicQuestion() {
   const progressEl = $("questionProgress");
 
   if (progressEl) {
-    const totalQuestions =
-      currentTopicQuestions.length;
+    const totalQuestions = currentTopicQuestions.length;
 
-    const questionNumber =
-      currentTopicQuestionIndex + 1;
+    const questionNumber = currentTopicQuestionIndex + 1;
 
-    const answeredCount =
-      currentTopicQuestionIndex;
+    const answeredCount = currentTopicQuestionIndex;
 
-    progressEl.textContent =
-      `${questionNumber}-savol / ${totalQuestions} tadan · ✅ Javob berilgan: ${answeredCount}`;
+    progressEl.textContent = `${questionNumber}-savol / ${totalQuestions} tadan · ✅ Javob berilgan: ${answeredCount}`;
   }
 
   /*
    * Ball tizimi saqlanadi.
    */
-  const score =
-    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
+  const score = Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100;
 
   /*
    * Eski openQ modal tizimini
@@ -7891,89 +5780,48 @@ function openTopicQuestion() {
    *
    * Virtual cell kerak emas.
    */
-  openQ(
-    null,
-    item,
-    score
-  );
+  openQ(null, item, score);
 }
 /* ================= QUESTION ENGINE ================= */
 
 function getAllAnswers() {
   const out = [];
 
-  const cats =
-    Array.isArray(questions)
-      ? questions
-      : Object.values(
-          questions || {}
-        );
+  const cats = Array.isArray(questions) ? questions : Object.values(questions || {});
 
-  cats.forEach(
-    cat =>
-      (cat || []).forEach(
-        item => {
-          const a =
-            String(
-              item?.a ??
-              item?.answer ??
-              ""
-            ).trim();
+  cats.forEach((cat) =>
+    (cat || []).forEach((item) => {
+      const a = String(item?.a ?? item?.answer ?? "").trim();
 
-          if (a) {
-            out.push(a);
-          }
-        }
-      )
+      if (a) {
+        out.push(a);
+      }
+    }),
   );
 
-  return [
-    ...new Set(out)
-  ];
+  return [...new Set(out)];
 }
 
 function shuffleArray(arr) {
   const a = [...arr];
 
-  for (
-    let i = a.length - 1;
-    i > 0;
-    i--
-  ) {
-    const j =
-      Math.floor(
-        Math.random() *
-          (i + 1)
-      );
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
 
-    [
-      a[i],
-      a[j]
-    ] = [
-      a[j],
-      a[i]
-    ];
+    [a[i], a[j]] = [a[j], a[i]];
   }
 
   return a;
 }
 
-function buildAnswerOptions(
-  correctAnswer,
-  questionItem
-) {
-
-  const correct =
-    String(
-      correctAnswer ?? ""
-    ).trim();
+function buildAnswerOptions(correctAnswer, questionItem) {
+  const correct = String(correctAnswer ?? "").trim();
 
   if (!correct) {
     return [];
   }
 
-  const correctKey =
-    correct.toLowerCase();
+  const correctKey = correct.toLowerCase();
 
   /*
    * ==========================================
@@ -7981,61 +5829,34 @@ function buildAnswerOptions(
    * ==========================================
    */
 
-  const manualWrong =
-    Array.isArray(
-      questionItem?.wrongAnswers
-    )
-      ? questionItem.wrongAnswers
-          .map(
-            answer =>
-              String(
-                answer ?? ""
-              ).trim()
-          )
-          .filter(Boolean)
-      : [];
-
+  const manualWrong = Array.isArray(questionItem?.wrongAnswers)
+    ? questionItem.wrongAnswers.map((answer) => String(answer ?? "").trim()).filter(Boolean)
+    : [];
 
   const wrongAnswers = [];
-
 
   /*
    * Excel'dan berilgan noto'g'ri
    * javoblarni qo'shamiz
    */
 
-  manualWrong.forEach(
-    answer => {
+  manualWrong.forEach((answer) => {
+    const key = answer.toLowerCase();
 
-      const key =
-        answer.toLowerCase();
-
-      if (!key) {
-        return;
-      }
-
-      if (
-        key === correctKey
-      ) {
-        return;
-      }
-
-      if (
-        wrongAnswers.some(
-          x =>
-            x.toLowerCase() ===
-            key
-        )
-      ) {
-        return;
-      }
-
-      wrongAnswers.push(
-        answer
-      );
+    if (!key) {
+      return;
     }
-  );
 
+    if (key === correctKey) {
+      return;
+    }
+
+    if (wrongAnswers.some((x) => x.toLowerCase() === key)) {
+      return;
+    }
+
+    wrongAnswers.push(answer);
+  });
 
   /*
    * ==========================================
@@ -8045,64 +5866,31 @@ function buildAnswerOptions(
    * ==========================================
    */
 
-  if (
-    wrongAnswers.length < 3
-  ) {
+  if (wrongAnswers.length < 3) {
+    const fallback = getAllAnswers().filter((answer) => {
+      const key = String(answer).trim().toLowerCase();
 
-    const fallback =
-      getAllAnswers()
-        .filter(
-          answer => {
+      if (!key) {
+        return false;
+      }
 
-            const key =
-              String(
-                answer
-              ).trim()
-                .toLowerCase();
+      if (key === correctKey) {
+        return false;
+      }
 
-            if (!key) {
-              return false;
-            }
+      return !wrongAnswers.some((x) => x.toLowerCase() === key);
+    });
 
-            if (
-              key ===
-              correctKey
-            ) {
-              return false;
-            }
+    const shuffled = shuffleArray(fallback);
 
-            return !wrongAnswers.some(
-              x =>
-                x.toLowerCase() ===
-                key
-            );
-          }
-        );
-
-
-    const shuffled =
-      shuffleArray(
-        fallback
-      );
-
-
-    for (
-      const answer
-      of shuffled
-    ) {
-
-      if (
-        wrongAnswers.length >= 3
-      ) {
+    for (const answer of shuffled) {
+      if (wrongAnswers.length >= 3) {
         break;
       }
 
-      wrongAnswers.push(
-        answer
-      );
+      wrongAnswers.push(answer);
     }
   }
-
 
   /*
    * ==========================================
@@ -8110,130 +5898,77 @@ function buildAnswerOptions(
    * ==========================================
    */
 
-  return shuffleArray([
-    correct,
-    ...wrongAnswers.slice(
-      0,
-      3
-    )
-  ]);
+  return shuffleArray([correct, ...wrongAnswers.slice(0, 3)]);
 }
 
 function ensureAnswerOptionsUI() {
-  const modalBox =
-    document.querySelector(
-      "#modal .questionBox"
-    );
+  const modalBox = document.querySelector("#modal .questionBox");
 
   if (!modalBox) return null;
 
-  let container =
-    $("answerOptions");
+  let container = $("answerOptions");
 
   if (!container) {
-    container =
-      document.createElement(
-        "div"
-      );
+    container = document.createElement("div");
 
-    container.id =
-      "answerOptions";
+    container.id = "answerOptions";
 
-    container.className =
-      "answerOptions";
+    container.className = "answerOptions";
 
-    const q =
-      $("qText");
+    const q = $("qText");
 
-    q?.parentNode?.insertBefore(
-      container,
-      q.nextSibling
-    );
+    q?.parentNode?.insertBefore(container, q.nextSibling);
 
     if (!q) {
-      modalBox.appendChild(
-        container
-      );
+      modalBox.appendChild(container);
     }
   }
 
   return container;
 }
 
-function renderAnswerOptions(
-  options,
-  correctAnswer
-) {
-  const box =
-    ensureAnswerOptionsUI();
+function renderAnswerOptions(options, correctAnswer) {
+  const box = ensureAnswerOptionsUI();
 
   if (!box) return;
 
   box.innerHTML = "";
 
-  options.forEach(
-    (answer, i) => {
-      const btn =
-        document.createElement(
-          "button"
-        );
+  options.forEach((answer, i) => {
+    const btn = document.createElement("button");
 
-      btn.type =
-        "button";
+    btn.type = "button";
 
-      btn.className =
-        "answerOption";
+    btn.className = "answerOption";
 
-      btn.dataset.answer =
-        answer;
+    btn.dataset.answer = answer;
 
-      btn.innerHTML = `
+    btn.innerHTML = `
         <span class="answerLetter">
-          ${String.fromCharCode(
-            65 + i
-          )}
+          ${String.fromCharCode(65 + i)}
         </span>
 
         <span class="answerText"></span>
       `;
 
-      btn.querySelector(
-        ".answerText"
-      ).textContent =
-        answer;
+    btn.querySelector(".answerText").textContent = answer;
 
-      btn.onclick =
-        () =>
-          handleAnswerSelection(
-            btn,
-            answer,
-            correctAnswer
-          );
+    btn.onclick = () => handleAnswerSelection(btn, answer, correctAnswer);
 
-      box.appendChild(
-        btn
-      );
-    }
-  );
+    box.appendChild(btn);
+  });
 }
 
 function updateTurnIndicator() {
+  const el = $("questionParticipants");
 
-  const el =
-    $("questionParticipants");
+  const sideBox = $("participantsSideBox");
 
-  const sideBox =
-    $("participantsSideBox");
-
-  const wrap =
-    document.querySelector(
-      ".questionModalWrap"
-    );
+  const wrap = document.querySelector(".questionModalWrap");
 
   if (!el) return;
 
   if (!teamsData.length) {
-
     /*
      * Ishtirokchi tanlanmagan
      * bo'lsa (solo rejim),
@@ -8243,13 +5978,10 @@ function updateTurnIndicator() {
      * egallaydi.
      */
     if (sideBox) {
-      sideBox.style.display =
-        "none";
+      sideBox.style.display = "none";
     }
 
-    wrap?.classList.add(
-      "soloMode"
-    );
+    wrap?.classList.add("soloMode");
 
     el.innerHTML = "";
 
@@ -8257,13 +5989,10 @@ function updateTurnIndicator() {
   }
 
   if (sideBox) {
-    sideBox.style.display =
-      "";
+    sideBox.style.display = "";
   }
 
-  wrap?.classList.remove(
-    "soloMode"
-  );
+  wrap?.classList.remove("soloMode");
 
   /*
    * Ballik hisob o'chirilgan (pointStep === 0)
@@ -8272,8 +6001,7 @@ function updateTurnIndicator() {
    * aks holda hech qachon o'zgarmagan "0"
    * ko'rinib qolaveradi.
    */
-  const scoringOff =
-    Number(pointStep) === 0;
+  const scoringOff = Number(pointStep) === 0;
 
   /*
    * Ball (yoki ballik o'chirilgan bo'lsa —
@@ -8283,43 +6011,22 @@ function updateTurnIndicator() {
    * ishtirokchi alohida belgi
    * bilan ajratiladi.
    */
-  const sorted =
-    [...teamsData].sort(
-      (a, b) =>
-        scoringOff
-          ? (b.correctCount || 0) -
-            (a.correctCount || 0)
-          : (b.score || 0) -
-            (a.score || 0)
-    );
+  const sorted = [...teamsData].sort((a, b) =>
+    scoringOff ? (b.correctCount || 0) - (a.correctCount || 0) : (b.score || 0) - (a.score || 0),
+  );
 
   const cardsHtml = sorted
-    .map(team => {
+    .map((team) => {
+      const isCurrent = teamsData[currentTurnIndex] === team;
 
-      const isCurrent =
-        teamsData[
-          currentTurnIndex
-        ] === team;
-
-      const p =
-        findParticipant(
-          team.participantId
-        );
+      const p = findParticipant(team.participantId);
 
       return `
-        <div class="qParticipantCard${
-          isCurrent
-            ? " isCurrentTurn"
-            : ""
-        }">
+        <div class="qParticipantCard${isCurrent ? " isCurrentTurn" : ""}">
 
           <div class="qParticipantAvatar">
             <img
-              src="${
-                p?.image ||
-                team.image ||
-                avatarData(team.name)
-              }"
+              src="${p?.image || team.image || avatarData(team.name)}"
               alt=""
             >
           </div>
@@ -8340,76 +6047,17 @@ function updateTurnIndicator() {
 
           </div>
 
-          ${
-            isCurrent
-              ? `<span class="turnBadge">NAVBAT</span>`
-              : ""
-          }
+          ${isCurrent ? `<span class="turnBadge">NAVBAT</span>` : ""}
 
         </div>
       `;
-
     })
     .join("");
 
-  el.innerHTML =
-    cardsHtml;
+  el.innerHTML = cardsHtml;
 }
 
-function getNextUnusedCell() {
-  return [
-    ...document.querySelectorAll(
-      "#board .cell"
-    )
-  ].find(
-    c =>
-      !c.classList.contains(
-        "used"
-      )
-  ) || null;
-}
-
-function getCellQuestion(cell) {
-  const cells = [
-    ...document.querySelectorAll(
-      "#board .cell"
-    )
-  ];
-
-  const index =
-    cells.indexOf(cell);
-
-  if (index < 0) {
-    return null;
-  }
-
-  const row =
-    Math.floor(
-      index / 5
-    );
-
-  const col =
-    index % 5;
-
-  const cats =
-    Array.isArray(questions)
-      ? questions
-      : Object.values(
-          questions || {}
-        );
-
-  return (
-    cats[col]?.[row] ||
-    null
-  );
-}
-
-function openQ(
-  cell,
-  item,
-  score
-) {
-
+function openQ(cell, item, score) {
   if (!item) {
     return;
   }
@@ -8433,27 +6081,17 @@ function openQ(
    */
   currentCell = null;
 
-  currentValue =
-    Number(score) || 0;
+  currentValue = Number(score) || 0;
 
-  currentQuestionItem =
-    item;
+  currentQuestionItem = item;
 
-  currentQuestionMultiplier =
-    1;
+  currentQuestionMultiplier = 1;
 
-  currentQuestionActive =
-    true;
+  currentQuestionActive = true;
 
-  gameInProgress =
-    true;
+  gameInProgress = true;
 
-  let questionText =
-    String(
-      item.q ??
-      item.question ??
-      ""
-    );
+  let questionText = String(item.q ?? item.question ?? "");
 
   /*
    * ESKI TIZIM O'CHIRILDI: ilgari savol matni
@@ -8469,37 +6107,21 @@ function openQ(
    * ko'rinishni tozalash uchun matndan olib
    * tashlanadi.
    */
-  questionText =
-    questionText.replace(
-      /^\s*\d+x\s*/i,
-      ""
-    );
+  questionText = questionText.replace(/^\s*\d+x\s*/i, "");
 
-  if (
-    activeBonusQuestions.has(item)
-  ) {
-
+  if (activeBonusQuestions.has(item)) {
     /*
      * Matnda qo'lda "Nx" yozilmagan,
      * lekin "Tasodifiy bonus savollar"
      * rejimi shu savolni bonus qilib
      * belgilagan.
      */
-    currentQuestionMultiplier =
-      activeBonusQuestions.get(item);
+    currentQuestionMultiplier = activeBonusQuestions.get(item);
 
-    showBonusEffect(
-      currentValue,
-      currentQuestionMultiplier
-    );
+    showBonusEffect(currentValue, currentQuestionMultiplier);
 
     playBonusSound();
-
-  } else if (
-    streakBonusEnabled &&
-    nextQuestionForcedBonus
-  ) {
-
+  } else if (streakBonusEnabled && nextQuestionForcedBonus) {
     /*
      * Oldingi 3 ta ketma-ket to'g'ri
      * javob tufayli, shu savol
@@ -8509,53 +6131,30 @@ function openQ(
 
     nextQuestionForcedBonus = false;
 
-    showBonusEffect(
-      currentValue,
-      currentQuestionMultiplier
-    );
+    showBonusEffect(currentValue, currentQuestionMultiplier);
 
     playBonusSound();
   }
 
   if ($("qText")) {
-
-    $("qText").textContent =
-      questionText;
-
+    $("qText").textContent = questionText;
   }
 
-  $("aText")?.classList.add(
-    "hidden"
-  );
+  $("aText")?.classList.add("hidden");
 
-  renderAnswerOptions(
-    buildAnswerOptions(
-      item.a ??
-      item.answer
-    ),
-    item.a ??
-    item.answer
-  );
+  renderAnswerOptions(buildAnswerOptions(item.a ?? item.answer), item.a ?? item.answer);
 
   updateTurnIndicator();
 
-  const modal =
-    $("modal");
+  const modal = $("modal");
 
   if (modal) {
+    modal.style.display = "flex";
 
-    modal.style.display =
-      "flex";
-
-    modal.classList.add(
-      "show"
-    );
-
+    modal.classList.add("show");
   }
 
-  clickSound
-    ?.play()
-    .catch(() => {});
+  clickSound?.play().catch(() => {});
 
   startTimer();
 }
@@ -8563,71 +6162,41 @@ function openQ(
 function startTimer() {
   clearInterval(timer);
 
-  timeLeft =
-    Math.max(
-      1,
-      Number(userTimer) || 10
-    );
+  timeLeft = Math.max(1, Number(userTimer) || 10);
 
-  const el =
-    $("timer");
+  const el = $("timer");
 
   if (el) {
-    el.textContent =
-      timeLeft;
+    el.textContent = timeLeft;
   }
 
-  timer =
-    setInterval(
-      () => {
-        timeLeft--;
+  timer = setInterval(() => {
+    timeLeft--;
 
-        if (el) {
-          el.textContent =
-            timeLeft;
+    if (el) {
+      el.textContent = timeLeft;
 
-          el.classList.remove(
-            "timer-animate"
-          );
+      el.classList.remove("timer-animate");
 
-          void el.offsetWidth;
+      void el.offsetWidth;
 
-          el.classList.add(
-            "timer-animate"
-          );
+      el.classList.add("timer-animate");
 
-          if (
-            timeLeft <= 3 &&
-            timeLeft > 0
-          ) {
-            el.classList.add(
-              "timer-last"
-            );
-          }
-        }
+      if (timeLeft <= 3 && timeLeft > 0) {
+        el.classList.add("timer-last");
+      }
+    }
 
-        if (
-          timeLeft <= 0
-        ) {
-          clearInterval(
-            timer
-          );
+    if (timeLeft <= 0) {
+      clearInterval(timer);
 
-          handleTimeExpired();
-        }
-      },
-      1000
-    );
+      handleTimeExpired();
+    }
+  }, 1000);
 }
 
-function handleAnswerSelection(
-  button,
-  selectedAnswer,
-  correctAnswer
-) {
-  if (
-    !currentQuestionActive
-  ) {
+function handleAnswerSelection(button, selectedAnswer, correctAnswer) {
+  if (!currentQuestionActive) {
     return;
   }
 
@@ -8638,56 +6207,27 @@ function handleAnswerSelection(
    * bo'lsa ham (solo rejim)
    * javob ishlashi kerak.
    */
-  const team =
-    teamsData[
-      currentTurnIndex
-    ] || null;
+  const team = teamsData[currentTurnIndex] || null;
 
-  const selected =
-    String(
-      selectedAnswer ?? ""
-    ).trim();
+  const selected = String(selectedAnswer ?? "").trim();
 
-  const correct =
-    String(
-      correctAnswer ?? ""
-    ).trim();
+  const correct = String(correctAnswer ?? "").trim();
 
-  const isCorrect =
-    selected === correct;
+  const isCorrect = selected === correct;
 
-  document
-    .querySelectorAll(
-      "#answerOptions .answerOption"
-    )
-    .forEach(btn => {
-      btn.disabled =
-        true;
+  document.querySelectorAll("#answerOptions .answerOption").forEach((btn) => {
+    btn.disabled = true;
 
-      const value =
-        String(
-          btn.dataset.answer ??
-          ""
-        ).trim();
+    const value = String(btn.dataset.answer ?? "").trim();
 
-      if (
-        value ===
-        correct
-      ) {
-        btn.classList.add(
-          "correct"
-        );
-      }
+    if (value === correct) {
+      btn.classList.add("correct");
+    }
 
-      if (
-        btn === button &&
-        !isCorrect
-      ) {
-        btn.classList.add(
-          "wrong"
-        );
-      }
-    });
+    if (btn === button && !isCorrect) {
+      btn.classList.add("wrong");
+    }
+  });
 
   /*
    * Noto'g'ri javob uchun ball
@@ -8696,11 +6236,7 @@ function handleAnswerSelection(
    * to'g'ri soni statistikada
    * alohida hisoblanadi.
    */
-  const points =
-    isCorrect
-      ? currentValue *
-        currentQuestionMultiplier
-      : 0;
+  const points = isCorrect ? currentValue * currentQuestionMultiplier : 0;
 
   /*
    * KETMA-KET TO'G'RI JAVOB (STREAK)
@@ -8709,204 +6245,120 @@ function handleAnswerSelection(
    * oqimi bo'yicha kuzatiladi.
    */
   if (streakBonusEnabled) {
-
     if (isCorrect) {
-
       consecutiveCorrectStreak++;
 
       if (consecutiveCorrectStreak >= 3) {
         nextQuestionForcedBonus = true;
         consecutiveCorrectStreak = 0;
       }
-
     } else {
       consecutiveCorrectStreak = 0;
     }
-
   }
 
   if (team) {
-
-    team.score +=
-      points;
+    team.score += points;
 
     if (isCorrect) {
-      team.correctCount =
-        (team.correctCount || 0) + 1;
+      team.correctCount = (team.correctCount || 0) + 1;
     } else {
-      team.wrongCount =
-        (team.wrongCount || 0) + 1;
+      team.wrongCount = (team.wrongCount || 0) + 1;
     }
 
-    updateTeamScoreUI(
-      team
-    );
-
+    updateTeamScoreUI(team);
   } else {
-
     if (isCorrect) {
       soloStats.correct++;
     } else {
       soloStats.wrong++;
     }
-
   }
 
-  showAnswerResult(
-    isCorrect,
-    points,
-    team
-  );
+  showAnswerResult(isCorrect, points, team);
 
-  setTimeout(
-    () =>
-      finishCurrentQuestionAndAdvance(),
-    2000
-  );
+  setTimeout(() => finishCurrentQuestionAndAdvance(), 2000);
 }
 
 function handleTimeExpired() {
-    if (
-    !currentQuestionActive
-  ) {
+  if (!currentQuestionActive) {
     return;
   }
 
-  const team =
-    teamsData[
-      currentTurnIndex
-    ] || null;
+  const team = teamsData[currentTurnIndex] || null;
 
-  const correct =
-    String(
-      currentQuestionItem?.a ??
-      currentQuestionItem?.answer ??
-      ""
-    ).trim();
+  const correct = String(currentQuestionItem?.a ?? currentQuestionItem?.answer ?? "").trim();
 
-  document
-    .querySelectorAll(
-      "#answerOptions .answerOption"
-    )
-    .forEach(btn => {
-      btn.disabled =
-        true;
+  document.querySelectorAll("#answerOptions .answerOption").forEach((btn) => {
+    btn.disabled = true;
 
-      if (
-        String(
-          btn.dataset.answer ??
-          ""
-        ).trim() ===
-        correct
-      ) {
-        btn.classList.add(
-          "correct"
-        );
-      }
-    });
+    if (String(btn.dataset.answer ?? "").trim() === correct) {
+      btn.classList.add("correct");
+    }
+  });
 
   if (streakBonusEnabled) {
     consecutiveCorrectStreak = 0;
   }
 
   if (team) {
-
     /*
      * Vaqt tugashi ham "xato javob"
      * bilan bir xil — ball
      * AYIRILMAYDI, faqat xato
      * hisoblanadi.
      */
-    team.wrongCount =
-      (team.wrongCount || 0) + 1;
+    team.wrongCount = (team.wrongCount || 0) + 1;
 
-    updateTeamScoreUI(
-      team
-    );
-
+    updateTeamScoreUI(team);
   } else {
-
     soloStats.wrong++;
-
   }
 
-  const a =
-    $("aText");
+  const a = $("aText");
 
   if (a) {
-    a.textContent =
-      "⏰ Vaqt tugadi! Ball berilmadi";
+    a.textContent = "⏰ Vaqt tugadi! Ball berilmadi";
 
-    a.classList.remove(
-      "hidden"
-    );
+    a.classList.remove("hidden");
   }
 
-  setTimeout(
-    () =>
-      finishCurrentQuestionAndAdvance(),
-    2000
-  );
+  setTimeout(() => finishCurrentQuestionAndAdvance(), 2000);
 }
 
-function showAnswerResult(
-  isCorrect,
-  points,
-  team
-) {
-  const a =
-    $("aText");
+function showAnswerResult(isCorrect, points, team) {
+  const a = $("aText");
 
   if (!a) return;
 
-  a.textContent =
-    team
-      ? isCorrect
-        ? `✅ To‘g‘ri! ${
-            points > 0 ? "+" + points + " ball — " : ""
-          }${team.name}`
-        : `❌ Xato! Ball berilmadi — ${team.name}`
-      : `${
-          isCorrect
-            ? "✅ To‘g‘ri!"
-            : "❌ Xato!"
-        }`;
+  a.textContent = team
+    ? isCorrect
+      ? `✅ To‘g‘ri! ${points > 0 ? "+" + points + " ball — " : ""}${team.name}`
+      : `❌ Xato! Ball berilmadi — ${team.name}`
+    : `${isCorrect ? "✅ To‘g‘ri!" : "❌ Xato!"}`;
 
-  a.classList.remove(
-    "hidden"
-  );
+  a.classList.remove("hidden");
 }
 
 function finishCurrentQuestionAndAdvance() {
-
   if (!currentQuestionActive) {
     return;
   }
 
   clearInterval(timer);
 
-  currentQuestionActive =
-    false;
+  currentQuestionActive = false;
 
-  currentQuestionItem =
-    null;
+  currentQuestionItem = null;
 
-  currentCell =
-    null;
+  currentCell = null;
 
-  currentQuestionMultiplier =
-    1;
+  currentQuestionMultiplier = 1;
 
   /*
    * Keyingi ishtirokchi
    */
-  currentTurnIndex =
-    teamsData.length
-      ? (
-          currentTurnIndex + 1
-        ) %
-        teamsData.length
-      : 0;
+  currentTurnIndex = teamsData.length ? (currentTurnIndex + 1) % teamsData.length : 0;
 
   /*
    * Keyingi savol
@@ -8916,11 +6368,7 @@ function finishCurrentQuestionAndAdvance() {
   /*
    * Barcha savollar tugagan bo‘lsa
    */
-  if (
-    currentTopicQuestionIndex >=
-    currentTopicQuestions.length
-  ) {
-
+  if (currentTopicQuestionIndex >= currentTopicQuestions.length) {
     closeModal(false);
 
     declareWinner();
@@ -8934,77 +6382,31 @@ function finishCurrentQuestionAndAdvance() {
   openTopicQuestion();
 }
 
-function allQuestionsUsed() {
-
-  return (
-    currentTopicQuestions.length > 0 &&
-    currentTopicQuestionIndex >=
-      currentTopicQuestions.length
-  );
-
-}
-
-function finishQuestionRound() {
-  finishCurrentQuestionAndAdvance();
-}
-
-function moveToNextParticipant() {
-  finishCurrentQuestionAndAdvance();
-}
-
-function prepareNextParticipantTurn() {
-  finishCurrentQuestionAndAdvance();
-}
-
 function showAnswer() {
   clearInterval(timer);
 
-  const correct =
-    String(
-      currentQuestionItem?.a ??
-      currentQuestionItem?.answer ??
-      ""
-    ).trim();
+  const correct = String(currentQuestionItem?.a ?? currentQuestionItem?.answer ?? "").trim();
 
-  document
-    .querySelectorAll(
-      "#answerOptions .answerOption"
-    )
-    .forEach(btn => {
-      btn.disabled =
-        true;
+  document.querySelectorAll("#answerOptions .answerOption").forEach((btn) => {
+    btn.disabled = true;
 
-      if (
-        String(
-          btn.dataset.answer ??
-          ""
-        ).trim() ===
-        correct
-      ) {
-        btn.classList.add(
-          "correct"
-        );
-      }
-    });
+    if (String(btn.dataset.answer ?? "").trim() === correct) {
+      btn.classList.add("correct");
+    }
+  });
 
-  const a =
-    $("aText");
+  const a = $("aText");
 
   if (a) {
-    a.textContent =
-      `💡 To‘g‘ri javob: ${correct}`;
+    a.textContent = `💡 To‘g‘ri javob: ${correct}`;
 
-    a.classList.remove(
-      "hidden"
-    );
+    a.classList.remove("hidden");
   }
 }
 
-window.showAnswer =
-  showAnswer;
+window.showAnswer = showAnswer;
 
-window.handleTimeExpired =
-  handleTimeExpired;
+window.handleTimeExpired = handleTimeExpired;
 
 /* =========================================================
    CLOSE / PAUSE QUESTION
@@ -9013,7 +6415,6 @@ window.handleTimeExpired =
 ========================================================= */
 
 function closeModal(userInitiated = true) {
-
   /*
    * MUHIM TUZATISH: bu funksiya ikki xil holatda
    * chaqiriladi —
@@ -9065,96 +6466,44 @@ function closeModal(userInitiated = true) {
 
   console.log("⏸ Savol yopildi — o'yin pauzada.");
 }
-function showBonusEffect(
-  points,
-  multiplier
-) {
-  const el =
-    $("bonusEffect");
+function showBonusEffect(points, multiplier) {
+  const el = $("bonusEffect");
 
   if (!el) return;
 
-  el.textContent =
-    `🔥 ${multiplier}X BONUS (${points * multiplier}) 🔥`;
+  el.textContent = `🔥 ${multiplier}X BONUS (${points * multiplier}) 🔥`;
 
-  el.classList.remove(
-    "hidden"
-  );
+  el.classList.remove("hidden");
 
-  setTimeout(
-    () =>
-      el.classList.add(
-        "hidden"
-      ),
-    1500
-  );
+  setTimeout(() => el.classList.add("hidden"), 1500);
 }
 
 function playBonusSound() {
-  const s =
-    $("bonusSound");
+  const s = $("bonusSound");
 
-  s?.play().catch(
-    () => {}
-  );
+  s?.play().catch(() => {});
 }
 
 /* ================= WINNER / STATS / FIREBASE ================= */
 
-async function updateParticipantsStats(
-  sortedTeams
-) {
-  const played =
-    new Set(
-      sortedTeams
-        .map(
-          t =>
-            String(
-              t.participantId
-            )
-        )
-        .filter(Boolean)
-    );
+async function updateParticipantsStats(sortedTeams) {
+  const played = new Set(sortedTeams.map((t) => String(t.participantId)).filter(Boolean));
 
-  const winnerId =
-    sortedTeams[0]
-      ?.participantId;
+  const winnerId = sortedTeams[0]?.participantId;
 
-  participants =
-    participants.map(
-      p => {
-        if (
-          !played.has(
-            String(p.id)
-          )
-        ) {
-          return p;
-        }
+  participants = participants.map((p) => {
+    if (!played.has(String(p.id))) {
+      return p;
+    }
 
-        return {
-          ...p,
+    return {
+      ...p,
 
-          games:
-            (Number(
-              p.games
-            ) || 0) + 1,
+      games: (Number(p.games) || 0) + 1,
 
-          wins:
-            String(p.id) ===
-            String(winnerId)
-              ? (
-                  Number(
-                    p.wins
-                  ) || 0
-                ) + 1
-              : (
-                  Number(
-                    p.wins
-                  ) || 0
-                )
-        };
-      }
-    );
+      wins: String(p.id) === String(winnerId) ? (Number(p.wins) || 0) + 1 : Number(p.wins) || 0,
+    };
+  });
 
   await saveParticipants();
 
@@ -9166,11 +6515,9 @@ async function declareWinner() {
     return;
   }
 
-  gameFinalized =
-    true;
+  gameFinalized = true;
 
-  gameInProgress =
-    false;
+  gameInProgress = false;
 
   clearInterval(timer);
 
@@ -9178,17 +6525,12 @@ async function declareWinner() {
    * ISHTIROKCHISIZ (SOLO) YAKUN
    */
   if (!teamsData.length) {
-
     showSoloResultModal();
 
     return;
   }
 
-  const sorted =
-    [...teamsData].sort(
-      (a, b) =>
-        b.score - a.score
-    );
+  const sorted = [...teamsData].sort((a, b) => b.score - a.score);
 
   /*
    * O'yin tarixi butunlay olib
@@ -9200,46 +6542,26 @@ async function declareWinner() {
    * shu yerda yangilanadi.
    */
   try {
-    await updateParticipantsStats(
-      sorted
-    );
+    await updateParticipantsStats(sorted);
   } catch (e) {
-    console.error(
-      "Participant stats update error:",
-      e
-    );
+    console.error("Participant stats update error:", e);
   }
 
-  showWinnerModal(
-    sorted
-  );
+  showWinnerModal(sorted);
 }
 
 function showSoloResultModal() {
+  const modal = $("winnerModal");
 
-  const modal =
-    $("winnerModal");
+  const text = $("winnerText");
 
-  const text =
-    $("winnerText");
-
-  const rest =
-    $("restWinners");
+  const rest = $("restWinners");
 
   if (!modal) return;
 
-  const total =
-    soloStats.correct +
-    soloStats.wrong;
+  const total = soloStats.correct + soloStats.wrong;
 
-  const percent =
-    total
-      ? Math.round(
-          (soloStats.correct /
-            total) *
-            100
-        )
-      : 0;
+  const percent = total ? Math.round((soloStats.correct / total) * 100) : 0;
 
   text.innerHTML = `
     <div class="winnerHero soloHero">
@@ -9259,90 +6581,63 @@ function showSoloResultModal() {
 
   rest.innerHTML = "";
 
-  modal.style.display =
-    "flex";
+  modal.style.display = "flex";
 
   playWinSound();
   launchConfetti();
 
-  clearTimeout(
-    winnerTimer
-  );
+  clearTimeout(winnerTimer);
 
-  winnerTimer =
-    setTimeout(
-      () => {
-        modal.style.display =
-          "none";
+  winnerTimer = setTimeout(() => {
+    modal.style.display = "none";
 
-        stopConfetti();
-        resetBoardOnly();
+    stopConfetti();
+    resetBoardOnly();
 
-        /*
-         * Mehmon (guestQuickLaunch) uchun asosiy
-         * "board" umuman ko'rsatilmaydi — shu sabab
-         * o'yin tugagach ularga keyingi mavzuni
-         * tanlash uchun ro'yxat DARHOL qayta
-         * ochilishi kerak, aks holda ekran bo'sh
-         * qolib, faqat sahifani yangilagandagina
-         * ro'yxat chiqardi.
-         *
-         * Ro'yxatdan o'tgan foydalanuvchi index.html'dagi
-         * "O'yin boshlash" orqali (?liveStart=play) kelgan
-         * bo'lsa ham xuddi shu "guestQuickLaunchMode"
-         * klassi body'ga qo'shilgan bo'ladi (board bir
-         * zum yalang'och ko'rinmasligi uchun) — lekin bu
-         * klass o'yin tugagach hech qachon olib
-         * tashlanmagani sabab, board (savol kartalari)
-         * doim bo'sh/ko'rinmas bo'lib qolar edi. Endi
-         * bunday foydalanuvchi uchun klass shu yerda
-         * olib tashlanadi, va board qaytadan ko'rinadi.
-         */
-        if (guestQuickLaunch) {
-          openRoomTopicPicker();
-        } else {
-          document.body.classList.remove(
-            "guestQuickLaunchMode"
-          );
-        }
-      },
-      12000
-    );
+    /*
+     * Mehmon (guestQuickLaunch) uchun asosiy
+     * "board" umuman ko'rsatilmaydi — shu sabab
+     * o'yin tugagach ularga keyingi mavzuni
+     * tanlash uchun ro'yxat DARHOL qayta
+     * ochilishi kerak, aks holda ekran bo'sh
+     * qolib, faqat sahifani yangilagandagina
+     * ro'yxat chiqardi.
+     *
+     * Ro'yxatdan o'tgan foydalanuvchi index.html'dagi
+     * "O'yin boshlash" orqali (?liveStart=play) kelgan
+     * bo'lsa ham xuddi shu "guestQuickLaunchMode"
+     * klassi body'ga qo'shilgan bo'ladi (board bir
+     * zum yalang'och ko'rinmasligi uchun) — lekin bu
+     * klass o'yin tugagach hech qachon olib
+     * tashlanmagani sabab, board (savol kartalari)
+     * doim bo'sh/ko'rinmas bo'lib qolar edi. Endi
+     * bunday foydalanuvchi uchun klass shu yerda
+     * olib tashlanadi, va board qaytadan ko'rinadi.
+     */
+    if (guestQuickLaunch) {
+      openRoomTopicPicker();
+    } else {
+      document.body.classList.remove("guestQuickLaunchMode");
+    }
+  }, 12000);
 }
 
-function showWinnerModal(
-  sorted
-) {
-  const modal =
-    $("winnerModal");
+function showWinnerModal(sorted) {
+  const modal = $("winnerModal");
 
-  const text =
-    $("winnerText");
+  const text = $("winnerText");
 
-  const rest =
-    $("restWinners");
+  const rest = $("restWinners");
 
-  if (
-    !modal ||
-    !sorted.length
-  ) {
+  if (!modal || !sorted.length) {
     return;
   }
 
-  const winner =
-    sorted[0];
+  const winner = sorted[0];
 
-  const p =
-    findParticipant(
-      winner.participantId
-    );
+  const p = findParticipant(winner.participantId);
 
-  const img =
-    p?.image ||
-    winner.image ||
-    avatarData(
-      winner.name
-    );
+  const img = p?.image || winner.image || avatarData(winner.name);
 
   text.innerHTML = `
     <div class="winnerHero">
@@ -9358,9 +6653,7 @@ function showWinnerModal(
         </div>
 
         <div>
-          ${escapeHtml(
-            winner.name
-          )}
+          ${escapeHtml(winner.name)}
         </div>
 
         <small>
@@ -9374,37 +6667,24 @@ function showWinnerModal(
     </div>
   `;
 
-  rest.innerHTML =
-    sorted
-      .slice(1)
-      .map(
-        (t, i) => {
-          const tp =
-            findParticipant(
-              t.participantId
-            );
+  rest.innerHTML = sorted
+    .slice(1)
+    .map((t, i) => {
+      const tp = findParticipant(t.participantId);
 
-          return `
+      return `
             <div class="winnerRow">
               <span>
                 #${i + 2}
               </span>
 
               <img
-                src="${
-                  tp?.image ||
-                  t.image ||
-                  avatarData(
-                    t.name
-                  )
-                }"
+                src="${tp?.image || t.image || avatarData(t.name)}"
                 alt=""
               >
 
               <strong>
-                ${escapeHtml(
-                  t.name
-                )}
+                ${escapeHtml(t.name)}
               </strong>
 
               <b>
@@ -9416,167 +6696,100 @@ function showWinnerModal(
               </span>
             </div>
           `;
-        }
-      )
-      .join("");
+    })
+    .join("");
 
-  modal.style.display =
-    "flex";
+  modal.style.display = "flex";
 
   playWinSound();
   launchConfetti();
 
-  clearTimeout(
-    winnerTimer
-  );
+  clearTimeout(winnerTimer);
 
-  winnerTimer =
-    setTimeout(
-      () => {
-        modal.style.display =
-          "none";
+  winnerTimer = setTimeout(() => {
+    modal.style.display = "none";
 
-        stopConfetti();
-        resetBoardOnly();
+    stopConfetti();
+    resetBoardOnly();
 
-        if (guestQuickLaunch) {
-          openRoomTopicPicker();
-        } else {
-          document.body.classList.remove(
-            "guestQuickLaunchMode"
-          );
-        }
-      },
-      12000
-    );
+    if (guestQuickLaunch) {
+      openRoomTopicPicker();
+    } else {
+      document.body.classList.remove("guestQuickLaunchMode");
+    }
+  }, 12000);
 }
 
 function playWinSound() {
-  winnerSound
-    ?.play()
-    .catch(
-      () => {}
-    );
+  winnerSound?.play().catch(() => {});
 }
 
 function launchConfetti() {
-  const canvas =
-    $("confetti");
+  const canvas = $("confetti");
 
   if (!canvas) return;
 
   stopConfetti();
 
-  canvas.width =
-    innerWidth;
+  canvas.width = innerWidth;
 
-  canvas.height =
-    innerHeight;
+  canvas.height = innerHeight;
 
-  const ctx =
-    canvas.getContext(
-      "2d"
-    );
+  const ctx = canvas.getContext("2d");
 
-  const ps =
-    Array.from(
-      {
-        length: 140
-      },
-      () => ({
-        x:
-          Math.random() *
-          canvas.width,
+  const ps = Array.from(
+    {
+      length: 140,
+    },
+    () => ({
+      x: Math.random() * canvas.width,
 
-        y:
-          -Math.random() *
-          canvas.height,
+      y: -Math.random() * canvas.height,
 
-        r:
-          2 +
-          Math.random() *
-            5,
+      r: 2 + Math.random() * 5,
 
-        v:
-          2 +
-          Math.random() *
-            4,
+      v: 2 + Math.random() * 4,
 
-        h:
-          Math.random() *
-          360
-      })
-    );
+      h: Math.random() * 360,
+    }),
+  );
 
   const draw = () => {
-    ctx.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ps.forEach(
-      p => {
-        ctx.fillStyle =
-          `hsl(${p.h},95%,60%)`;
+    ps.forEach((p) => {
+      ctx.fillStyle = `hsl(${p.h},95%,60%)`;
 
-        ctx.fillRect(
-          p.x,
-          p.y,
-          p.r,
-          p.r * 2
-        );
+      ctx.fillRect(p.x, p.y, p.r, p.r * 2);
 
-        p.y += p.v;
+      p.y += p.v;
 
-        if (
-          p.y >
-          canvas.height
-        ) {
-          p.y = -10;
-        }
+      if (p.y > canvas.height) {
+        p.y = -10;
       }
-    );
+    });
 
-    confettiFrame =
-      requestAnimationFrame(
-        draw
-      );
+    confettiFrame = requestAnimationFrame(draw);
   };
 
   draw();
 }
 
 function stopConfetti() {
-  if (
-    confettiFrame
-  ) {
-    cancelAnimationFrame(
-      confettiFrame
-    );
+  if (confettiFrame) {
+    cancelAnimationFrame(confettiFrame);
   }
 
-  confettiFrame =
-    null;
+  confettiFrame = null;
 
-  const c =
-    $("confetti");
+  const c = $("confetti");
 
-  c
-    ?.getContext("2d")
-    ?.clearRect(
-      0,
-      0,
-      c.width,
-      c.height
-    );
+  c?.getContext("2d")?.clearRect(0, 0, c.width, c.height);
 }
 
 /* ================= RESET / SHUFFLE ================= */
 
 function resetBoardOnly() {
-
   clearInterval(timer);
 
   currentTopicQuestionIndex = 0;
@@ -9591,17 +6804,15 @@ function resetBoardOnly() {
 
   currentTurnIndex = 0;
 
-  teamsData.forEach(
-    t => {
-      t.score = 0;
-      t.correctCount = 0;
-      t.wrongCount = 0;
-    }
-  );
+  teamsData.forEach((t) => {
+    t.score = 0;
+    t.correctCount = 0;
+    t.wrongCount = 0;
+  });
 
   soloStats = {
     correct: 0,
-    wrong: 0
+    wrong: 0,
   };
 
   /*
@@ -9609,41 +6820,24 @@ function resetBoardOnly() {
    * savollarni qayta tayyorlaymiz
    */
   if (currentUserTopicId) {
-
-    const topic =
-      userTopics.find(
-        t =>
-          t.id ===
-          currentUserTopicId
-      );
+    const topic = userTopics.find((t) => t.id === currentUserTopicId);
 
     if (topic) {
-
       currentTopicQuestions = [];
 
-      Object.values(
-        topic.questions || {}
-      ).forEach(category => {
-
+      Object.values(topic.questions || {}).forEach((category) => {
         if (!Array.isArray(category)) {
           return;
         }
 
-        category.forEach(item => {
-
+        category.forEach((item) => {
           if (item) {
-            currentTopicQuestions.push(
-              item
-            );
+            currentTopicQuestions.push(item);
           }
-
         });
-
       });
 
-      questions = [
-        currentTopicQuestions
-      ];
+      questions = [currentTopicQuestions];
     }
   }
 
@@ -9652,26 +6846,16 @@ function resetBoardOnly() {
   renderBoard();
 }
 
-window.resetBoardOnly =
-  resetBoardOnly;
+window.resetBoardOnly = resetBoardOnly;
 
 async function shuffleTopicQuestions() {
-
   if (!currentUserTopicId) {
-
-    alert(
-      "Avval mavzuni tanlang!"
-    );
+    alert("Avval mavzuni tanlang!");
 
     return;
   }
 
-  const topic =
-    userTopics.find(
-      t =>
-        t.id ===
-        currentUserTopicId
-    );
+  const topic = userTopics.find((t) => t.id === currentUserTopicId);
 
   if (!topic) {
     return;
@@ -9679,40 +6863,28 @@ async function shuffleTopicQuestions() {
 
   const perm = await getMyPermissions();
 
-  if (
-    !perm.isAdmin &&
-    !perm.canEditTopics
-  ) {
+  if (!perm.isAdmin && !perm.canEditTopics) {
     return showLimitWarning(
-      "Sizga mavzularni tahrirlash huquqi administrator tomonidan cheklangan."
+      "Sizga mavzularni tahrirlash huquqi administrator tomonidan cheklangan.",
     );
   }
 
   const allQuestions = [];
 
-  Object.values(
-    topic.questions || {}
-  ).forEach(category => {
-
+  Object.values(topic.questions || {}).forEach((category) => {
     if (!Array.isArray(category)) {
       return;
     }
 
-    category.forEach(item => {
-
+    category.forEach((item) => {
       if (item) {
         allQuestions.push(item);
       }
-
     });
-
   });
 
   if (allQuestions.length < 2) {
-
-    alert(
-      "Aralashtirish uchun savollar yetarli emas!"
-    );
+    alert("Aralashtirish uchun savollar yetarli emas!");
 
     return;
   }
@@ -9720,27 +6892,10 @@ async function shuffleTopicQuestions() {
   /*
    * Fisher-Yates
    */
-  for (
-    let i =
-      allQuestions.length - 1;
-    i > 0;
-    i--
-  ) {
+  for (let i = allQuestions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
 
-    const j =
-      Math.floor(
-        Math.random() *
-        (i + 1)
-      );
-
-    [
-      allQuestions[i],
-      allQuestions[j]
-    ] = [
-      allQuestions[j],
-      allQuestions[i]
-    ];
-
+    [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
   }
 
   /*
@@ -9751,46 +6906,36 @@ async function shuffleTopicQuestions() {
    * saqlaymiz.
    */
   topic.questions = {
-    shuffled: allQuestions
+    shuffled: allQuestions,
   };
 
-  currentTopicQuestions =
-    allQuestions;
+  currentTopicQuestions = allQuestions;
 
-  questions = [
-    allQuestions
-  ];
+  questions = [allQuestions];
 
-  currentTopicQuestionIndex =
-    0;
+  currentTopicQuestionIndex = 0;
 
   await saveTopics(topic.id);
 
   renderUserTopics();
 
   renderBoard();
-
 }
 
 function shuffleQuestionsByButton() {
   shuffleTopicQuestions();
 }
 
-window.shuffleTopicQuestions =
-  shuffleTopicQuestions;
+window.shuffleTopicQuestions = shuffleTopicQuestions;
 
-window.shuffleQuestionsByButton =
-  shuffleQuestionsByButton;
+window.shuffleQuestionsByButton = shuffleQuestionsByButton;
 
 /* ================= OTHER TOPICS ================= */
 
 let otherTopics = [];
 
 async function loadOtherTopics() {
-  if (
-    !db ||
-    !currentUserUid
-  ) {
+  if (!db || !currentUserUid) {
     return;
   }
 
@@ -9811,40 +6956,24 @@ async function loadOtherTopics() {
      * bitta mavzu bor, boshqa
      * hech narsa yo'q.
      */
-    const snap =
-      await getDocs(
-        collection(
-          db,
-          "sharedTopics"
-        )
-      );
+    const snap = await getDocs(collection(db, "sharedTopics"));
 
-    snap.docs.forEach(
-      d => {
-        const data =
-          d.data();
+    snap.docs.forEach((d) => {
+      const data = d.data();
 
-        if (
-          data.ownerId ===
-          currentUserUid
-        ) {
-          return;
-        }
-
-        otherTopics.push({
-          ...data,
-          id:
-            data.id || d.id
-        });
+      if (data.ownerId === currentUserUid) {
+        return;
       }
-    );
+
+      otherTopics.push({
+        ...data,
+        id: data.id || d.id,
+      });
+    });
 
     renderOtherTopics("");
   } catch (e) {
-    console.warn(
-      "other topics:",
-      e
-    );
+    console.warn("other topics:", e);
   }
 }
 
@@ -9860,17 +6989,13 @@ async function loadOtherTopics() {
  * ===============================================
  */
 function setupGuestDemoTopic() {
-
   /*
    * Ulashilgan mavzularning BARCHASINI
    * to'g'ridan-to'g'ri board'ga chiqaramiz
    * (userTopics'ga faqat vaqtincha, xotirada —
    * hech qachon saqlanmaydi/o'zgartirilmaydi).
    */
-  userTopics =
-    otherTopics.map(
-      topic => ({ ...topic })
-    );
+  userTopics = otherTopics.map((topic) => ({ ...topic }));
 
   currentUserTopicId = null;
 
@@ -9887,77 +7012,47 @@ function setupGuestDemoTopic() {
    * allaqachon mavjud va sinovdan
    * o'tgan.
    */
-  document.body.classList.add(
-    "guestMode",
-    "teacherLocked"
-  );
+  document.body.classList.add("guestMode", "teacherLocked");
 
-  const banner =
-    $("guestBanner");
+  const banner = $("guestBanner");
 
   if (banner) {
-    banner.style.display =
-      "block";
+    banner.style.display = "block";
   }
 }
 
-function renderOtherTopics(
-  filterText = ""
-) {
-  const box =
-    $("otherTopicPanel");
+function renderOtherTopics(filterText = "") {
+  const box = $("otherTopicPanel");
 
   if (!box) return;
 
   box.innerHTML = "";
 
-  const list =
-    otherTopics.filter(
-      t =>
-        String(
-          t.title || ""
-        )
-          .toLowerCase()
-          .includes(
-            filterText.toLowerCase()
-          )
-    );
+  const list = otherTopics.filter((t) =>
+    String(t.title || "")
+      .toLowerCase()
+      .includes(filterText.toLowerCase()),
+  );
 
   if (!list.length) {
-    box.innerHTML =
-      "<p>🔎 Mavzu topilmadi</p>";
+    box.innerHTML = "<p>🔎 Mavzu topilmadi</p>";
 
     return;
   }
 
-  list.forEach(
-    topic => {
-      const d =
-        document.createElement(
-          "div"
-        );
+  list.forEach((topic) => {
+    const d = document.createElement("div");
 
-      d.className =
-        "topicCard otherTopic";
+    d.className = "topicCard otherTopic";
 
-      const total =
-        Object.values(
-          topic.questions ||
-            {}
-        ).reduce(
-          (s, c) =>
-            s +
-            (Array.isArray(c)
-              ? c.length
-              : 0),
-          0
-        );
+    const total = Object.values(topic.questions || {}).reduce(
+      (s, c) => s + (Array.isArray(c) ? c.length : 0),
+      0,
+    );
 
-      d.innerHTML = `
+    d.innerHTML = `
         <strong>
-          ${escapeHtml(
-            topic.title
-          )}
+          ${escapeHtml(topic.title)}
         </strong>
 
         <span>
@@ -9965,41 +7060,23 @@ function renderOtherTopics(
         </span>
 
         <small>
-          👤 ${escapeHtml(
-            topic.ownerName
-          )}
+          👤 ${escapeHtml(topic.ownerName)}
         </small>
       `;
 
-      d.onclick =
-        () =>
-          openTopicIntro(
-            topic
-          );
+    d.onclick = () => openTopicIntro(topic);
 
-      box.appendChild(d);
-    }
-  );
+    box.appendChild(d);
+  });
 }
 
-window.loadOtherTopics =
-  loadOtherTopics;
+window.loadOtherTopics = loadOtherTopics;
 
-$("otherTopicSearchInput")
-  ?.addEventListener(
-    "input",
-    e =>
-      renderOtherTopics(
-        e.target.value.trim()
-      )
-  );
+$("otherTopicSearchInput")?.addEventListener("input", (e) =>
+  renderOtherTopics(e.target.value.trim()),
+);
 
-$("boardTopicSearch")
-  ?.addEventListener(
-    "input",
-    () =>
-      renderBoard()
-  );
+$("boardTopicSearch")?.addEventListener("input", () => renderBoard());
 
 /* =========================================================
    XONA UCHUN MAVZU TANLASH — QIDIRUVLI RO'YXAT
@@ -10007,15 +7084,10 @@ $("boardTopicSearch")
 ========================================================= */
 
 function sortTopicsByNewest(list) {
-  return [...list].sort(
-    (a, b) =>
-      (Number(b.createdAt) || 0) -
-      (Number(a.createdAt) || 0)
-  );
+  return [...list].sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
 }
 
 function getRoomPickerTopics() {
-
   /*
    * Mehmon (guest) uchun userTopics allaqachon
    * BARCHA ulashilgan mavzularni o'z ichiga oladi
@@ -10044,22 +7116,18 @@ function getRoomPickerTopics() {
    * qolmasin deb, joriy hisob egasining ismini
    * to'g'ridan-to'g'ri shu yerda qo'yamiz.
    */
-  const myName =
-    auth.currentUser?.displayName ||
-    "Siz";
+  const myName = auth.currentUser?.displayName || "Siz";
 
-  const own = rawOwn.map(t => ({
+  const own = rawOwn.map((t) => ({
     ...t,
-    ownerName: myName
+    ownerName: myName,
   }));
 
-  const seen = new Set(
-    own.map(t => t.id)
-  );
+  const seen = new Set(own.map((t) => t.id));
 
   const merged = [...own];
 
-  (otherTopics || []).forEach(t => {
+  (otherTopics || []).forEach((t) => {
     if (!seen.has(t.id)) {
       merged.push(t);
       seen.add(t.id);
@@ -10070,7 +7138,6 @@ function getRoomPickerTopics() {
 }
 
 function openRoomTopicPicker() {
-
   const modal = $("roomTopicPickerModal");
 
   if (!modal) return;
@@ -10084,8 +7151,8 @@ function openRoomTopicPicker() {
       roomPickerTargetMode === "duel"
         ? "⚔️ Duel uchun mavzu tanlang"
         : roomPickerTargetMode === "play"
-        ? "🎯 O‘yin uchun mavzu tanlang"
-        : "📱 Xona uchun mavzu tanlang";
+          ? "🎯 O‘yin uchun mavzu tanlang"
+          : "📱 Xona uchun mavzu tanlang";
   }
 
   const searchInput = $("roomTopicPickerSearch");
@@ -10104,7 +7171,6 @@ function openRoomTopicPicker() {
 window.openRoomTopicPicker = openRoomTopicPicker;
 
 function closeRoomTopicPickerModal(viaSelection = false) {
-
   const modal = $("roomTopicPickerModal");
 
   if (modal) modal.style.display = "none";
@@ -10138,26 +7204,20 @@ function closeRoomTopicPickerModal(viaSelection = false) {
    * o'yin sahifasini (board) qaytadan ko'rishi kerak.
    */
   if (!viaSelection) {
-    document.body.classList.remove(
-      "guestQuickLaunchMode"
-    );
+    document.body.classList.remove("guestQuickLaunchMode");
 
     hideFlowShield();
   }
 }
 
-window.closeRoomTopicPickerModal =
-  closeRoomTopicPickerModal;
+window.closeRoomTopicPickerModal = closeRoomTopicPickerModal;
 
 function renderRoomTopicPickerList(filterText = "") {
-
   const box = $("roomTopicPickerList");
 
-  const subBox =
-    $("roomTopicPickerSubjectList");
+  const subBox = $("roomTopicPickerSubjectList");
 
-  const catBox =
-    $("roomTopicPickerCategoryList");
+  const catBox = $("roomTopicPickerCategoryList");
 
   if (!box) return;
 
@@ -10177,50 +7237,28 @@ function renderRoomTopicPickerList(filterText = "") {
   let subjectFiltered = all;
 
   if (!categorySettingsState.enabled) {
-
     selectedRoomPickerSubject = null;
     selectedRoomPickerCategory = null;
 
     if (subBox) subBox.innerHTML = "";
     if (catBox) catBox.innerHTML = "";
-
   } else {
+    const subjects = getTopicSubjectStats(all);
 
-    const subjects =
-      getTopicSubjectStats(all);
-
-    if (
-      selectedRoomPickerSubject &&
-      !subjects.some(
-        s => s.name === selectedRoomPickerSubject
-      )
-    ) {
+    if (selectedRoomPickerSubject && !subjects.some((s) => s.name === selectedRoomPickerSubject)) {
       selectedRoomPickerSubject = null;
       selectedRoomPickerCategory = null;
     }
 
-    renderCategorySidebar(
-      subBox,
-      subjects,
-      selectedRoomPickerSubject,
-      name => {
-        selectedRoomPickerSubject = name;
-        selectedRoomPickerCategory = null;
-        renderRoomTopicPickerList(
-          $("roomTopicPickerSearch")
-            ?.value || ""
-        );
-      }
-    );
+    renderCategorySidebar(subBox, subjects, selectedRoomPickerSubject, (name) => {
+      selectedRoomPickerSubject = name;
+      selectedRoomPickerCategory = null;
+      renderRoomTopicPickerList($("roomTopicPickerSearch")?.value || "");
+    });
 
-    subjectFiltered =
-      filterTopicsBySubject(
-        all,
-        selectedRoomPickerSubject
-      );
+    subjectFiltered = filterTopicsBySubject(all, selectedRoomPickerSubject);
 
     if (!selectedRoomPickerSubject) {
-
       /*
        * "Barchasi" (hech qanday fan
        * tanlanmagan) holatda kategoriya
@@ -10234,50 +7272,29 @@ function renderRoomTopicPickerList(filterText = "") {
       selectedRoomPickerCategory = null;
 
       if (catBox) catBox.innerHTML = "";
-
     } else {
-
-      const categories =
-        getTopicCategoryStats(subjectFiltered);
+      const categories = getTopicCategoryStats(subjectFiltered);
 
       if (
         selectedRoomPickerCategory &&
-        !categories.some(
-          c => c.name === selectedRoomPickerCategory
-        )
+        !categories.some((c) => c.name === selectedRoomPickerCategory)
       ) {
         selectedRoomPickerCategory = null;
       }
 
-      renderCategorySidebar(
-        catBox,
-        categories,
-        selectedRoomPickerCategory,
-        name => {
-          selectedRoomPickerCategory = name;
-          renderRoomTopicPickerList(
-            $("roomTopicPickerSearch")
-              ?.value || ""
-          );
-        }
-      );
+      renderCategorySidebar(catBox, categories, selectedRoomPickerCategory, (name) => {
+        selectedRoomPickerCategory = name;
+        renderRoomTopicPickerList($("roomTopicPickerSearch")?.value || "");
+      });
     }
   }
 
   let list = term
-    ? subjectFiltered.filter(t =>
-        (t.title || "")
-          .toLowerCase()
-          .includes(term)
-      )
+    ? subjectFiltered.filter((t) => (t.title || "").toLowerCase().includes(term))
     : subjectFiltered;
 
   if (selectedRoomPickerCategory) {
-    list = list.filter(
-      t =>
-        getTopicCategory(t) ===
-        selectedRoomPickerCategory
-    );
+    list = list.filter((t) => getTopicCategory(t) === selectedRoomPickerCategory);
   }
 
   if (!list.length) {
@@ -10291,16 +7308,9 @@ function renderRoomTopicPickerList(filterText = "") {
 
   box.innerHTML = list
     .map((topic, i) => {
-
-      const total = Object.values(
-        topic.questions || {}
-      ).reduce(
-        (sum, category) =>
-          sum +
-          (Array.isArray(category)
-            ? category.length
-            : 0),
-        0
+      const total = Object.values(topic.questions || {}).reduce(
+        (sum, category) => sum + (Array.isArray(category) ? category.length : 0),
+        0,
       );
 
       return `
@@ -10310,7 +7320,10 @@ function renderRoomTopicPickerList(filterText = "") {
             <span class="rtpCount">${total} ta savol</span>
             <span class="rtpOwner">👤 ${escapeHtml(topic.ownerName || "Noma'lum")}${
               categorySettingsState.enabled
-                ? " · " + escapeHtml(getTopicSubject(topic)) + " / " + escapeHtml(getTopicCategory(topic))
+                ? " · " +
+                  escapeHtml(getTopicSubject(topic)) +
+                  " / " +
+                  escapeHtml(getTopicCategory(topic))
                 : ""
             }</span>
           </div>
@@ -10320,18 +7333,16 @@ function renderRoomTopicPickerList(filterText = "") {
     })
     .join("");
 
-  box
-    .querySelectorAll(".roomTopicPickerRow")
-    .forEach(row => {
-      row.onclick = () => {
-        const idx = Number(row.dataset.idx);
-        const topic = list[idx];
+  box.querySelectorAll(".roomTopicPickerRow").forEach((row) => {
+    row.onclick = () => {
+      const idx = Number(row.dataset.idx);
+      const topic = list[idx];
 
-        if (!topic) return;
+      if (!topic) return;
 
-        selectTopicForRoomOpen(topic);
-      };
-    });
+      selectTopicForRoomOpen(topic);
+    };
+  });
 }
 
 /*
@@ -10348,7 +7359,6 @@ function renderRoomTopicPickerList(filterText = "") {
  *             (xuddi shunday, teamsData orqali).
  */
 function selectTopicForRoomOpen(topic) {
-
   const wasSwap = roomTopicSwapMode;
 
   closeRoomTopicPickerModal(true);
@@ -10373,112 +7383,68 @@ function selectTopicForRoomOpen(topic) {
   openRoomSetup();
 }
 
-$("roomTopicPickerSearch")
-  ?.addEventListener(
-    "input",
-    e =>
-      renderRoomTopicPickerList(
-        e.target.value
-      )
-  );
+$("roomTopicPickerSearch")?.addEventListener("input", (e) =>
+  renderRoomTopicPickerList(e.target.value),
+);
 
-$("quickRoomBtn")
-  ?.addEventListener(
-    "click",
-    () => {
-      roomPickerTargetMode = "room";
-      openRoomTopicPicker();
-    }
-  );
+$("quickRoomBtn")?.addEventListener("click", () => {
+  roomPickerTargetMode = "room";
+  openRoomTopicPicker();
+});
 
 /* ================= CHART ================= */
 
 function renderStatsChart() {
-  const ctx =
-    $("statsChart");
+  const ctx = $("statsChart");
 
-  if (
-    !ctx ||
-    typeof Chart ===
-      "undefined"
-  ) {
+  if (!ctx || typeof Chart === "undefined") {
     return;
   }
 
-  new Chart(
-    ctx,
-    {
-      type: "bar",
+  new Chart(ctx, {
+    type: "bar",
 
-      data: {
-        labels:
-          participants.map(
-            p => p.name
-          ),
+    data: {
+      labels: participants.map((p) => p.name),
 
-        datasets: [
-          {
-            label:
-              "G‘alabalar",
+      datasets: [
+        {
+          label: "G‘alabalar",
 
-            data:
-              participants.map(
-                p => p.wins
-              )
-          }
-        ]
-      }
-    }
-  );
+          data: participants.map((p) => p.wins),
+        },
+      ],
+    },
+  });
 }
 
-window.renderStatsChart =
-  renderStatsChart;
+window.renderStatsChart = renderStatsChart;
 
 /* ================= PROFILE ================= */
 
-const accountBtn =
-  $("accountBtn");
+const accountBtn = $("accountBtn");
 
-const accountModal =
-  $("accountModal");
+const accountModal = $("accountModal");
 
-const displayNameInput =
-  $("displayNameInput");
+const displayNameInput = $("displayNameInput");
 
-const saveProfileBtn =
-  $("saveProfileBtn");
+const saveProfileBtn = $("saveProfileBtn");
 
-accountBtn?.addEventListener(
-  "click",
-  () => {
-    if (
-      displayNameInput
-    ) {
-      displayNameInput.value =
-        auth.currentUser
-          ?.displayName ||
-        "";
-    }
-
-    if (
-      accountModal
-    ) {
-      accountModal.style.display =
-        "flex";
-    }
+accountBtn?.addEventListener("click", () => {
+  if (displayNameInput) {
+    displayNameInput.value = auth.currentUser?.displayName || "";
   }
-);
 
-window.closeAccountModal =
-  () => {
-    if (
-      accountModal
-    ) {
-      accountModal.style.display =
-        "none";
-    }
-  };
+  if (accountModal) {
+    accountModal.style.display = "flex";
+  }
+});
+
+window.closeAccountModal = () => {
+  if (accountModal) {
+    accountModal.style.display = "none";
+  }
+};
 
 /* =========================================================
    MUROJAATLAR (SUPPORT MESSAGES)
@@ -10525,14 +7491,13 @@ function formatSupportDate(ts) {
     if (!d) return "";
 
     const localeMap = { uz: "uz-UZ", en: "en-GB", ru: "ru-RU" };
-    const lang =
-      typeof getAppLang === "function" ? getAppLang() : "uz";
+    const lang = typeof getAppLang === "function" ? getAppLang() : "uz";
 
     return d.toLocaleString(localeMap[lang] || "uz-UZ", {
       day: "2-digit",
       month: "2-digit",
       hour: "2-digit",
-      minute: "2-digit"
+      minute: "2-digit",
     });
   } catch (e) {
     return "";
@@ -10543,41 +7508,34 @@ function renderMyMessages() {
   if (!contactModalBody) return;
 
   if (!myMessages.length) {
-    const emptyText = tt(
-      "contact.empty",
-      "Hali murojaat yubormagansiz."
-    );
+    const emptyText = tt("contact.empty", "Hali murojaat yubormagansiz.");
 
-    contactModalBody.innerHTML = `<div class="usersEmpty">${escapeHtml(
-      emptyText
-    )}</div>`;
+    contactModalBody.innerHTML = `<div class="usersEmpty">${escapeHtml(emptyText)}</div>`;
     return;
   }
 
   contactModalBody.innerHTML = myMessages
-    .map(m => {
+    .map((m) => {
       const answered = !!m.adminReply;
 
       const badge = answered
         ? `<span class="contactStatusBadge answered">✅ ${escapeHtml(
-            tt("contact.answered", "Javob berildi")
+            tt("contact.answered", "Javob berildi"),
           )}</span>`
         : `<span class="contactStatusBadge pending">⏳ ${escapeHtml(
-            tt("contact.pending", "Javob kutilmoqda")
+            tt("contact.pending", "Javob kutilmoqda"),
           )}</span>`;
 
       const replyBlock = answered
         ? `<div class="contactHistoryReply"><strong>${escapeHtml(
-            tt("contact.adminReplyLabel", "Administrator javobi")
+            tt("contact.adminReplyLabel", "Administrator javobi"),
           )}:</strong> ${escapeHtml(m.adminReply)}</div>`
         : "";
 
       return `
         <div class="contactHistoryItem">
           <div class="contactHistoryMeta">
-            <span class="contactHistoryDate">${escapeHtml(
-              formatSupportDate(m.createdAt)
-            )}</span>
+            <span class="contactHistoryDate">${escapeHtml(formatSupportDate(m.createdAt))}</span>
             ${badge}
           </div>
           <div class="contactHistoryMsg">${escapeHtml(m.message)}</div>
@@ -10591,9 +7549,7 @@ function renderMyMessages() {
 function renderReplyBanners() {
   if (!adminReplyBannersEl) return;
 
-  const unseen = myMessages.filter(
-    m => m.adminReply && !m.dismissedByUser
-  );
+  const unseen = myMessages.filter((m) => m.adminReply && !m.dismissedByUser);
 
   if (!unseen.length) {
     adminReplyBannersEl.innerHTML = "";
@@ -10605,12 +7561,12 @@ function renderReplyBanners() {
 
   adminReplyBannersEl.innerHTML = unseen
     .map(
-      m => `
+      (m) => `
         <div class="adminReplyBanner">
           <span class="adminReplyIcon">❗</span>
           <div class="adminReplyText">
             <strong>${escapeHtml(
-              tt("contact.adminReplyLabel", "Administrator javobi")
+              tt("contact.adminReplyLabel", "Administrator javobi"),
             )}:</strong> ${escapeHtml(m.adminReply)}
           </div>
           <button
@@ -10620,15 +7576,13 @@ function renderReplyBanners() {
             data-id="${escapeHtml(m.id)}"
           >×</button>
         </div>
-      `
+      `,
     )
     .join("");
 }
 
-document.addEventListener("click", async e => {
-  const btn = e.target.closest(
-    "button[data-action='dismissReply']"
-  );
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action='dismissReply']");
   if (!btn) return;
 
   const id = btn.dataset.id;
@@ -10638,7 +7592,7 @@ document.addEventListener("click", async e => {
 
   try {
     await updateDoc(doc(db, SUPPORT_COLLECTION, id), {
-      dismissedByUser: true
+      dismissedByUser: true,
     });
   } catch (err) {
     console.warn("dismissReply:", err);
@@ -10667,16 +7621,13 @@ function startMyMessagesListener() {
      * Shu sabab faqat oddiy "where" so'rovi yuboriladi,
      * saralash esa pastda JS orqali qo'lda amalga oshiriladi.
      */
-    const q = query(
-      collection(db, SUPPORT_COLLECTION),
-      where("uid", "==", currentUserUid)
-    );
+    const q = query(collection(db, SUPPORT_COLLECTION), where("uid", "==", currentUserUid));
 
     myMessagesUnsub = onSnapshot(
       q,
-      snap => {
+      (snap) => {
         myMessages = snap.docs
-          .map(d => ({ id: d.id, ...d.data() }))
+          .map((d) => ({ id: d.id, ...d.data() }))
           .sort((a, b) => {
             const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
             const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -10687,15 +7638,15 @@ function startMyMessagesListener() {
         renderMyMessages();
         renderReplyBanners();
       },
-      err => {
+      (err) => {
         console.error("startMyMessagesListener:", err);
 
         if (contactModalBody) {
           contactModalBody.innerHTML = `<div class="usersEmpty">❌ Murojaatlar tarixini yuklab bo'lmadi (${escapeHtml(
-            err?.code || err?.message || "xatolik"
+            err?.code || err?.message || "xatolik",
           )}). Firestore qoidalarini tekshiring.</div>`;
         }
-      }
+      },
     );
   } catch (e) {
     console.error("startMyMessagesListener:", e);
@@ -10706,10 +7657,7 @@ async function submitContactMessage() {
   const text = contactMessageInput?.value?.trim();
 
   if (!text) {
-    return alert(
-      "🔒 " +
-        tt("contact.emptyWarning", "Iltimos, xabar matnini kiriting.")
-    );
+    return alert("🔒 " + tt("contact.emptyWarning", "Iltimos, xabar matnini kiriting."));
   }
 
   if (!currentUserUid || isGuestUser) {
@@ -10717,8 +7665,8 @@ async function submitContactMessage() {
       "🔒 " +
         tt(
           "contact.guestOnly",
-          "Murojaat yuborish uchun ro'yxatdan o'tgan hisobingiz bilan tizimga kiring."
-        )
+          "Murojaat yuborish uchun ro'yxatdan o'tgan hisobingiz bilan tizimga kiring.",
+        ),
     );
   }
 
@@ -10733,14 +7681,13 @@ async function submitContactMessage() {
       createdAt: serverTimestamp(),
       adminReply: "",
       repliedAt: null,
-      dismissedByUser: false
+      dismissedByUser: false,
     });
 
     if (contactMessageInput) contactMessageInput.value = "";
 
     if (contactSendStatus) {
-      contactSendStatus.textContent =
-        "✅ " + tt("contact.sent", "Xabaringiz yuborildi!");
+      contactSendStatus.textContent = "✅ " + tt("contact.sent", "Xabaringiz yuborildi!");
 
       clearTimeout(submitContactMessage._t);
       submitContactMessage._t = setTimeout(() => {
@@ -10792,50 +7739,32 @@ document.addEventListener("beks:langchange", () => {
 let teacherUnlocked = true;
 
 function getTeacherPinKey() {
-  return (
-    "teacherPin_" +
-    (currentUserUid || "guest")
-  );
+  return "teacherPin_" + (currentUserUid || "guest");
 }
 
 function getTeacherPin() {
-  return localStorage.getItem(
-    getTeacherPinKey()
-  );
+  return localStorage.getItem(getTeacherPinKey());
 }
 
 function setTeacherPin(pin) {
-  localStorage.setItem(
-    getTeacherPinKey(),
-    pin
-  );
+  localStorage.setItem(getTeacherPinKey(), pin);
 }
 
 function applyLockUI() {
+  document.body.classList.toggle("teacherLocked", !teacherUnlocked);
 
-  document.body.classList.toggle(
-    "teacherLocked",
-    !teacherUnlocked
-  );
-
-  const btn =
-    $("teacherLockBtn");
+  const btn = $("teacherLockBtn");
 
   if (btn) {
-    btn.textContent =
-      teacherUnlocked
-        ? "🔓"
-        : "🔒";
+    btn.textContent = teacherUnlocked ? "🔓" : "🔒";
 
-    btn.title =
-      teacherUnlocked
-        ? "Boshqaruv ochiq — qulflash uchun bosing"
-        : "Boshqaruv qulflangan — ochish uchun bosing";
+    btn.title = teacherUnlocked
+      ? "Boshqaruv ochiq — qulflash uchun bosing"
+      : "Boshqaruv qulflangan — ochish uchun bosing";
   }
 }
 
 function openTeacherLockModal() {
-
   /*
    * Allaqachon ochiq bo'lsa —
    * PIN so'ralmasdan darhol
@@ -10847,33 +7776,24 @@ function openTeacherLockModal() {
     return;
   }
 
-  const hasPin =
-    !!getTeacherPin();
+  const hasPin = !!getTeacherPin();
 
-  const title =
-    $("teacherLockTitle");
+  const title = $("teacherLockTitle");
 
-  const hint =
-    $("teacherLockHint");
+  const hint = $("teacherLockHint");
 
-  const input =
-    $("teacherLockPinInput");
+  const input = $("teacherLockPinInput");
 
-  const submitBtn =
-    $("teacherLockSubmitBtn");
+  const submitBtn = $("teacherLockSubmitBtn");
 
   if (title) {
-    title.textContent =
-      hasPin
-        ? "Boshqaruvni ochish"
-        : "PIN kod o‘rnating";
+    title.textContent = hasPin ? "Boshqaruvni ochish" : "PIN kod o‘rnating";
   }
 
   if (hint) {
-    hint.textContent =
-      hasPin
-        ? "Boshqaruv funksiyalarini (mavzu/ishtirokchi o‘chirish, sozlamalar) ochish uchun PIN kodni kiriting."
-        : "Bu birinchi marta ishlatilyapti — o‘zingiz uchun PIN kod o‘rnating. Bu kod orqali keyinchalik boshqaruvni ochasiz.";
+    hint.textContent = hasPin
+      ? "Boshqaruv funksiyalarini (mavzu/ishtirokchi o‘chirish, sozlamalar) ochish uchun PIN kodni kiriting."
+      : "Bu birinchi marta ishlatilyapti — o‘zingiz uchun PIN kod o‘rnating. Bu kod orqali keyinchalik boshqaruvni ochasiz.";
   }
 
   if (input) {
@@ -10881,65 +7801,43 @@ function openTeacherLockModal() {
   }
 
   if (submitBtn) {
-    submitBtn.textContent =
-      hasPin
-        ? "Ochish"
-        : "O‘rnatish";
+    submitBtn.textContent = hasPin ? "Ochish" : "O‘rnatish";
   }
 
-  const modal =
-    $("teacherLockModal");
+  const modal = $("teacherLockModal");
 
   if (modal) {
-    modal.style.display =
-      "flex";
+    modal.style.display = "flex";
   }
 
-  setTimeout(
-    () =>
-      input?.focus(),
-    50
-  );
+  setTimeout(() => input?.focus(), 50);
 }
 
 function closeTeacherLockModal() {
-
-  const modal =
-    $("teacherLockModal");
+  const modal = $("teacherLockModal");
 
   if (modal) {
-    modal.style.display =
-      "none";
+    modal.style.display = "none";
   }
 }
 
-window.closeTeacherLockModal =
-  closeTeacherLockModal;
+window.closeTeacherLockModal = closeTeacherLockModal;
 
 function submitTeacherLockPin() {
+  const input = $("teacherLockPinInput");
 
-  const input =
-    $("teacherLockPinInput");
-
-  const pin =
-    (input?.value || "").trim();
+  const pin = (input?.value || "").trim();
 
   if (!pin) {
-    alert(
-      "PIN kodni kiriting!"
-    );
+    alert("PIN kodni kiriting!");
     return;
   }
 
-  const hasPin =
-    !!getTeacherPin();
+  const hasPin = !!getTeacherPin();
 
   if (!hasPin) {
-
     if (pin.length < 4) {
-      alert(
-        "PIN kod kamida 4 ta belgidan iborat bo‘lsin!"
-      );
+      alert("PIN kod kamida 4 ta belgidan iborat bo‘lsin!");
       return;
     }
 
@@ -10952,177 +7850,115 @@ function submitTeacherLockPin() {
     closeTeacherLockModal();
 
     alert(
-      "✅ PIN kod o‘rnatildi va boshqaruv ochildi. Bu kodni eslab qoling — Profil bo‘limidan o‘zgartirishingiz mumkin!"
+      "✅ PIN kod o‘rnatildi va boshqaruv ochildi. Bu kodni eslab qoling — Profil bo‘limidan o‘zgartirishingiz mumkin!",
     );
 
     return;
   }
 
   if (pin === getTeacherPin()) {
-
     teacherUnlocked = true;
 
     applyLockUI();
 
     closeTeacherLockModal();
-
   } else {
-
-    alert(
-      "❌ PIN kod noto‘g‘ri!"
-    );
-
+    alert("❌ PIN kod noto‘g‘ri!");
   }
 }
 
-$("teacherLockBtn")?.addEventListener(
-  "click",
-  () => {
-    openTeacherLockModal();
-  }
-);
+$("teacherLockBtn")?.addEventListener("click", () => {
+  openTeacherLockModal();
+});
 
-$("teacherLockSubmitBtn")?.addEventListener(
-  "click",
-  () => {
+$("teacherLockSubmitBtn")?.addEventListener("click", () => {
+  submitTeacherLockPin();
+});
+
+$("teacherLockPinInput")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
     submitTeacherLockPin();
   }
-);
+});
 
-$("teacherLockPinInput")?.addEventListener(
-  "keydown",
-  e => {
-    if (e.key === "Enter") {
-      submitTeacherLockPin();
-    }
+$("savePinBtn")?.addEventListener("click", () => {
+  const input = $("teacherPinInput");
+
+  const pin = (input?.value || "").trim();
+
+  if (!pin) {
+    alert("Yangi PIN kodni kiriting!");
+    return;
   }
-);
 
-$("savePinBtn")?.addEventListener(
-  "click",
-  () => {
+  if (pin.length < 4) {
+    alert("PIN kod kamida 4 ta belgidan iborat bo‘lsin!");
+    return;
+  }
 
-    const input =
-      $("teacherPinInput");
+  setTeacherPin(pin);
 
-    const pin =
-      (input?.value || "").trim();
+  if (input) {
+    input.value = "";
+  }
 
-    if (!pin) {
-      alert(
-        "Yangi PIN kodni kiriting!"
-      );
-      return;
-    }
+  alert("✅ Yangi PIN kod saqlandi!");
+});
 
-    if (pin.length < 4) {
-      alert(
-        "PIN kod kamida 4 ta belgidan iborat bo‘lsin!"
-      );
-      return;
-    }
-
-    setTeacherPin(pin);
-
-    if (input) {
-      input.value = "";
-    }
-
+$("changePasswordBtn")?.addEventListener("click", async () => {
+  if (!auth.currentUser || !auth.currentUser.email || currentUserUid === "guest_offline") {
     alert(
-      "✅ Yangi PIN kod saqlandi!"
+      "Mehmon (offline) rejimida parolni o‘zgartirib bo‘lmaydi. " +
+        "Bu funksiyadan foydalanish uchun ro‘yxatdan o‘ting.",
     );
-
+    return;
   }
-);
 
-$("changePasswordBtn")?.addEventListener(
-  "click",
-  async () => {
+  const currentPassword = ($("currentPasswordInput")?.value || "").trim();
 
-    if (
-      !auth.currentUser ||
-      !auth.currentUser.email ||
-      currentUserUid === "guest_offline"
-    ) {
-      alert(
-        "Mehmon (offline) rejimida parolni o‘zgartirib bo‘lmaydi. " +
-        "Bu funksiyadan foydalanish uchun ro‘yxatdan o‘ting."
-      );
-      return;
-    }
+  const newPassword = ($("newPasswordInput")?.value || "").trim();
 
-    const currentPassword =
-      ($("currentPasswordInput")?.value || "").trim();
+  const newPasswordConfirm = ($("newPasswordConfirmInput")?.value || "").trim();
 
-    const newPassword =
-      ($("newPasswordInput")?.value || "").trim();
-
-    const newPasswordConfirm =
-      ($("newPasswordConfirmInput")?.value || "").trim();
-
-    if (!currentPassword || !newPassword || !newPasswordConfirm) {
-      alert(
-        "Barcha parol maydonlarini to‘ldiring!"
-      );
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      alert(
-        "Yangi parol kamida 6 ta belgidan iborat bo‘lsin!"
-      );
-      return;
-    }
-
-    if (newPassword !== newPasswordConfirm) {
-      alert(
-        "Yangi parol va tasdiqlash mos emas!"
-      );
-      return;
-    }
-
-    try {
-
-      const credential =
-        EmailAuthProvider.credential(
-          auth.currentUser.email,
-          currentPassword
-        );
-
-      await reauthenticateWithCredential(
-        auth.currentUser,
-        credential
-      );
-
-      await updatePassword(
-        auth.currentUser,
-        newPassword
-      );
-
-      $("currentPasswordInput").value = "";
-      $("newPasswordInput").value = "";
-      $("newPasswordConfirmInput").value = "";
-
-      alert(
-        "✅ Parol muvaffaqiyatli yangilandi!"
-      );
-
-    } catch (e) {
-
-      console.error(e);
-
-      if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
-        alert("Joriy parol noto‘g‘ri!");
-      } else if (e.code === "auth/too-many-requests") {
-        alert("Juda ko‘p urinish. Birozdan so‘ng qayta urinib ko‘ring.");
-      } else {
-        alert("Xato: " + (e.message || e));
-      }
-
-    }
-
+  if (!currentPassword || !newPassword || !newPasswordConfirm) {
+    alert("Barcha parol maydonlarini to‘ldiring!");
+    return;
   }
-);
+
+  if (newPassword.length < 6) {
+    alert("Yangi parol kamida 6 ta belgidan iborat bo‘lsin!");
+    return;
+  }
+
+  if (newPassword !== newPasswordConfirm) {
+    alert("Yangi parol va tasdiqlash mos emas!");
+    return;
+  }
+
+  try {
+    const credential = EmailAuthProvider.credential(auth.currentUser.email, currentPassword);
+
+    await reauthenticateWithCredential(auth.currentUser, credential);
+
+    await updatePassword(auth.currentUser, newPassword);
+
+    $("currentPasswordInput").value = "";
+    $("newPasswordInput").value = "";
+    $("newPasswordConfirmInput").value = "";
+
+    alert("✅ Parol muvaffaqiyatli yangilandi!");
+  } catch (e) {
+    console.error(e);
+
+    if (e.code === "auth/wrong-password" || e.code === "auth/invalid-credential") {
+      alert("Joriy parol noto‘g‘ri!");
+    } else if (e.code === "auth/too-many-requests") {
+      alert("Juda ko‘p urinish. Birozdan so‘ng qayta urinib ko‘ring.");
+    } else {
+      alert("Xato: " + (e.message || e));
+    }
+  }
+});
 
 /*
  * Boshlang'ich holat — sahifa
@@ -11133,390 +7969,277 @@ $("changePasswordBtn")?.addEventListener(
  */
 applyLockUI();
 
-$("introPlayBtn")?.addEventListener(
-  "click",
-  () => {
-    confirmStartTopicGame();
+$("introPlayBtn")?.addEventListener("click", () => {
+  confirmStartTopicGame();
+});
+
+$("introDuelBtn")?.addEventListener("click", () => {
+  confirmStartDuel();
+});
+
+$("introRoomBtn")?.addEventListener("click", () => {
+  openRoomSetup();
+});
+
+$("roomSetupConfirmBtn")?.addEventListener("click", () => {
+  confirmOpenRoom();
+});
+
+$("duelExitBtn")?.addEventListener("click", () => {
+  exitDuel();
+});
+
+saveProfileBtn?.addEventListener("click", async () => {
+  const name = displayNameInput?.value?.trim();
+
+  if (!name) {
+    return alert("Iltimos ism kiriting!");
   }
-);
 
-$("introDuelBtn")?.addEventListener(
-  "click",
-  () => {
-    confirmStartDuel();
-  }
-);
+  try {
+    await updateProfile(auth.currentUser, {
+      displayName: name,
+    });
 
-$("introRoomBtn")?.addEventListener(
-  "click",
-  () => {
-    openRoomSetup();
-  }
-);
+    const ref = getUserDocRef();
 
-$("roomSetupConfirmBtn")?.addEventListener(
-  "click",
-  () => {
-    confirmOpenRoom();
-  }
-);
-
-$("duelExitBtn")?.addEventListener(
-  "click",
-  () => {
-    exitDuel();
-  }
-);
-
-saveProfileBtn?.addEventListener(
-  "click",
-  async () => {
-    const name =
-      displayNameInput
-        ?.value?.trim();
-
-    if (!name) {
-      return alert(
-        "Iltimos ism kiriting!"
-      );
+    if (ref) {
+      await updateDoc(ref, {
+        displayName: name,
+      });
     }
 
-    try {
-      await updateProfile(
-        auth.currentUser,
-        {
-          displayName:
-            name
-        }
-      );
+    window.closeAccountModal();
+  } catch (e) {
+    console.error(e);
 
-      const ref =
-        getUserDocRef();
-
-      if (ref) {
-        await updateDoc(
-          ref,
-          {
-            displayName:
-              name
-          }
-        );
-      }
-
-      window.closeAccountModal();
-    } catch (e) {
-      console.error(e);
-
-      alert(
-        "Xatolik yuz berdi"
-      );
-    }
+    alert("Xatolik yuz berdi");
   }
-);
+});
 
-$("logoutBtn")
-  ?.addEventListener(
-    "click",
-    () =>
-      signOut(auth)
-        .then(
-          () =>
-            location.href =
-              "index.html"
-        )
-  );
+$("logoutBtn")?.addEventListener("click", () =>
+  signOut(auth).then(() => (location.href = "index.html")),
+);
 
 /* ================= INIT ================= */
 
-onAuthStateChanged(
-  auth,
-  async user => {
-    if (!user) {
-      location.href =
-        "index.html";
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = "index.html";
 
+    return;
+  }
+
+  currentUserUid = user.uid;
+
+  isGuestUser = !!user.isAnonymous;
+
+  localStorage.setItem("uid", currentUserUid);
+
+  /*
+   * Murojaatlar (support messages) tinglovchisini
+   * ishga tushiramiz — real vaqtda o'z xabarlari va
+   * ularga berilgan admin javoblarini kuzatib boradi
+   * (mehmon foydalanuvchilar uchun ishlamaydi).
+   */
+  startMyMessagesListener();
+
+  /*
+   * Har yangi kirishda (login)
+   * hujjat keshi tozalanadi —
+   * shunda eski/boshqa
+   * foydalanuvchiga tegishli
+   * ma'lumot qolib ketmaydi.
+   */
+  resetUserDocCache();
+
+  await loadCategorySettings();
+
+  await loadParticipants();
+
+  /*
+   * index.html'dagi "Jonli xona / Duel / Play"
+   * tugmalaridan kelingan bo'lsa aniqlaymiz.
+   *
+   * ?liveStart=room|duel|play — qaysi rejim uchun
+   *   kelinganini bildiradi ("room" — eski
+   *   ?openRoom=1 bilan ham mos keladi).
+   * ?names=Ali,Vali,... — Duel/Play uchun
+   *   index.html'da oldindan kiritilgan
+   *   ishtirokchi ismlari (bo'lsa).
+   */
+  const params = new URLSearchParams(window.location.search);
+
+  const liveStart = params.get("liveStart") || (params.get("openRoom") === "1" ? "room" : null);
+
+  const hasValidLiveStart = liveStart === "room" || liveStart === "duel" || liveStart === "play";
+
+  /*
+   * MUHIM (XATOLIK TUZATILDI): ilgari bu klass FAQAT
+   * mehmon (guest) uchun qo'shilardi. Ro'yxatdan o'tgan
+   * foydalanuvchi index.html'dagi "Jonli xona" tugmasi
+   * orqali kelganda esa, mavzu tanlash oynasi ochilishidan
+   * OLDIN bir nechta tarmoq so'rovi (loadTopicsSafe,
+   * loadOtherTopics va h.k.) amalga oshardi — shu vaqt
+   * ichida asosiy o'yin sahifasi (board) BIR ZUM to'liq
+   * ko'rinib, keyin ustidan modal ochilardi. Endi bu
+   * klass "hasValidLiveStart" aniqlangan zahoti — har
+   * qanday keyingi kodni kutmasdan — qo'shiladi, shu
+   * sabab board hech qachon "yalang'och" ko'rinmaydi.
+   */
+  if (hasValidLiveStart) {
+    document.body.classList.add("guestQuickLaunchMode");
+  }
+
+  if (isGuestUser) {
+    /*
+     * MUHIM: savollar kartasi bor asosiy
+     * boshqaruv paneli ("board") faqat haqiqiy
+     * (ro'yxatdan o'tgan) foydalanuvchilar uchun.
+     * Mehmon (anonim) sessiya aniq maqsadsiz
+     * (Jonli xona/Duel/Play'dan kelmagan holda)
+     * bu sahifaga tushib qolsa — darhol
+     * index.html'ga qaytariladi, board hech
+     * qachon render qilinmaydi.
+     */
+    if (!hasValidLiveStart) {
+      window.location.href = "index.html";
       return;
     }
 
-    currentUserUid =
-      user.uid;
+    guestQuickLaunch = true;
 
-    isGuestUser =
-      !!user.isAnonymous;
-
-    localStorage.setItem(
-      "uid",
-      currentUserUid
-    );
+    await initSettings();
 
     /*
-     * Murojaatlar (support messages) tinglovchisini
-     * ishga tushiramiz — real vaqtda o'z xabarlari va
-     * ularga berilgan admin javoblarini kuzatib boradi
-     * (mehmon foydalanuvchilar uchun ishlamaydi).
+     * Faqat mavzular RO'YXATI uchun kerak bo'lgan
+     * ma'lumotni to'g'ridan-to'g'ri "sharedTopics"
+     * kolleksiyasidan yuklaymiz — board hech qachon
+     * render qilinmaydi (setupGuestDemoTopic()
+     * o'rniga, chunki u board'ni ko'rsatib qo'yardi).
      */
-    startMyMessagesListener();
+    await loadOtherTopics();
+
+    userTopics = otherTopics.map((t) => ({ ...t }));
+
+    currentUserTopicId = null;
+
+    renderTeams();
+  } else {
+    await loadTopicsSafe();
+
+    await initSettings();
+
+    restoreLastTopic();
+
+    renderBoard();
+
+    renderTeams();
+
+    await loadOtherTopics();
 
     /*
-     * Har yangi kirishda (login)
-     * hujjat keshi tozalanadi —
-     * shunda eski/boshqa
-     * foydalanuvchiga tegishli
-     * ma'lumot qolib ketmaydi.
+     * Eski usulda saqlangan
+     * mavzularni ("users" hujjati
+     * ichida) yangi, tez ishlaydigan
+     * "sharedTopics" kolleksiyasiga
+     * fonda ko'chirib qo'yamiz —
+     * UI'ni kutdirmaslik uchun
+     * await qilinmaydi.
      */
-    resetUserDocCache();
-
-    await loadCategorySettings();
-
-    await loadParticipants();
+    syncSharedTopics();
 
     /*
-     * index.html'dagi "Jonli xona / Duel / Play"
-     * tugmalaridan kelingan bo'lsa aniqlaymiz.
-     *
-     * ?liveStart=room|duel|play — qaysi rejim uchun
-     *   kelinganini bildiradi ("room" — eski
-     *   ?openRoom=1 bilan ham mos keladi).
-     * ?names=Ali,Vali,... — Duel/Play uchun
-     *   index.html'da oldindan kiritilgan
-     *   ishtirokchi ismlari (bo'lsa).
+     * Tashlab ketilgan (host tomonidan yopilmagan)
+     * eski xonalarni fonda tozalab boramiz — UI'ni
+     * kutdirmaslik uchun await qilinmaydi.
      */
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    const liveStart =
-      params.get("liveStart") ||
-      (params.get("openRoom") === "1"
-        ? "room"
-        : null);
-
-    const hasValidLiveStart =
-      liveStart === "room" ||
-      liveStart === "duel" ||
-      liveStart === "play";
+    cleanupStaleRoomsOnce();
 
     /*
-     * MUHIM (XATOLIK TUZATILDI): ilgari bu klass FAQAT
-     * mehmon (guest) uchun qo'shilardi. Ro'yxatdan o'tgan
-     * foydalanuvchi index.html'dagi "Jonli xona" tugmasi
-     * orqali kelganda esa, mavzu tanlash oynasi ochilishidan
-     * OLDIN bir nechta tarmoq so'rovi (loadTopicsSafe,
-     * loadOtherTopics va h.k.) amalga oshardi — shu vaqt
-     * ichida asosiy o'yin sahifasi (board) BIR ZUM to'liq
-     * ko'rinib, keyin ustidan modal ochilardi. Endi bu
-     * klass "hasValidLiveStart" aniqlangan zahoti — har
-     * qanday keyingi kodni kutmasdan — qo'shiladi, shu
-     * sabab board hech qachon "yalang'och" ko'rinmaydi.
+     * "🛠 Boshqaruv paneli" tugmasi faqat
+     * users/{uid} hujjatida role: "admin"
+     * bo'lganlarga ko'rinadi. fetchUserDocOnce()
+     * boshqa joylarda ham ishlatilgani uchun
+     * (keshlangan) qo'shimcha tarmoq so'rovi
+     * qilmaydi.
      */
-    if (hasValidLiveStart) {
-      document.body.classList.add(
-        "guestQuickLaunchMode"
-      );
-    }
+    try {
+      const myDoc = await fetchUserDocOnce();
 
-    if (isGuestUser) {
-
-      /*
-       * MUHIM: savollar kartasi bor asosiy
-       * boshqaruv paneli ("board") faqat haqiqiy
-       * (ro'yxatdan o'tgan) foydalanuvchilar uchun.
-       * Mehmon (anonim) sessiya aniq maqsadsiz
-       * (Jonli xona/Duel/Play'dan kelmagan holda)
-       * bu sahifaga tushib qolsa — darhol
-       * index.html'ga qaytariladi, board hech
-       * qachon render qilinmaydi.
-       */
-      if (!hasValidLiveStart) {
-        window.location.href = "index.html";
-        return;
+      if (myDoc?.role === "admin" && $("adminPanelBtn")) {
+        $("adminPanelBtn").classList.remove("hidden");
       }
-
-      guestQuickLaunch = true;
-
-      await initSettings();
-
-      /*
-       * Faqat mavzular RO'YXATI uchun kerak bo'lgan
-       * ma'lumotni to'g'ridan-to'g'ri "sharedTopics"
-       * kolleksiyasidan yuklaymiz — board hech qachon
-       * render qilinmaydi (setupGuestDemoTopic()
-       * o'rniga, chunki u board'ni ko'rsatib qo'yardi).
-       */
-      await loadOtherTopics();
-
-      userTopics =
-        otherTopics.map(t => ({ ...t }));
-
-      currentUserTopicId = null;
-
-      renderTeams();
-
-    } else {
-
-      await loadTopicsSafe();
-
-      await initSettings();
-
-      restoreLastTopic();
-
-      renderBoard();
-
-      renderTeams();
-
-      await loadOtherTopics();
-
-      /*
-       * Eski usulda saqlangan
-       * mavzularni ("users" hujjati
-       * ichida) yangi, tez ishlaydigan
-       * "sharedTopics" kolleksiyasiga
-       * fonda ko'chirib qo'yamiz —
-       * UI'ni kutdirmaslik uchun
-       * await qilinmaydi.
-       */
-      syncSharedTopics();
-
-      /*
-       * Tashlab ketilgan (host tomonidan yopilmagan)
-       * eski xonalarni fonda tozalab boramiz — UI'ni
-       * kutdirmaslik uchun await qilinmaydi.
-       */
-      cleanupStaleRoomsOnce();
-
-      /*
-       * "🛠 Boshqaruv paneli" tugmasi faqat
-       * users/{uid} hujjatida role: "admin"
-       * bo'lganlarga ko'rinadi. fetchUserDocOnce()
-       * boshqa joylarda ham ishlatilgani uchun
-       * (keshlangan) qo'shimcha tarmoq so'rovi
-       * qilmaydi.
-       */
-      try {
-        const myDoc = await fetchUserDocOnce();
-
-        if (
-          myDoc?.role === "admin" &&
-          $("adminPanelBtn")
-        ) {
-          $("adminPanelBtn").classList.remove("hidden");
-        }
-      } catch (e) {
-        console.warn("Admin holatini tekshirishda xatolik:", e);
-      }
-
-    }
-
-    if (hasValidLiveStart) {
-
-      roomPickerTargetMode = liveStart;
-
-      const namesParam =
-        params.get("names");
-
-      if (
-        (liveStart === "duel" ||
-          liveStart === "play") &&
-        namesParam
-      ) {
-
-        const names = namesParam
-          .split(",")
-          .map(n => decodeURIComponent(n).trim())
-          .filter(Boolean)
-          .slice(0, 40);
-
-        teamsData = names.map(n =>
-          createGuestDuelTeam(n)
-        );
-
-        renderTeams();
-      }
-
-      /*
-       * ?timer=NN — index.html'dagi "Play" bosqichida
-       * mehmon o'zi tanlagan savol vaqti (soniya). Faqat
-       * "play" rejimi uchun ishlatiladi; kiritilmagan yoki
-       * noto'g'ri bo'lsa, initSettings() allaqachon
-       * o'rnatgan standart (shaxsiy yoki global) qiymat
-       * o'zgarishsiz qoladi.
-       */
-      if (liveStart === "play") {
-        const timerParam = parseInt(params.get("timer"), 10);
-
-        if (Number.isFinite(timerParam) && timerParam > 0) {
-          userTimer = Math.min(timerParam, 300);
-
-          if ($("timerInput")) {
-            $("timerInput").value = userTimer;
-          }
-        }
-      }
-
-      openRoomTopicPicker();
+    } catch (e) {
+      console.warn("Admin holatini tekshirishda xatolik:", e);
     }
   }
-);
+
+  if (hasValidLiveStart) {
+    roomPickerTargetMode = liveStart;
+
+    const namesParam = params.get("names");
+
+    if ((liveStart === "duel" || liveStart === "play") && namesParam) {
+      const names = namesParam
+        .split(",")
+        .map((n) => decodeURIComponent(n).trim())
+        .filter(Boolean)
+        .slice(0, 40);
+
+      teamsData = names.map((n) => createGuestDuelTeam(n));
+
+      renderTeams();
+    }
+
+    /*
+     * ?timer=NN — index.html'dagi "Play" bosqichida
+     * mehmon o'zi tanlagan savol vaqti (soniya). Faqat
+     * "play" rejimi uchun ishlatiladi; kiritilmagan yoki
+     * noto'g'ri bo'lsa, initSettings() allaqachon
+     * o'rnatgan standart (shaxsiy yoki global) qiymat
+     * o'zgarishsiz qoladi.
+     */
+    if (liveStart === "play") {
+      const timerParam = parseInt(params.get("timer"), 10);
+
+      if (Number.isFinite(timerParam) && timerParam > 0) {
+        userTimer = Math.min(timerParam, 300);
+
+        if ($("timerInput")) {
+          $("timerInput").value = userTimer;
+        }
+      }
+    }
+
+    openRoomTopicPicker();
+  }
+});
 
 /* ================= TEMPLATE DOWNLOAD ================= */
 
-$("downloadTemplateBtn")
-  ?.addEventListener(
-    "click",
-    async () => {
+$("downloadTemplateBtn")?.addEventListener("click", async () => {
+  try {
+    await loadXlsxLib();
+  } catch (e) {
+    alert("Excel kutubxonasi yuklanmadi. Internetni tekshirib, qayta urinib ko'ring.");
+    return;
+  }
 
-      try {
-        await loadXlsxLib();
-      } catch (e) {
-        alert("Excel kutubxonasi yuklanmadi. Internetni tekshirib, qayta urinib ko'ring.");
-        return;
-      }
+  const wb = XLSX.utils.book_new();
 
-      const wb =
-        XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([
+    ["Question", "Answer", "Wrong Answer 1", "Wrong Answer 2", "Wrong Answer 3"],
 
-      const ws =
-        XLSX.utils.aoa_to_sheet(
-          [
-            [
-  "Question",
-  "Answer",
-  "Wrong Answer 1",
-  "Wrong Answer 2",
-  "Wrong Answer 3"
-],
+    ["Savol matni", "To'g'ri javob", "Noto'g'ri javob 1", "Noto'g'ri javob 2", "Noto'g'ri javob 3"],
 
-[
-  "Savol matni",
-  "To'g'ri javob",
-  "Noto'g'ri javob 1",
-  "Noto'g'ri javob 2",
-  "Noto'g'ri javob 3"
-],
+    ["Savol matni", "To'g'ri javob", "Noto'g'ri javob 1", "Noto'g'ri javob 2", "Noto'g'ri javob 3"],
+  ]);
 
-[
-  "Savol matni",
-  "To'g'ri javob",
-  "Noto'g'ri javob 1",
-  "Noto'g'ri javob 2",
-  "Noto'g'ri javob 3"
-]
-          ]
-        );
+  XLSX.utils.book_append_sheet(wb, ws, "Shablon");
 
-      XLSX.utils.book_append_sheet(
-        wb,
-        ws,
-        "Shablon"
-      );
-
-      XLSX.writeFile(
-        wb,
-        "BeksGame_Shablon.xlsx"
-      );
-    }
-  );
+  XLSX.writeFile(wb, "BeksGame_Shablon.xlsx");
+});
 
 /* Final public exports (single place to avoid duplicates) */
 window.openQ = openQ;
