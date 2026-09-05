@@ -1666,7 +1666,7 @@ body.categoriesDisabled .topicSidebarCol, body.categoriesDisabled #qcSubjectRow,
 
   .winnerCard { padding:32px 16px !important; border-radius:20px !important; }
 
-  #winnerText { font-size:32px !important; }
+  #winnerText { font-size:38px !important; }
 
 }
 
@@ -2112,6 +2112,29 @@ body.teacherLocked .gameBoardCard::after { content:"🔒 Boshqaruv qulflangan �
 /* ---------- XONA UCHUN MAVZU TANLASH (LIST) ---------- */
 
 .roomTopicPickerBox { width:min(520px,92vw); max-height:82vh; display:flex; flex-direction:column; }
+
+/*
+ * MOBIL: "Savol/mavzu ro'yxati" (roomTopicPickerModal)
+ * telefon ekranining TO'LIQ kengligini (va balandligini)
+ * egallashi kerak — atrofida bo'sh chekka (padding)
+ * qolmasligi uchun tashqi ".modal" konteynerining
+ * padding'i ham shu yerda nolga tushiriladi.
+ */
+@media(max-width:720px) {
+  #roomTopicPickerModal.modal {
+    padding:0;
+  }
+
+  .roomTopicPickerBox {
+    width:100vw;
+    max-width:100vw;
+    height:100vh;
+    height:100dvh;
+    max-height:100vh;
+    max-height:100dvh;
+    border-radius:0;
+  }
+}
 
 .roomTopicPickerSearchInput { width:100%; padding:12px 14px; margin:4px 0 14px; border:1px solid var(--line2, rgba(255,255,255,.18)); border-radius:12px; background:rgba(255,255,255,.06); color:var(--text, #f7f9fc); font-size:14px; outline:none; transition:.2s; }
 
