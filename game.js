@@ -27,6 +27,287 @@ let pointStep = 100;
 let pointMode = "fixed";
 
 /*
+ * MAVZULAR KATEGORIYASI — har bir mavzu (topic)
+ * ixtiyoriy "category" (string) maydoniga ega.
+ * Berilmagan bo'lsa DEFAULT_TOPIC_CATEGORY'ga
+ * tushadi — eski mavzular buzilmaydi.
+ */
+const DEFAULT_TOPIC_CATEGORY = "Umumiy";
+
+/*
+ * Kategoriya chiplariga navbat bilan
+ * beriladigan ranglar — yorqin/zamonaviy
+ * ko'rinish uchun.
+ */
+const TOPIC_CATEGORY_COLORS = [
+  "catPurple",
+  "catTeal",
+  "catCoral",
+  "catPink",
+  "catAmber",
+  "catBlue",
+  "catGreen"
+];
+
+function getTopicCategory(topic) {
+  const c =
+    (topic?.category || "")
+      .toString()
+      .trim();
+
+  return c || DEFAULT_TOPIC_CATEGORY;
+}
+
+/*
+ * MAVZU FANI (SUBJECT) — kategoriyadan
+ * BIR POG'ONA YUQORIDA turadi. Admin
+ * belgilagan ro'yxatdan (masalan "Ingliz
+ * tili", "Koreys tili", "Matematika")
+ * biri bo'lishi shart. Eski (fan
+ * belgilanmagan) mavzular avtomatik
+ * DEFAULT_TOPIC_SUBJECT ("Umumiy")
+ * bo'limiga tushadi — hech narsa
+ * buzilmaydi.
+ */
+const DEFAULT_TOPIC_SUBJECT = "Umumiy";
+
+function getTopicSubject(topic) {
+  const s =
+    (topic?.subject || "")
+      .toString()
+      .trim();
+
+  return s || DEFAULT_TOPIC_SUBJECT;
+}
+
+/*
+ * Berilgan mavzular ro'yxatidan faqat
+ * berilgan FANGA tegishlilarini qaytaradi.
+ * subject === null/"" bo'lsa — hammasi
+ * ("Barchasi" tanlangan holat).
+ */
+function filterTopicsBySubject(topics, subject) {
+  if (!subject) return topics || [];
+
+  return (topics || []).filter(
+    t => getTopicSubject(t) === subject
+  );
+}
+
+/*
+ * Fanlar bo'yicha statistika (chap
+ * ustunda ko'rsatish uchun) —
+ * getTopicCategoryStats bilan bir xil
+ * shaklda ({name,count,colorClass}),
+ * lekin tartib admin belgilagan
+ * "subjects" ro'yxati tartibida, so'ng
+ * eski/noma'lum fanlar, eng oxirida
+ * "Umumiy" keladi.
+ */
+function getTopicSubjectStats(topics) {
+
+  const map = new Map();
+
+  (topics || []).forEach(topic => {
+    const name = getTopicSubject(topic);
+    map.set(name, (map.get(name) || 0) + 1);
+  });
+
+  const known = categorySettingsState.subjects || [];
+
+  const names = [
+    ...known.filter(n => map.has(n)),
+    ...[...map.keys()].filter(
+      n => !known.includes(n) && n !== DEFAULT_TOPIC_SUBJECT
+    ).sort((a, b) => a.localeCompare(b)),
+    ...(map.has(DEFAULT_TOPIC_SUBJECT) ? [DEFAULT_TOPIC_SUBJECT] : [])
+  ];
+
+  return names.map(
+    (name, i) => ({
+      name,
+      count: map.get(name),
+      colorClass:
+        TOPIC_CATEGORY_COLORS[
+          i % TOPIC_CATEGORY_COLORS.length
+        ]
+    })
+  );
+}
+
+/*
+ * Berilgan mavzular ro'yxatidan
+ * unikal kategoriyalar + har birida
+ * nechta mavzu borligini hisoblaydi.
+ * Natija: [{ name, count, colorClass }]
+ */
+function getTopicCategoryStats(topics) {
+
+  const map = new Map();
+
+  (topics || []).forEach(topic => {
+
+    const name =
+      getTopicCategory(topic);
+
+    map.set(
+      name,
+      (map.get(name) || 0) + 1
+    );
+
+  });
+
+  const names =
+    [...map.keys()].sort(
+      (a, b) => {
+
+        if (a === DEFAULT_TOPIC_CATEGORY)
+          return 1;
+
+        if (b === DEFAULT_TOPIC_CATEGORY)
+          return -1;
+
+        return a.localeCompare(b);
+      }
+    );
+
+  return names.map(
+    (name, i) => ({
+      name,
+      count: map.get(name),
+      colorClass:
+        TOPIC_CATEGORY_COLORS[
+          i % TOPIC_CATEGORY_COLORS.length
+        ]
+    })
+  );
+}
+
+/*
+ * Board (o'z mavzular) va Room
+ * Topic Picker (umumiy ro'yxat)
+ * uchun alohida-alohida "hozir qaysi
+ * kategoriya tanlangan" holati —
+ * null = "Barchasi".
+ */
+let selectedBoardCategory = null;
+let selectedRoomPickerCategory = null;
+let selectedBoardSubject = null;
+let selectedRoomPickerSubject = null;
+
+/*
+ * FAN VA KATEGORIYALASH — GLOBAL SOZLAMA (settings/app):
+ * admin panelidan boshqariladi.
+ *  - categoriesEnabled      → fan/kategoriya UI'si umuman
+ *                              ko'rsatilsinmi
+ *  - subjects               → admin belgilagan FANLAR
+ *                              (yo'nalishlar) ro'yxati
+ *                              (masalan "Ingliz tili",
+ *                              "Koreys tili", "Matematika";
+ *                              soni cheklanmagan). Har bir
+ *                              foydalanuvchi mavzu
+ *                              qo'shishdan oldin shu
+ *                              ro'yxatdan BITTASINI tanlashi
+ *                              SHART — erkin matn emas.
+ *  - usersCanAddCategories  → oddiy foydalanuvchilar UZI
+ *                              tanlagan FAN ICHIDA yangi
+ *                              (o'ziga xos) kategoriya
+ *                              yoza olsinmi — GLOBAL standart
+ *                              holat. Har bir foydalanuvchi
+ *                              uchun admin panelidagi shaxsiy
+ *                              "Fan ichida o'z kategoriyasini
+ *                              qo'shish" svichi bu global
+ *                              holatni bosib o'tishi mumkin.
+ */
+const DEFAULT_SUBJECTS = [
+  "Ingliz tili",
+  "Koreys tili",
+  "Matematika"
+];
+
+let categorySettingsState = {
+  enabled: true,
+  subjects: DEFAULT_SUBJECTS,
+  usersCanAddCategoriesDefault: true
+};
+
+/*
+ * Joriy foydalanuvchining shaxsiy
+ * ruxsatlari (getMyPermissions natijasi)
+ * — bir marta yuklanib keshlanadi, chunki
+ * kategoriya inputini SINXRON chizish
+ * kerak (render funksiyalari async emas).
+ */
+let myPermissionsCache = null;
+
+async function loadCategorySettings() {
+
+  const s =
+    await fetchAppSettingsOnce();
+
+  const enabled =
+    s?.categoriesEnabled !== false;
+
+  // Yangi maydon "subjects"; eski hujjatlarda hali
+  // "standardCategories" nomi bilan qolgan bo'lishi
+  // mumkin — shu ham o'qib qo'llab-quvvatlanadi.
+  const rawSubjectsSource =
+    Array.isArray(s?.subjects) && s.subjects.length
+      ? s.subjects
+      : s?.standardCategories;
+
+  const rawList =
+    Array.isArray(rawSubjectsSource)
+      ? rawSubjectsSource
+          .map(c =>
+            (c || "")
+              .toString()
+              .trim()
+          )
+          .filter(Boolean)
+      : [];
+
+  categorySettingsState = {
+    enabled,
+    subjects:
+      rawList.length
+        ? rawList
+        : DEFAULT_SUBJECTS,
+    usersCanAddCategoriesDefault:
+      s?.usersCanAddCategories !== false
+  };
+
+  document.body.classList.toggle(
+    "categoriesDisabled",
+    !enabled
+  );
+
+  myPermissionsCache =
+    await getMyPermissions();
+
+  return categorySettingsState;
+}
+
+/*
+ * Joriy foydalanuvchi o'ziga xos
+ * (standart ro'yxatdan tashqari)
+ * kategoriya yoza oladimi?
+ * Admin — doim ha. Oddiy foydalanuvchi —
+ * shaxsiy ruxsati (agar admin panelida
+ * ANIQ belgilangan bo'lsa) yoki bo'lmasa
+ * GLOBAL standart holat asosida.
+ */
+function canUserAddOwnCategory() {
+
+  if (myPermissionsCache?.isAdmin) return true;
+
+  return (
+    myPermissionsCache?.canAddCategories ??
+    categorySettingsState.usersCanAddCategoriesDefault
+  );
+}
+
+/*
  * BONUS REJIMI — o'qituvchi Excel matnida
  * qo'lda "2x"/"3x" yozmasa ham, tizim
  * o'zi tasodifiy ravishda ba'zi savollarni
@@ -135,6 +416,49 @@ let duelStats = {
 };
 
 const $ = id => document.getElementById(id);
+
+/*
+ * JONLI OQIM TO'SIG'I (LIVE FLOW SHIELD)
+ * -----------------------------------------------------------
+ * Xona ochish / Duel boshlash kabi ko'p bosqichli
+ * jarayonlarda, bosqichlar orasida (masalan Firestore'ga
+ * yozish kutilayotganda) o'yin maydoni (board) BIR ZUM ham
+ * "yalang'och" ko'rinib qolmasligi uchun ishlatiladi.
+ *
+ * showFlowShield()   — jarayon boshlanganda darhol chaqiriladi,
+ *                       parda paydo bo'ladi (hozircha spinnersiz).
+ * showFlowLoading(t) — haqiqiy tarmoq so'rovi ketayotgan
+ *                       "bo'sh" lahzalarda (hech qanday alohida
+ *                       bosqich oynasi ko'rinmayotganda) spinner
+ *                       va matn (t) bilan ko'rsatiladi.
+ * hideFlowShield()   — jarayon to'liq yakunlanganda (yakuniy
+ *                       ekran ochilganda yoki foydalanuvchi
+ *                       bekor qilganda) chaqiriladi.
+ */
+function showFlowShield() {
+  $("liveFlowShieldModal")
+    ?.classList.add("show");
+}
+
+function showFlowLoading(text) {
+  const el = $("liveFlowShieldModal");
+  if (!el) return;
+  el.classList.add("show");
+  el.classList.add("loading");
+  const t = $("liveFlowShieldText");
+  if (t) t.textContent = text || "Iltimos kuting...";
+}
+
+function hideFlowShield() {
+  const el = $("liveFlowShieldModal");
+  if (!el) return;
+  el.classList.remove("show");
+  el.classList.remove("loading");
+}
+
+window.showFlowShield = showFlowShield;
+window.showFlowLoading = showFlowLoading;
+window.hideFlowShield = hideFlowShield;
 const clickSound = $("clickSound");
 const winnerSound = $("winnerSound");
 
@@ -346,7 +670,11 @@ async function getMyPermissions() {
       canEditTopics: d?.canEditTopics !== false,
       canAddParticipants: d?.canAddParticipants !== false,
       canSetParticipantImage:
-        d?.canSetParticipantImage !== false
+        d?.canSetParticipantImage !== false,
+      canAddCategories:
+        typeof d?.canAddCategories === "boolean"
+          ? d.canAddCategories
+          : null
     };
   } catch (e) {
     console.warn("getMyPermissions:", e);
@@ -356,7 +684,8 @@ async function getMyPermissions() {
       canAddTopics: true,
       canEditTopics: true,
       canAddParticipants: true,
-      canSetParticipantImage: true
+      canSetParticipantImage: true,
+      canAddCategories: null
     };
   }
 }
@@ -372,18 +701,19 @@ async function initSettings() {
   const defaults = await getAppDefaults();
 
   // ---- BALL (Ball qadami) ----
-  {
-    const storedRaw = localStorage.getItem("pointStep");
-    if (storedRaw === null) {
-      pointStep = defaults.pointStep;
-    } else {
-      const storedStep = parseInt(storedRaw, 10);
-      pointStep =
-        Number.isFinite(storedStep) && storedStep >= 0
-          ? storedStep
-          : defaults.pointStep;
-    }
-  }
+  /*
+   * MUHIM TUZATISH: bu qiymat endi HAR DOIM admin panelidagi
+   * global standartdan (settings/app -> pointStep) olinadi.
+   * Ilgari bu yerda localStorage'dagi SHAXSIY (faqat shu
+   * qurilmaga tegishli) qiymat admin standartini "bosib
+   * o'tar" edi — shu sabab foydalanuvchi o'z sozlamalaridan
+   * ballni o'zgartirsa, keyinchalik index.html orqali qayta
+   * kirganida ham (yoki hatto boshqa ishtirokchilarga ham)
+   * o'sha ESKI shaxsiy qiymat qo'llanib qolardi. Endi sahifa
+   * har safar yuklanganda (index'dan qaytib kirilganda ham)
+   * FAQAT admin standarti ishlatiladi.
+   */
+  pointStep = defaults.pointStep;
   pointMode = localStorage.getItem("pointMode") || "fixed";
 
   if ($("pointStepInput")) {
@@ -413,35 +743,20 @@ async function initSettings() {
   }
 
   // ---- BONUS REJIMI ----
-  {
-    const storedBonusMode = localStorage.getItem("bonusModeEnabled");
-    bonusModeEnabled =
-      storedBonusMode === null
-        ? defaults.bonusModeEnabled
-        : storedBonusMode === "1";
-  }
-
-  {
-    const storedCountRaw = localStorage.getItem("bonusQuestionCount");
-    bonusQuestionCount =
-      storedCountRaw === null
-        ? defaults.bonusQuestionCount
-        : parseInt(storedCountRaw, 10) || defaults.bonusQuestionCount;
-  }
-
-  {
-    const storedMultiplier = localStorage.getItem("bonusMultiplierMode");
-    bonusMultiplierMode =
-      storedMultiplier || defaults.bonusMultiplierMode;
-  }
-
-  {
-    const storedStreak = localStorage.getItem("streakBonusEnabled");
-    streakBonusEnabled =
-      storedStreak === null
-        ? defaults.streakBonusEnabled
-        : storedStreak === "1";
-  }
+  /*
+   * ESKI TIZIM BEKOR QILINDI: bonus sozlamalari
+   * (rejim, bonus savol soni, ko'paytiruvchi, streak)
+   * ilgari localStorage'da SAQLANIB, bir marta
+   * o'zgartirilgandan keyin admin panelidagi yangi
+   * GLOBAL standartni "bosib o'tar" edi. Endi bular
+   * HAR DOIM admin.html'dagi "O'yin standartlari
+   * (global)" bo'limidan o'qiladi — localStorage'dan
+   * eski qiymat o'qilmaydi.
+   */
+  bonusModeEnabled = defaults.bonusModeEnabled;
+  bonusQuestionCount = defaults.bonusQuestionCount;
+  bonusMultiplierMode = defaults.bonusMultiplierMode;
+  streakBonusEnabled = defaults.streakBonusEnabled;
 
   if ($("bonusModeCheckbox")) {
     $("bonusModeCheckbox").checked = bonusModeEnabled;
@@ -479,25 +794,15 @@ function updateBonusSettings() {
   streakBonusEnabled =
     !!$("streakBonusCheckbox")?.checked;
 
-  localStorage.setItem(
-    "bonusModeEnabled",
-    bonusModeEnabled ? "1" : "0"
-  );
-
-  localStorage.setItem(
-    "bonusQuestionCount",
-    String(bonusQuestionCount)
-  );
-
-  localStorage.setItem(
-    "bonusMultiplierMode",
-    bonusMultiplierMode
-  );
-
-  localStorage.setItem(
-    "streakBonusEnabled",
-    streakBonusEnabled ? "1" : "0"
-  );
+  /*
+   * ESKI TIZIM BEKOR QILINDI: bu yerdagi o'zgartirish
+   * endi FAQAT joriy sessiya/o'yin uchun amal qiladi
+   * va localStorage'ga YOZILMAYDI — aks holda u
+   * "shaxsiy standart" bo'lib qolib, admin panelidagi
+   * yangi global bonus sozlamalarini keyingi safar
+   * sahifa ochilganda bosib o'tar edi. Doimiy standart
+   * endi FAQAT admin.html orqali belgilanadi.
+   */
 
   /*
    * Agar hozir biror mavzu savollari
@@ -579,10 +884,17 @@ function updatePointSettings() {
     return alert("Ball noto'g'ri!");
   }
 
+  /*
+   * MUHIM: bu qiymat endi localStorage'ga YOZILMAYDI, shu
+   * sababli sahifa qayta yuklanganda (masalan index.html'ga
+   * chiqib, keyin yana "o'yin o'ynash"ni bosganda) bu shaxsiy
+   * o'zgartirish YO'QOLADI va yana admin panelidagi global
+   * standart qaytadan qo'llanadi. Faqat JORIY sahifa
+   * (reload'gacha) uchun vaqtinchalik ko'rinishda ishlaydi.
+   */
   pointStep = step;
   pointMode = mode;
 
-  localStorage.setItem("pointStep", String(step));
   localStorage.setItem("pointMode", mode);
 
   renderBoard();
@@ -590,8 +902,8 @@ function updatePointSettings() {
 
   alert(
     step === 0
-      ? "✅ Saqlandi! Endi o'yinda ball ko'rsatilmaydi — to'g'ri/xato javob statistikasi ko'rinadi."
-      : "✅ Ball sozlamasi saqlandi!"
+      ? "✅ Saqlandi! Endi o'yinda ball ko'rsatilmaydi — to'g'ri/xato javob statistikasi ko'rinadi. (Diqqat: bu faqat joriy seans uchun — admin paneldagi standart o'zgarmaydi.)"
+      : "✅ Ball sozlamasi saqlandi! (Diqqat: bu faqat joriy seans uchun — sahifa qayta yuklanganda admin paneldagi standart qiymat qo'llanadi.)"
   );
 }
 
@@ -601,8 +913,9 @@ function updatePointStep() {
   const value = parseInt($("pointStepInput")?.value, 10);
 
   if (Number.isFinite(value) && value > 0) {
+    // Vaqtinchalik (faqat joriy sahifa/seans) — localStorage'ga
+    // yozilmaydi, shu sababli admin standartini bosib o'tmaydi.
     pointStep = value;
-    localStorage.setItem("pointStep", String(value));
     renderBoard();
   }
 }
@@ -2173,7 +2486,7 @@ function renderUserTopics() {
  * applyExcelFileToTopic() orqali
  * amalga oshiriladi.
  */
-async function createUserTopic(title) {
+async function createUserTopic(title, subject, category) {
 
   const perm = await getMyPermissions();
 
@@ -2202,6 +2515,18 @@ async function createUserTopic(title) {
       Date.now(),
 
     title,
+
+    subject:
+      (subject || "")
+        .toString()
+        .trim() ||
+      DEFAULT_TOPIC_SUBJECT,
+
+    category:
+      (category || "")
+        .toString()
+        .trim() ||
+      DEFAULT_TOPIC_CATEGORY,
 
     questions: {
       0: [],
@@ -2386,13 +2711,108 @@ async function saveQuestionCard() {
 
   if (title) {
 
+    /*
+     * FAN — kategoriyalash yoqilgan
+     * bo'lsa, admin belgilagan
+     * ro'yxatdan BITTASINI tanlash
+     * SHART (erkin matn emas).
+     */
+    const subjectInput =
+      $("newUserTopicSubject");
+
+    let subject =
+      subjectInput?.value?.trim() ||
+      "";
+
+    if (categorySettingsState.enabled) {
+
+      const subjectOptions =
+        categorySettingsState.subjects;
+
+      if (!subjectOptions.includes(subject)) {
+        alert(
+          "Iltimos, avval FANni (yo'nalishni) tanlang: " +
+            subjectOptions.join(", ")
+        );
+        return;
+      }
+
+    } else {
+      subject = "";
+    }
+
+    /*
+     * KATEGORIYA — agar admin
+     * kategoriyalashni o'chirgan
+     * bo'lsa, umuman tekshirilmaydi.
+     * Aks holda: foydalanuvchi tanlagan
+     * FAN ICHIDA o'z kategoriyasini
+     * yoza olsa — kiritilgan matn
+     * qanday bo'lsa shunday qabul
+     * qilinadi (bo'sh bo'lsa "Umumiy").
+     * Yoza olmasa — FAQAT shu fan
+     * ichida ALLAQACHON mavjud bo'lgan
+     * kategoriyalardan biriga mos
+     * kelishi shart.
+     */
+    const categoryInput =
+      $("newUserTopicCategory");
+
+    let category =
+      categoryInput?.value?.trim() ||
+      "";
+
+    if (categorySettingsState.enabled) {
+
+      if (!canUserAddOwnCategory()) {
+
+        const options =
+          getTopicCategoryStats(
+            filterTopicsBySubject(userTopics, subject)
+          ).map(c => c.name);
+
+        const matched =
+          options.find(
+            o =>
+              o.toLowerCase() ===
+              category.toLowerCase()
+          );
+
+        if (category && !matched) {
+          alert(
+            "Bunday kategoriya yo'q. \"" + subject + "\" fani ichida faqat quyidagilardan birini tanlang: " +
+              (options.join(", ") || "(hozircha kategoriya yo'q — administratorga murojaat qiling)")
+          );
+          return;
+        }
+
+        if (!matched && !options.length) {
+          alert(
+            "\"" + subject + "\" fani ichida hali kategoriya mavjud emas. Administratorga murojaat qiling."
+          );
+          return;
+        }
+
+        category =
+          matched || options[0] || "";
+      }
+
+    } else {
+      category = "";
+    }
+
     // NOM YOZILGAN → yangi savol kartasi
     topic =
-      await createUserTopic(title);
+      await createUserTopic(
+        title,
+        subject,
+        category
+      );
 
     if (!topic) return;
 
     if (titleInput) titleInput.value = "";
+    if (categoryInput) categoryInput.value = "";
 
   } else {
 
@@ -2605,6 +3025,97 @@ async function editUserTopicTitle(
   topic.title =
     title.trim();
 
+  if (categorySettingsState.enabled) {
+
+    const subjectOptions =
+      categorySettingsState.subjects;
+
+    const subjectAnswer =
+      prompt(
+        `Fan (${subjectOptions.join(", ")}):`,
+        getTopicSubject(topic)
+      );
+
+    if (subjectAnswer !== null) {
+
+      const trimmedSubject =
+        subjectAnswer.trim();
+
+      const matchedSubject =
+        subjectOptions.find(
+          o =>
+            o.toLowerCase() ===
+            trimmedSubject.toLowerCase()
+        );
+
+      if (trimmedSubject && !matchedSubject) {
+        alert(
+          "Bunday fan yo'q. Faqat quyidagilardan birini tanlang: " +
+            subjectOptions.join(", ")
+        );
+      } else if (matchedSubject) {
+        topic.subject = matchedSubject;
+      }
+    }
+
+    const subjectForCategory =
+      getTopicSubject(topic);
+
+    const canFree =
+      canUserAddOwnCategory();
+
+    const existingCategoryOptions =
+      getTopicCategoryStats(
+        filterTopicsBySubject(userTopics, subjectForCategory)
+      ).map(c => c.name);
+
+    const hint =
+      canFree
+        ? "(istalgan nom yozing)"
+        : "(\"" + subjectForCategory + "\" fani ichida: " +
+          (existingCategoryOptions.join(", ") || "hozircha yo'q") +
+          ")";
+
+    const category =
+      prompt(
+        `Kategoriya ${hint}:`,
+        getTopicCategory(topic)
+      );
+
+    if (category !== null) {
+
+      const trimmed =
+        category.trim();
+
+      if (canFree) {
+
+        topic.category =
+          trimmed ||
+          DEFAULT_TOPIC_CATEGORY;
+
+      } else {
+
+        const matched =
+          existingCategoryOptions.find(
+            o =>
+              o.toLowerCase() ===
+              trimmed.toLowerCase()
+          );
+
+        if (trimmed && !matched) {
+          alert(
+            "Bunday kategoriya yo'q. \"" + subjectForCategory + "\" fani ichida faqat quyidagilardan birini tanlang: " +
+              (existingCategoryOptions.join(", ") || "(hozircha yo'q)")
+          );
+        } else {
+          topic.category =
+            matched ||
+            DEFAULT_TOPIC_CATEGORY;
+        }
+      }
+    }
+  }
+
   renderUserTopics();
 
   await saveTopics(topicId);
@@ -2758,23 +3269,288 @@ function renderExcelTargetOptions() {
    TOPIC BOARD
 ========================= */
 
+/*
+ * Kategoriya ustunini (chapdagi
+ * ro'yxat) chizadi — board va
+ * room-picker uchun umumiy.
+ */
+function renderCategorySidebar(
+  container,
+  categories,
+  selected,
+  onSelect
+) {
+
+  if (!container) return;
+
+  const totalCount =
+    categories.reduce(
+      (sum, c) => sum + c.count,
+      0
+    );
+
+  const allChip = `
+    <div
+      class="categoryChip catAllChip${
+        !selected ? " active" : ""
+      }"
+      data-cat=""
+    >
+      <span>Barchasi</span>
+      <small>${totalCount}</small>
+    </div>
+  `;
+
+  const chips = categories
+    .map(
+      c => `
+        <div
+          class="categoryChip ${c.colorClass}${
+            selected === c.name
+              ? " active"
+              : ""
+          }"
+          data-cat="${escapeHtml(c.name)}"
+        >
+          <span>${escapeHtml(c.name)}</span>
+          <small>${c.count}</small>
+        </div>
+      `
+    )
+    .join("");
+
+  container.innerHTML =
+    allChip + chips;
+
+  container
+    .querySelectorAll(".categoryChip")
+    .forEach(chip => {
+      chip.onclick = () => {
+        onSelect(
+          chip.dataset.cat || null
+        );
+      };
+    });
+}
+
+/*
+ * "+ Yangi" kartasi — bosilganda
+ * Savol qo'shish panelini ochib,
+ * nom maydoniga fokus qiladi va
+ * (agar bitta kategoriya tanlangan
+ * bo'lsa) kategoriya maydonini
+ * avtomatik shu bilan to'ldiradi.
+ */
+function focusAddTopicPanel(
+  presetCategory,
+  presetSubject
+) {
+
+  const dock =
+    document.querySelector(
+      ".controlDockWide"
+    );
+
+  if (
+    dock &&
+    dock.classList.contains(
+      "settingsClosed"
+    )
+  ) {
+    toggleQuestionSettings();
+  }
+
+  const titleInput =
+    $("newUserTopicTitle");
+
+  const subjectSelect =
+    $("newUserTopicSubject");
+
+  const categoryInput =
+    $("newUserTopicCategory");
+
+  if (
+    subjectSelect &&
+    presetSubject &&
+    categorySettingsState.subjects.includes(presetSubject)
+  ) {
+    subjectSelect.value = presetSubject;
+    renderTopicCategoryOptions();
+  }
+
+  if (categoryInput) {
+    categoryInput.value =
+      presetCategory || "";
+  }
+
+  titleInput?.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  titleInput?.focus();
+}
+
+window.focusAddTopicPanel =
+  focusAddTopicPanel;
+
+function appendAddTopicCard(
+  board,
+  presetCategory,
+  presetSubject
+) {
+
+  const addCard =
+    document.createElement("div");
+
+  addCard.className =
+    "topicBoardCard topicBoardAddCard";
+
+  const labelParts = [];
+
+  if (presetSubject) labelParts.push(presetSubject);
+  if (presetCategory) labelParts.push(presetCategory);
+
+  addCard.innerHTML = `
+    <div class="topicBoardAddIcon">
+      +
+    </div>
+    <div class="topicBoardInfo">
+      <strong>Yangi mavzu</strong>
+      <span>
+        ${
+          labelParts.length
+            ? escapeHtml(labelParts.join(" / ")) + " uchun"
+            : "Savol qo‘shish"
+        }
+      </span>
+    </div>
+  `;
+
+  addCard.onclick = () => {
+    focusAddTopicPanel(
+      presetCategory,
+      presetSubject
+    );
+  };
+
+  board.appendChild(addCard);
+}
+
+/*
+ * "Savol qo'shish" bloki ustidagi
+ * FAN (subject) tanlovini to'ldiradi
+ * — admin belgilagan "subjects"
+ * ro'yxati. Joriy tanlangan board
+ * fani (agar "Barchasi" emas) —
+ * boshlang'ich qiymat sifatida
+ * qo'yiladi.
+ */
+function renderTopicSubjectOptions() {
+
+  const select =
+    $("newUserTopicSubject");
+
+  if (!select) return;
+
+  const subjects =
+    categorySettingsState.subjects;
+
+  const prevValue = select.value;
+
+  select.innerHTML = subjects
+    .map(
+      s =>
+        `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`
+    )
+    .join("");
+
+  const preferred =
+    selectedBoardSubject &&
+    subjects.includes(selectedBoardSubject)
+      ? selectedBoardSubject
+      : (
+          subjects.includes(prevValue)
+            ? prevValue
+            : subjects[0] || ""
+        );
+
+  select.value = preferred;
+
+  select.onchange = () => {
+    renderTopicCategoryOptions();
+  };
+}
+
+/*
+ * "Savol qo'shish" bloki ostidagi
+ * Kategoriya inputini to'ldiradi.
+ * Datalist tarkibi — joriy tanlangan
+ * FAN ICHIDA foydalanuvchining o'z
+ * mavzularida allaqachon ishlatilgan
+ * kategoriyalar. Agar foydalanuvchi
+ * o'z kategoriyasini yoza olmasa
+ * (canUserAddOwnCategory() false),
+ * maydon FAQAT shu ro'yxatga
+ * moslashtirilib tekshiriladi
+ * (saveQuestionCard ichida).
+ */
+function renderTopicCategoryOptions() {
+
+  const list =
+    $("topicCategoryOptions");
+
+  if (!list) return;
+
+  const subject =
+    $("newUserTopicSubject")?.value || "";
+
+  const names =
+    getTopicCategoryStats(
+      filterTopicsBySubject(userTopics, subject)
+    ).map(c => c.name);
+
+  list.innerHTML = names
+    .map(
+      name =>
+        `<option value="${escapeHtml(name)}"></option>`
+    )
+    .join("");
+}
+
 function renderBoard() {
 
   const board = $("board");
+
+  const subBox =
+    $("boardSubjectList");
+
+  const catBox =
+    $("boardCategoryList");
 
   if (!board) return;
 
   board.innerHTML = "";
 
+  renderTopicSubjectOptions();
+  renderTopicCategoryOptions();
+
   if (
     !Array.isArray(userTopics) ||
     !userTopics.length
   ) {
+
+    if (subBox) subBox.innerHTML = "";
+    if (catBox) catBox.innerHTML = "";
+
     board.innerHTML = `
       <div class="topicBoardEmpty">
         📚 Hozircha mavzu mavjud emas
       </div>
     `;
+
+    appendAddTopicCard(board);
+
     return;
   }
 
@@ -2791,6 +3567,105 @@ function renderBoard() {
     );
 
   /*
+   * FANLAR VA KATEGORIYALAR —
+   * chapdagi ustunlar BARCHA mavzular
+   * asosida (qidiruv natijasidan
+   * qat'i nazar) chiqadi. Avval FAN
+   * tanlanadi, keyin shu FAN ICHIDAGI
+   * kategoriyalar ko'rsatiladi. Admin
+   * kategoriyalashni o'chirgan bo'lsa —
+   * bu ustunlar umuman ko'rsatilmaydi
+   * va filtrlash ishlamaydi.
+   */
+  let subjectFilteredTopics = sortedTopics;
+
+  if (!categorySettingsState.enabled) {
+
+    selectedBoardSubject = null;
+    selectedBoardCategory = null;
+
+    if (subBox) subBox.innerHTML = "";
+    if (catBox) catBox.innerHTML = "";
+
+  } else {
+
+    const subjects =
+      getTopicSubjectStats(
+        sortedTopics
+      );
+
+    if (
+      selectedBoardSubject &&
+      !subjects.some(
+        s => s.name === selectedBoardSubject
+      )
+    ) {
+      selectedBoardSubject = null;
+      selectedBoardCategory = null;
+    }
+
+    renderCategorySidebar(
+      subBox,
+      subjects,
+      selectedBoardSubject,
+      name => {
+        selectedBoardSubject = name;
+        selectedBoardCategory = null;
+        renderBoard();
+      }
+    );
+
+    subjectFilteredTopics =
+      filterTopicsBySubject(
+        sortedTopics,
+        selectedBoardSubject
+      );
+
+    if (!selectedBoardSubject) {
+
+      /*
+       * "Barchasi" (hech qanday fan
+       * tanlanmagan) holatda kategoriya
+       * ustuni butunlay yashiriladi —
+       * yuqorida fan qatorida allaqachon
+       * "Barchasi" chipi bor va u BARCHA
+       * savollarni ko'rsatadi. Kategoriya
+       * ustuni FAQAT aniq bir FAN
+       * tanlanganda paydo bo'ladi.
+       */
+      selectedBoardCategory = null;
+
+      if (catBox) catBox.innerHTML = "";
+
+    } else {
+
+      const categories =
+        getTopicCategoryStats(
+          subjectFilteredTopics
+        );
+
+      if (
+        selectedBoardCategory &&
+        !categories.some(
+          c => c.name === selectedBoardCategory
+        )
+      ) {
+        selectedBoardCategory = null;
+      }
+
+      renderCategorySidebar(
+        catBox,
+        categories,
+        selectedBoardCategory,
+        name => {
+          selectedBoardCategory = name;
+          renderBoard();
+        }
+      );
+    }
+  }
+
+  /*
    * NOM BO'YICHA QIDIRISH —
    * "1 → 5 kategoriya" yozuvi
    * o'rniga qo'shilgan qidiruv
@@ -2804,15 +3679,24 @@ function renderBoard() {
       .trim()
       .toLowerCase();
 
-  const visibleTopics =
+  let visibleTopics =
     searchTerm
-      ? sortedTopics.filter(
+      ? subjectFilteredTopics.filter(
           t =>
             (t.title || "")
               .toLowerCase()
               .includes(searchTerm)
         )
-      : sortedTopics;
+      : subjectFilteredTopics;
+
+  if (selectedBoardCategory) {
+    visibleTopics =
+      visibleTopics.filter(
+        t =>
+          getTopicCategory(t) ===
+          selectedBoardCategory
+      );
+  }
 
   if (!visibleTopics.length) {
     board.innerHTML = `
@@ -2820,6 +3704,13 @@ function renderBoard() {
         🔍 "${escapeHtml(searchTerm)}" bo‘yicha mavzu topilmadi
       </div>
     `;
+
+    appendAddTopicCard(
+      board,
+      selectedBoardCategory,
+      selectedBoardSubject
+    );
+
     return;
   }
 
@@ -2864,7 +3755,11 @@ function renderBoard() {
         </strong>
 
         <span>
-          ${total} ta savol
+          ${total} ta savol${
+            categorySettingsState.enabled
+              ? " · " + escapeHtml(getTopicSubject(topic)) + " / " + escapeHtml(getTopicCategory(topic))
+              : ""
+          }
         </span>
 
         ${
@@ -2921,6 +3816,12 @@ function renderBoard() {
     board.appendChild(card);
 
   });
+
+  appendAddTopicCard(
+    board,
+    selectedBoardCategory,
+    selectedBoardSubject
+  );
 }
 
 /* ================= TOPIC INTRO / PLAY MODAL ================= */
@@ -2943,6 +3844,15 @@ function openTopicIntro(topic) {
     swapRoomTopic(topic);
     return;
   }
+
+  /*
+   * Shu yerdan boshlab (Duel/Xona/Play qaysi biri
+   * tanlanishidan qat'iy nazar) board hech qachon
+   * "yalang'och" ko'rinib qolmasligi uchun parda ishga
+   * tushadi — jarayon tugagach yoki bekor qilinganda
+   * o'chiriladi.
+   */
+  showFlowShield();
 
   pendingIntroTopic = topic;
 
@@ -3085,7 +3995,7 @@ function renderIntroRules() {
     `;
 }
 
-function closeTopicIntroModal() {
+function closeTopicIntroModal(cancelling = true) {
 
   const modal =
     $("topicIntroModal");
@@ -3102,6 +4012,18 @@ function closeTopicIntroModal() {
   }
 
   pendingIntroTopic = null;
+
+  /*
+   * "cancelling" faqat foydalanuvchi haqiqatan ham
+   * jarayonni bekor qilganda (× yoki "Yopish" tugmasi)
+   * true bo'ladi — Duel/Xona/Play davom ettirilayotganda
+   * (confirmStartTopicGame/confirmStartDuel/openRoomSetup)
+   * `false` uzatiladi, shunda parda keyingi bosqichgacha
+   * turib qoladi.
+   */
+  if (cancelling) {
+    hideFlowShield();
+  }
 }
 
 window.closeTopicIntroModal =
@@ -3114,7 +4036,7 @@ function confirmStartTopicGame() {
   const topic =
     pendingIntroTopic;
 
-  closeTopicIntroModal();
+  closeTopicIntroModal(false);
 
   selectUserTopic(
     topic.id
@@ -3196,7 +4118,7 @@ function confirmStartDuel() {
   const topic =
     pendingIntroTopic;
 
-  closeTopicIntroModal();
+  closeTopicIntroModal(false);
 
   selectUserTopic(
     topic.id
@@ -3359,7 +4281,7 @@ function openRoomSetup() {
   pendingRoomTopic =
     pendingIntroTopic;
 
-  closeTopicIntroModal();
+  closeTopicIntroModal(false);
 
   const nameInput =
     $("roomSetupName");
@@ -3418,6 +4340,10 @@ function closeRoomSetupModal(viaConfirm = false) {
    * bossa — uning uchun ko'rsatiladigan boshqa hech
    * qanday ekran yo'q, index.html'ga qaytaramiz.
    */
+  if (!viaConfirm) {
+    hideFlowShield();
+  }
+
   if (!viaConfirm && guestQuickLaunch) {
     window.location.href = "index.html";
   }
@@ -3557,6 +4483,15 @@ async function confirmOpenRoom() {
   closeRoomSetupModal(true);
 
   /*
+   * Xona yaratish bir nechta Firestore so'rovini
+   * (kod tekshirish, tozalash, yozish) o'z ichiga oladi
+   * — shu payt hech qanday bosqich oynasi ko'rinmaydi,
+   * shu sabab parda spinner/matn bilan ko'rsatiladi (board
+   * hech qachon "yalang'och" ko'rinib qolmaydi).
+   */
+  showFlowLoading("Xona tayyorlanmoqda...");
+
+  /*
    * MUHIM (XATOLIK TUZATILDI): oldin, agar xona kodi
    * band-emasligini tekshirish (getDoc) tarmoq xatosi
    * tufayli muvaffaqiyatsiz bo'lsa, kod TEKSHIRILMAGAN
@@ -3613,6 +4548,7 @@ async function confirmOpenRoom() {
   }
 
   if (!code) {
+    hideFlowShield();
     alert(
       "Xona kodi yaratib bo‘lmadi (internet aloqasi beqaror bo‘lishi mumkin), qayta urinib ko‘ring."
     );
@@ -3657,8 +4593,21 @@ async function confirmOpenRoom() {
     );
   }
 
-  const step =
-    (Number.isFinite(pointStep) && pointStep >= 0 ? pointStep : 100);
+  /*
+   * MUHIM TUZATISH: bu yerda XONA (rooms) uchun ball qadami
+   * ishlatilyapti — bu xona index.html orqali qo'shiladigan
+   * BOSHQA ishtirokchilarga ham umumiy (jonli) ko'rinadi.
+   * Shu sabab bu qiymat albatta ADMIN PANELIDAGI global
+   * standartdan (settings/app) olinishi SHART — xost
+   * qurilmasida localStorage'da saqlangan SHAXSIY (faqat shu
+   * qurilma/foydalanuvchi uchun) pointStep sozlamasi xonaga
+   * hech qachon ko'chib o'tmasligi kerak (avvalgi xato aynan
+   * shu edi). Global sozlamalar fetchAppSettingsOnce() orqali
+   * keshlangani uchun bu qo'shimcha so'rov qo'shimcha tarmoq
+   * xarajati qilmaydi.
+   */
+  const roomDefaults = await getAppDefaults();
+  const step = roomDefaults.pointStep;
 
   /*
    * Mehmon (guest) foydalanuvchi ham nazoratchi
@@ -3773,6 +4722,8 @@ async function confirmOpenRoom() {
     }
 
   } catch (e) {
+
+    hideFlowShield();
 
     console.error(
       "Xona yaratishda xatolik:",
@@ -4077,6 +5028,8 @@ function openRoomHostView() {
     modal.style.display =
       "flex";
   }
+
+  hideFlowShield();
 }
 
 function hideRoomHostViewOnly() {
@@ -4139,6 +5092,8 @@ function closeRoomHostView() {
   $("roomChatBox")?.classList.add("hidden");
 
   setRoomSwapBanner(false);
+
+  hideFlowShield();
 }
 
 /*
@@ -4462,6 +5417,14 @@ function startRoomTopicSwap() {
 
   roomTopicSwapMode = true;
 
+  /*
+   * Xona egasi allaqachon xonada — mavzu almashtirish
+   * jarayonida ham board/orqa fon ko'rinib qolmasligi
+   * uchun parda yoqiladi (roomTopicPicker va undan keyingi
+   * Firestore yozuvi tugagunga qadar).
+   */
+  showFlowShield();
+
   hideRoomHostViewOnly();
 
   setRoomSwapBanner(true);
@@ -4606,6 +5569,8 @@ async function swapRoomTopic(topic) {
   const newRoundId =
     (roomData?.roundId || 1) +
     1;
+
+  showFlowLoading("Mavzu almashtirilmoqda...");
 
   try {
 
@@ -5974,6 +6939,8 @@ function startDuel(topic, playerA, playerB) {
 
   if (pool.length < 2) {
 
+    hideFlowShield();
+
     alert(
       "Duel uchun mavzuda kamida 2 ta savol bo‘lishi kerak!"
     );
@@ -6064,6 +7031,8 @@ function startDuel(topic, playerA, playerB) {
     modal.style.display =
       "flex";
   }
+
+  hideFlowShield();
 
   renderDuelRound();
 }
@@ -6768,6 +7737,8 @@ function startTopicGame(topic) {
 
   if (!currentTopicQuestions.length) {
 
+    hideFlowShield();
+
     alert(
       "Bu mavzuda savollar mavjud emas!"
     );
@@ -6785,9 +7756,10 @@ function startTopicGame(topic) {
     );
 
   /*
-   * Bonus rejimi yoqilgan bo'lsa,
-   * tasodifiy savollarga 2X/3X
-   * belgisi qo'yamiz.
+   * Bonus rejimi (admin panelidan yoqilgan bo'lsa)
+   * tasodifiy savollarga 2X/3X belgisini shu yerda
+   * qo'yadi — bu ADMIN boshqaradigan yagona bonus
+   * manbai.
    */
   assignRandomBonusQuestions(
     currentTopicQuestions
@@ -7409,6 +8381,13 @@ function openQ(
     return;
   }
 
+  /*
+   * Savol oynasi haqiqatan ham ko'rsatilyapti —
+   * jonli oqim to'sig'i (agar Duel/Xona/Play orqali
+   * kelingan bo'lsa) endi kerak emas.
+   */
+  hideFlowShield();
+
   clearInterval(timer);
 
   /*
@@ -7439,36 +8418,27 @@ function openQ(
       ""
     );
 
-  const match =
-    questionText.match(
-      /^\s*(\d+)x\s*/i
+  /*
+   * ESKI TIZIM O'CHIRILDI: ilgari savol matni
+   * boshida qo'lda yozilgan "2x"/"3x" (masalan
+   * Excel'dan yuklangan eski savollarda) shu
+   * yerda o'qilib, AVTOMATIK ravishda bonus
+   * (ball ko'paytmasi) sifatida qo'llanardi.
+   * Endi bonus FAQAT admin panelidagi bonus
+   * tizimi (tasodifiy tayinlash / streak bonusi)
+   * orqali beriladi — matndagi "Nx" yozuvi endi
+   * hech qanday ball ko'paytmasi bermaydi, faqat
+   * (agar eski savollarda qolib ketgan bo'lsa)
+   * ko'rinishni tozalash uchun matndan olib
+   * tashlanadi.
+   */
+  questionText =
+    questionText.replace(
+      /^\s*\d+x\s*/i,
+      ""
     );
 
-  if (match) {
-
-    currentQuestionMultiplier =
-      Math.max(
-        1,
-        parseInt(
-          match[1],
-          10
-        )
-      );
-
-    questionText =
-      questionText.replace(
-        /^\s*\d+x\s*/i,
-        ""
-      );
-
-    showBonusEffect(
-      currentValue,
-      currentQuestionMultiplier
-    );
-
-    playBonusSound();
-
-  } else if (
+  if (
     activeBonusQuestions.has(item)
   ) {
 
@@ -9068,6 +10038,8 @@ function openRoomTopicPicker() {
 
   if (!modal) return;
 
+  showFlowShield();
+
   const titleEl = $("roomTopicPickerTitle");
 
   if (titleEl) {
@@ -9082,6 +10054,8 @@ function openRoomTopicPicker() {
   const searchInput = $("roomTopicPickerSearch");
 
   if (searchInput) searchInput.value = "";
+
+  selectedRoomPickerCategory = null;
 
   renderRoomTopicPickerList("");
 
@@ -9130,6 +10104,8 @@ function closeRoomTopicPickerModal(viaSelection = false) {
     document.body.classList.remove(
       "guestQuickLaunchMode"
     );
+
+    hideFlowShield();
   }
 }
 
@@ -9140,19 +10116,132 @@ function renderRoomTopicPickerList(filterText = "") {
 
   const box = $("roomTopicPickerList");
 
+  const subBox =
+    $("roomTopicPickerSubjectList");
+
+  const catBox =
+    $("roomTopicPickerCategoryList");
+
   if (!box) return;
 
   const term = filterText.trim().toLowerCase();
 
   const all = getRoomPickerTopics();
 
-  const list = term
-    ? all.filter(t =>
+  /*
+   * FANLAR VA KATEGORIYALAR —
+   * qidiruvdan qat'i nazar BARCHA
+   * mavzular asosida (tepadagi
+   * qatorlarda doim to'liq ro'yxat
+   * ko'rinsin). Admin o'chirgan
+   * bo'lsa — bu qatorlar umuman
+   * ko'rsatilmaydi.
+   */
+  let subjectFiltered = all;
+
+  if (!categorySettingsState.enabled) {
+
+    selectedRoomPickerSubject = null;
+    selectedRoomPickerCategory = null;
+
+    if (subBox) subBox.innerHTML = "";
+    if (catBox) catBox.innerHTML = "";
+
+  } else {
+
+    const subjects =
+      getTopicSubjectStats(all);
+
+    if (
+      selectedRoomPickerSubject &&
+      !subjects.some(
+        s => s.name === selectedRoomPickerSubject
+      )
+    ) {
+      selectedRoomPickerSubject = null;
+      selectedRoomPickerCategory = null;
+    }
+
+    renderCategorySidebar(
+      subBox,
+      subjects,
+      selectedRoomPickerSubject,
+      name => {
+        selectedRoomPickerSubject = name;
+        selectedRoomPickerCategory = null;
+        renderRoomTopicPickerList(
+          $("roomTopicPickerSearch")
+            ?.value || ""
+        );
+      }
+    );
+
+    subjectFiltered =
+      filterTopicsBySubject(
+        all,
+        selectedRoomPickerSubject
+      );
+
+    if (!selectedRoomPickerSubject) {
+
+      /*
+       * "Barchasi" (hech qanday fan
+       * tanlanmagan) holatda kategoriya
+       * qatori ko'rsatilmaydi — fan
+       * qatoridagi "Barchasi" chipi
+       * allaqachon BARCHA mavzularni
+       * ko'rsatadi. Kategoriya qatori
+       * FAQAT aniq bir FAN tanlanganda
+       * paydo bo'ladi.
+       */
+      selectedRoomPickerCategory = null;
+
+      if (catBox) catBox.innerHTML = "";
+
+    } else {
+
+      const categories =
+        getTopicCategoryStats(subjectFiltered);
+
+      if (
+        selectedRoomPickerCategory &&
+        !categories.some(
+          c => c.name === selectedRoomPickerCategory
+        )
+      ) {
+        selectedRoomPickerCategory = null;
+      }
+
+      renderCategorySidebar(
+        catBox,
+        categories,
+        selectedRoomPickerCategory,
+        name => {
+          selectedRoomPickerCategory = name;
+          renderRoomTopicPickerList(
+            $("roomTopicPickerSearch")
+              ?.value || ""
+          );
+        }
+      );
+    }
+  }
+
+  let list = term
+    ? subjectFiltered.filter(t =>
         (t.title || "")
           .toLowerCase()
           .includes(term)
       )
-    : all;
+    : subjectFiltered;
+
+  if (selectedRoomPickerCategory) {
+    list = list.filter(
+      t =>
+        getTopicCategory(t) ===
+        selectedRoomPickerCategory
+    );
+  }
 
   if (!list.length) {
     box.innerHTML = `
@@ -9182,7 +10271,11 @@ function renderRoomTopicPickerList(filterText = "") {
           <div class="roomTopicPickerRowInfo">
             <strong class="rtpName">${escapeHtml(topic.title || "")}</strong>
             <span class="rtpCount">${total} ta savol</span>
-            <span class="rtpOwner">👤 ${escapeHtml(topic.ownerName || "Noma'lum")}</span>
+            <span class="rtpOwner">👤 ${escapeHtml(topic.ownerName || "Noma'lum")}${
+              categorySettingsState.enabled
+                ? " · " + escapeHtml(getTopicSubject(topic)) + " / " + escapeHtml(getTopicCategory(topic))
+                : ""
+            }</span>
           </div>
           <span class="roomTopicPickerRowArrow">▶</span>
         </div>
@@ -10135,6 +11228,8 @@ onAuthStateChanged(
      * ma'lumot qolib ketmaydi.
      */
     resetUserDocCache();
+
+    await loadCategorySettings();
 
     await loadParticipants();
 

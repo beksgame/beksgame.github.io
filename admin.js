@@ -39,12 +39,22 @@ const defaultBonusMultiplierSelect = $("defaultBonusMultiplierSelect");
 const defaultStreakBonusCheckbox = $("defaultStreakBonusCheckbox");
 const saveGameDefaultsBtn = $("saveGameDefaultsBtn");
 
+const categoriesEnabledCheckbox = $("categoriesEnabledCheckbox");
+const usersCanAddCategoriesCheckbox = $("usersCanAddCategoriesCheckbox");
+const subjectsInput = $("subjectsInput");
+const saveCategorySettingsBtn = $("saveCategorySettingsBtn");
+
 const DEFAULT_TOPIC_LIMIT = 10;
 const DEFAULT_PARTICIPANT_LIMIT = 10;
 const DEFAULT_POINT_STEP = 100;
 const DEFAULT_TIMER = 10;
 const DEFAULT_BONUS_COUNT = 3;
 const DEFAULT_BONUS_MULTIPLIER = "2x";
+const DEFAULT_SUBJECTS = [
+  "Ingliz tili",
+  "Koreys tili",
+  "Matematika"
+];
 const SUPPORT_COLLECTION = "supportMessages";
 
 let allUsers = [];
@@ -64,7 +74,8 @@ const PERMISSIONS = [
   { key: "canAddQuestions", label: "Mavzu qo'shish" },
   { key: "canEditTopics", label: "Mavzu tahrirlash" },
   { key: "canAddParticipants", label: "Ishtirokchi qo'shish" },
-  { key: "canSetParticipantImage", label: "Ishtirokchi rasmi" }
+  { key: "canSetParticipantImage", label: "Ishtirokchi rasmi" },
+  { key: "canAddCategories", label: "Fan ichida o'z kategoriyasini qo'shish" }
 ];
 
 function escapeHtml(value) {
@@ -406,6 +417,27 @@ async function loadAppSettings() {
     if (defaultStreakBonusCheckbox) {
       defaultStreakBonusCheckbox.checked = data.streakBonusEnabled === true;
     }
+
+    if (categoriesEnabledCheckbox) {
+      categoriesEnabledCheckbox.checked = data.categoriesEnabled !== false;
+    }
+
+    if (usersCanAddCategoriesCheckbox) {
+      usersCanAddCategoriesCheckbox.checked = data.usersCanAddCategories !== false;
+    }
+
+    if (subjectsInput) {
+      // Eski hujjatlarda "standardCategories" nomi bilan
+      // saqlangan bo'lishi mumkin — shuni ham o'qib, yangi
+      // "subjects" nomiga o'tkazamiz (birinchi saqlashda).
+      const subs = Array.isArray(data.subjects) && data.subjects.length
+        ? data.subjects
+        : (Array.isArray(data.standardCategories) && data.standardCategories.length
+            ? data.standardCategories
+            : DEFAULT_SUBJECTS);
+
+      subjectsInput.value = subs.join(", ");
+    }
   } catch (e) {
     console.error("Sozlamalarni yuklashda xatolik:", e);
     showToast(
@@ -516,6 +548,58 @@ saveGameDefaultsBtn?.addEventListener("click", async () => {
     showToast("❌ Xatolik: " + err.message, true);
   } finally {
     saveGameDefaultsBtn.disabled = false;
+  }
+});
+
+/* ================= FANLAR (YO'NALISHLAR) VA KATEGORIYALASH =================
+ *
+ * Xuddi shu "settings/app" hujjatiga { categoriesEnabled,
+ * usersCanAddCategories, subjects } maydonlari qo'shiladi.
+ * game.js buni o'qib, agar categoriesEnabled === false
+ * bo'lsa, fan/kategoriya UI'sini butunlay yashiradi; aks
+ * holda foydalanuvchilar yangi mavzu qo'shishdan oldin
+ * FAQAT shu "subjects" ro'yxatidan bittasini (masalan
+ * "Koreys tili") tanlaydi, so'ng o'sha FAN ICHIDA o'z
+ * kategoriyasini ochadi — shu bilan turli fan
+ * o'qituvchilarining kategoriyalari aralashib ketmaydi.
+ */
+
+function parseCategoryList(raw) {
+  return (raw || "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+saveCategorySettingsBtn?.addEventListener("click", async () => {
+  const categoriesEnabled = !!categoriesEnabledCheckbox?.checked;
+  const usersCanAddCategories = !!usersCanAddCategoriesCheckbox?.checked;
+
+  const parsed = parseCategoryList(subjectsInput?.value);
+
+  const subjects = parsed.length
+    ? parsed
+    : DEFAULT_SUBJECTS;
+
+  saveCategorySettingsBtn.disabled = true;
+
+  try {
+    await setDoc(
+      doc(db, "settings", "app"),
+      { categoriesEnabled, usersCanAddCategories, subjects },
+      { merge: true }
+    );
+
+    if (subjectsInput) {
+      subjectsInput.value = subjects.join(", ");
+    }
+
+    showToast("✅ Fan va kategoriya sozlamalari saqlandi");
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Xatolik: " + err.message, true);
+  } finally {
+    saveCategorySettingsBtn.disabled = false;
   }
 });
 

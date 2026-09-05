@@ -149,6 +149,25 @@
   </div>
 
   <!-- =========================
+       JONLI OQIM — TO'SIQ (SHIELD)
+       Xona/Duel ochish jarayonida bosqichlar orasida
+       (masalan, Firestore bilan tarmoq so'rovi ketayotganda)
+       o'yin maydoni (board) BIR ZUM ham ko'rinib qolmasligi
+       uchun — bu qorong'i parda butun jarayon davomida
+       (birinchi bosqich ochilgandan to jarayon tugagunga
+       qadar) doimiy ravishda pastda turadi. Har bir alohida
+       bosqich oynasi (modal) uning USTIDA ochiladi/yopiladi,
+       lekin ular orasidagi "bo'sh" lahzalarda ham board
+       ko'rinmaydi — chunki bu parda hamon turibdi.
+  ========================== -->
+  <div class="liveFlowShield" id="liveFlowShieldModal">
+    <div class="liveFlowShieldCard">
+      <div class="liveFlowSpinner"></div>
+      <p id="liveFlowShieldText">Iltimos kuting...</p>
+    </div>
+  </div>
+
+  <!-- =========================
        TOPIC INTRO / PLAY MODAL
   ========================== -->
   <div class="modal" id="topicIntroModal">
@@ -195,7 +214,13 @@
 
       <input type="text" id="roomTopicPickerSearch" class="roomTopicPickerSearchInput" placeholder="🔍 Mavzu nomi bo‘yicha qidirish...">
 
-      <div id="roomTopicPickerList" class="roomTopicPickerList"></div>
+      <div class="roomTopicPickerLayout">
+        <div class="roomPickerSidebarCol">
+          <div id="roomTopicPickerSubjectList" class="topicCategoryList"></div>
+          <div id="roomTopicPickerCategoryList" class="topicCategoryList"></div>
+        </div>
+        <div id="roomTopicPickerList" class="roomTopicPickerList"></div>
+      </div>
     </div>
   </div>
 
@@ -316,11 +341,17 @@
             <input type="text" id="boardTopicSearch" placeholder="🔍 Mavzu nomi bo‘yicha qidirish...">
           </div>
         </div>
-        <div
-  class="topicBoard"
-  id="board"
->
-</div>
+        <div class="topicBoardLayout">
+          <div class="topicSidebarCol">
+            <div class="topicCategoryList" id="boardSubjectList"></div>
+            <div class="topicCategoryList" id="boardCategoryList"></div>
+          </div>
+          <div
+    class="topicBoard"
+    id="board"
+  >
+  </div>
+        </div>
         <div id="bonusEffect" class="bonusEffect hidden">🔥 2X BONUS 🔥</div>
 
         <div class="settingsToggleBar">
@@ -350,6 +381,15 @@
 
             <div class="toolRow">
               <input type="text" id="newUserTopicTitle" placeholder="Yangi karta nomi (yangisi uchun)">
+            </div>
+
+            <div class="toolRow" id="qcSubjectRow">
+              <select id="newUserTopicSubject" class="excelTargetSelect"></select>
+            </div>
+
+            <div class="toolRow" id="qcCategoryRow">
+              <input type="text" id="newUserTopicCategory" list="topicCategoryOptions" placeholder="Kategoriya">
+              <datalist id="topicCategoryOptions"></datalist>
             </div>
 
             <div class="toolRow" id="qcExistingRow">

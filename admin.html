@@ -141,6 +141,57 @@
       </div>
 
       <!-- =========================
+           FANLAR (YO'NALISHLAR) VA KATEGORIYALASH
+
+           Foydalanuvchi avval shu yerda belgilangan
+           FANLAR ro'yxatidan (masalan: Ingliz tili,
+           Koreys tili, Matematika) birini tanlaydi,
+           keyin O'SHA FAN ICHIDA o'z kategoriyasini
+           ochib fayl yuklaydi. Shu sababli, masalan,
+           ingliz tili o'qituvchisi bilan koreys tili
+           o'qituvchisining kategoriyalari aralashib
+           ketmaydi — har biri faqat o'z faniga tegishli
+           kategoriya va mavzularni ko'radi.
+      ========================== -->
+      <div class="adminSettingsCard" id="adminCategoriesCard">
+        <div class="adminSettingsHeader">
+          <span class="eyebrow">FANLAR</span>
+          <h3>🏷 Fanlar (yo‘nalishlar) va kategoriyalash</h3>
+        </div>
+
+        <div class="adminSettingsGrid">
+          <label class="permToggle settingsFieldWide">
+            <span class="permToggleLabel">Foydalanuvchilar uchun fan/kategoriyalash yoqilgan bo‘lsin</span>
+            <span class="toggleSwitch">
+              <input type="checkbox" id="categoriesEnabledCheckbox">
+              <span class="toggleTrack"><span class="toggleThumb"></span></span>
+            </span>
+          </label>
+
+          <label class="permToggle settingsFieldWide">
+            <span class="permToggleLabel">Foydalanuvchilar tanlagan fan ichida o‘z kategoriyasini qo‘sha olsin — GLOBAL standart holat</span>
+            <span class="toggleSwitch">
+              <input type="checkbox" id="usersCanAddCategoriesCheckbox">
+              <span class="toggleTrack"><span class="toggleThumb"></span></span>
+            </span>
+          </label>
+
+          <label class="settingsField settingsFieldWide">
+            <span>Fanlar / yo‘nalishlar (vergul bilan ajrating, soni cheklanmagan)</span>
+            <textarea id="subjectsInput" rows="2" placeholder="Ingliz tili, Koreys tili, Matematika"></textarea>
+          </label>
+        </div>
+
+        <p class="settingsHint" style="margin:10px 0 0;font-size:11.5px;color:var(--muted);">
+          Foydalanuvchilar mavzu qo‘shishdan oldin shu ro‘yxatdan o‘z FANINI tanlaydi (masalan "Koreys tili"), so‘ng o‘sha fan ichida xohlagan kategoriyasini ochadi. Har bir foydalanuvchi uchun kategoriya qo‘shish huquqini pastdagi "Foydalanuvchilar" ro'yxatida "O'z kategoriyasini qo'shish" svichi orqali alohida ham o'zgartirish mumkin — u shu global holatni bosib o'tadi.
+        </p>
+
+        <div class="adminSettingsActions">
+          <button type="button" class="bigBtn primaryBtn" id="saveCategorySettingsBtn">💾 Fan va kategoriya sozlamalarini saqlash</button>
+        </div>
+      </div>
+
+      <!-- =========================
            MUROJAATLAR (foydalanuvchi xabarlari)
       ========================== -->
       <div class="adminSettingsCard" id="adminMessagesCard">

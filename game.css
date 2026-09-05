@@ -753,7 +753,7 @@ select option{background:#101c31;color:#fff}
 .toolRow input[type="text"]{min-width:0;width:100%}
 .toolRow input[type="file"]{min-width:0;width:100%;font-size:11px}
 .toolRow select.excelTargetSelect{min-width:0;width:100%}
-.timerTool input{width:85px}
+.timerTool input{width:92px}
 
 .bonusCheckRow{
   display:flex;
@@ -896,6 +896,57 @@ select option{background:#101c31;color:#fff}
 
 #userTopicPanel .topicCard .editBtn{right:37px;color:#f5c95b}
 #userTopicPanel .topicCard .deleteBtn{right:7px;color:#ff6675}
+
+/* ==========================================================
+   JONLI OQIM TO'SIG'I (LIVE FLOW SHIELD)
+   Xona/Duel ochish bosqichlari orasida board bir zum ham
+   ko'rinib qolmasligi uchun doimiy fon parda.
+========================================================== */
+
+.liveFlowShield{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:998;
+  align-items:center;
+  justify-content:center;
+  background:rgba(2,7,14,.82);
+  backdrop-filter:blur(12px);
+}
+
+.liveFlowShield.show{
+  display:flex;
+}
+
+.liveFlowShieldCard{
+  display:none;
+  text-align:center;
+}
+
+.liveFlowShield.loading .liveFlowShieldCard{
+  display:block;
+}
+
+.liveFlowSpinner{
+  width:40px;
+  height:40px;
+  margin:0 auto 16px;
+  border-radius:50%;
+  border:4px solid rgba(32,217,255,.18);
+  border-top-color:#20d9ff;
+  animation:liveFlowSpin .8s linear infinite;
+}
+
+@keyframes liveFlowSpin{
+  to{ transform:rotate(360deg); }
+}
+
+#liveFlowShieldText{
+  margin:0;
+  color:var(--muted);
+  font-size:13.5px;
+  font-weight:700;
+}
 
 /* ==========================================================
    MODALS
@@ -2905,10 +2956,12 @@ select option{background:#101c31;color:#fff}
 
 
 .controlDock .toolBox.timerTool input {
-  width: 74px !important;
+  width: 92px !important;
 
   height: 36px !important;
   min-height: 36px !important;
+
+  padding: 6px 8px !important;
 
   font-size: 13px !important;
   font-weight: 700 !important;
@@ -3400,6 +3453,230 @@ select option{background:#101c31;color:#fff}
 /* =========================================================
    TOPIC BOARD — QUESTION BOARD ICHIDAGI MAVZULAR
 ========================================================= */
+
+/* ---------- KATEGORIYA + MAVZULAR JOYLASHUVI ---------- */
+
+.topicBoardLayout{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+}
+
+/*
+ * Board sidebar'ida FAN ro'yxati
+ * (yuqorida) va shu fan ichidagi
+ * KATEGORIYA ro'yxati (pastda)
+ * bitta ustunda ketma-ket turadi.
+ */
+.topicSidebarCol{
+  flex:0 0 172px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.topicSidebarCol .topicCategoryList{
+  flex:0 0 auto;
+  max-height:182px;
+  margin-top:0;
+}
+
+/*
+ * Admin "Kategoriyalash"ni o'chirgan
+ * bo'lsa — fan/kategoriya bilan bog'liq
+ * HAR QANDAY UI elementi (board
+ * sidebar'i, savol qo'shish
+ * paneldagi fan/kategoriya maydoni,
+ * index-picker'dagi gorizontal
+ * qator) butunlay yashiriladi.
+ */
+body.categoriesDisabled .topicSidebarCol,
+body.categoriesDisabled #qcSubjectRow,
+body.categoriesDisabled #qcCategoryRow,
+body.categoriesDisabled .roomTopicPickerLayout .topicCategoryList{
+  display:none !important;
+}
+
+.topicBoardLayout .topicBoard{
+  flex:1 1 auto;
+  min-width:0;
+  margin-top:0;
+}
+
+.topicCategoryList{
+  flex:0 0 172px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:378px;
+  overflow-y:auto;
+  padding-right:2px;
+  margin-top:8px;
+}
+
+.topicCategoryList::-webkit-scrollbar{width:5px}
+.topicCategoryList::-webkit-scrollbar-track{background:transparent}
+.topicCategoryList::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
+
+.categoryChip{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:11px 13px;
+  border-radius:13px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.04);
+  color:#c8d4e3;
+  font-size:12.5px;
+  font-weight:850;
+  cursor:pointer;
+  transition:.15s;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.categoryChip span{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.categoryChip:hover{
+  border-color:rgba(255,255,255,.24);
+  background:rgba(255,255,255,.07);
+  transform:translateX(2px);
+}
+
+.categoryChip small{
+  flex:0 0 auto;
+  font-size:10px;
+  font-weight:900;
+  padding:2px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  color:inherit;
+}
+
+/* "Barchasi" chipi */
+.categoryChip.catAllChip.active{
+  background:linear-gradient(135deg,#20d9ff,#4f8cff);
+  border-color:transparent;
+  color:#04121f;
+  box-shadow:0 8px 20px rgba(32,217,255,.3);
+}
+
+.categoryChip.catAllChip.active small{
+  background:rgba(4,18,31,.18);
+}
+
+/* Rangli kategoriya chiplari — passiv holat (yumshoq ton) */
+.categoryChip.catPurple{ border-color:rgba(140,92,255,.35); background:rgba(140,92,255,.10); color:#d9ceff; }
+.categoryChip.catTeal{ border-color:rgba(32,217,255,.35); background:rgba(32,217,255,.10); color:#bdf3ff; }
+.categoryChip.catCoral{ border-color:rgba(255,107,107,.35); background:rgba(255,107,107,.10); color:#ffc9c9; }
+.categoryChip.catPink{ border-color:rgba(255,94,196,.35); background:rgba(255,94,196,.10); color:#ffd1ef; }
+.categoryChip.catAmber{ border-color:rgba(255,179,71,.35); background:rgba(255,179,71,.10); color:#ffe2b8; }
+.categoryChip.catBlue{ border-color:rgba(79,140,255,.35); background:rgba(79,140,255,.10); color:#c7d9ff; }
+.categoryChip.catGreen{ border-color:rgba(32,211,122,.35); background:rgba(32,211,122,.10); color:#baf7d6; }
+
+/* Rangli kategoriya chiplari — faol (to'liq bo'yalgan) holat */
+.categoryChip.catPurple.active{ background:linear-gradient(135deg,#8c5cff,#6a3ff5); border-color:transparent; color:#fff; box-shadow:0 8px 20px rgba(140,92,255,.35); }
+.categoryChip.catTeal.active{ background:linear-gradient(135deg,#20d9ff,#4f8cff); border-color:transparent; color:#04121f; box-shadow:0 8px 20px rgba(32,217,255,.3); }
+.categoryChip.catCoral.active{ background:linear-gradient(135deg,#ff6b6b,#ff3b3b); border-color:transparent; color:#fff; box-shadow:0 8px 20px rgba(255,107,107,.35); }
+.categoryChip.catPink.active{ background:linear-gradient(135deg,#ff5ec4,#ff2ea6); border-color:transparent; color:#fff; box-shadow:0 8px 20px rgba(255,94,196,.35); }
+.categoryChip.catAmber.active{ background:linear-gradient(135deg,#ffd166,#ffb347); border-color:transparent; color:#3a2400; box-shadow:0 8px 20px rgba(255,179,71,.3); }
+.categoryChip.catBlue.active{ background:linear-gradient(135deg,#4f8cff,#2f6bff); border-color:transparent; color:#fff; box-shadow:0 8px 20px rgba(79,140,255,.35); }
+.categoryChip.catGreen.active{ background:linear-gradient(135deg,#20d37a,#0fae63); border-color:transparent; color:#041a10; box-shadow:0 8px 20px rgba(32,211,122,.3); }
+
+.categoryChip.active small{
+  background:rgba(0,0,0,.16);
+}
+
+/* ---------- "+ YANGI MAVZU" KARTASI ---------- */
+
+.topicBoardAddCard{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:120px;
+  border:1.5px dashed rgba(255,255,255,.22) !important;
+  border-radius:16px;
+  background:rgba(255,255,255,.02) !important;
+  cursor:pointer;
+  transition:.15s;
+  text-align:center;
+  padding:14px;
+}
+
+.topicBoardAddCard:hover{
+  border-color:rgba(32,217,255,.5) !important;
+  background:rgba(32,217,255,.06) !important;
+}
+
+.topicBoardAddIcon{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+  font-weight:900;
+  color:#bdf3ff;
+  background:rgba(32,217,255,.14);
+  border:1px solid rgba(32,217,255,.3);
+}
+
+.topicBoardAddCard .topicBoardInfo{
+  align-items:center;
+  text-align:center;
+}
+
+.topicBoardAddCard strong{
+  font-size:12.5px !important;
+  color:#f1f6fb !important;
+}
+
+.topicBoardAddCard span{
+  font-size:10.5px !important;
+  color:var(--muted) !important;
+}
+
+@media(max-width:720px){
+  .topicBoardLayout{
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px !important;
+  }
+
+  .topicSidebarCol{
+    flex:0 0 auto;
+    width:100%;
+    gap:6px;
+  }
+
+  .topicCategoryList{
+    flex-direction:row;
+    align-items:stretch;
+    max-height:none !important;
+    min-height:0 !important;
+    overflow-x:auto;
+    overflow-y:visible;
+    width:100%;
+    margin-top:0 !important;
+    margin-bottom:0 !important;
+    padding:0 0 2px !important;
+    gap:6px !important;
+  }
+
+  .topicCategoryList .categoryChip{
+    flex:0 0 auto;
+    padding:8px 12px !important;
+  }
+}
 
 .topicBoard{
   width:100%;
@@ -5493,6 +5770,33 @@ body.teacherLocked .gameBoardCard::after{
   gap:8px;
   overflow-y:auto;
   padding-right:4px;
+  flex:1;
+  min-height:0;
+}
+
+.roomTopicPickerLayout{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:0;
+  overflow:hidden;
+}
+
+.roomTopicPickerLayout .topicCategoryList{
+  flex:0 0 auto;
+  flex-direction:row;
+  align-items:stretch;
+  max-height:none;
+  overflow-x:auto;
+  overflow-y:visible;
+  width:100%;
+  margin-top:0;
+  padding:0 0 2px;
+}
+
+.roomTopicPickerLayout .topicCategoryList .categoryChip{
+  flex:0 0 auto;
 }
 
 .roomTopicPickerRow{
@@ -5565,6 +5869,119 @@ body.teacherLocked .gameBoardCard::after{
   color:var(--muted, #9eacc0);
   font-size:13.5px;
 }
+
+@media(max-width:560px){
+  .roomTopicPickerList{
+    max-height:50vh;
+  }
+}
+
+/*
+ * Fan + kategoriya qatorlarini bitta ustunga
+ * jamlaydigan o'rovchi (wrapper). Mobilda oddiy
+ * tik ustun (ikkalasi ham to'liq enda, orasida
+ * 10px bo'shliq — avvalgi ko'rinish bilan bir xil);
+ * PC'da esa CHAP tomonda qattiq (172px) sidebar
+ * bo'lib qoladi (pastga qarang).
+ */
+.roomPickerSidebarCol{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:100%;
+}
+
+/*
+ * PC / kengroq ekranlar: xona/duel/play uchun mavzu
+ * tanlash oynasi torroq va TEPADA gorizontal fan/kategoriya
+ * qatorlari bilan emas, balki gameBoard'dagi kabi CHAP
+ * tomonda tik joylashgan sidebar + kengroq mavzular ro'yxati
+ * shaklida ko'rsatiladi. Mobilda (max-width:720px va past)
+ * oldingi (ustma-ust, gorizontal qatorli) ko'rinish saqlanadi.
+ */
+@media(min-width:721px){
+
+  .roomTopicPickerBox{
+    width:min(760px,90vw);
+    /*
+     * DIQQAT: shunchaki "max-height" emas, balki
+     * ANIQ (qat'iy) "height" beriladi. Aks holda —
+     * ichki flex ustunlaridan biri (masalan, mavzular
+     * ro'yxati) juda uzun kontentga ega bo'lganda,
+     * brauzer balandlikni ANIQLASHTIRMASDAN turib
+     * ("hypothetical size" orqali) hisoblab, natijada
+     * sidebar ustuni (fan+kategoriya) o'zining ICHKI
+     * kontentiga qarab qisqa hisoblanib qolar va
+     * "flex-grow" to'g'ri ishlamas edi — aynan shu
+     * sabab kategoriya qutisi tagida bo'sh joy qolib,
+     * o'zi esa tiqilib qolgandek ko'rinar edi. Endi
+     * balandlik oldindan ANIQ berilgani uchun ikkala
+     * ustun (sidebar va ro'yxat) unga ishonchli tarzda
+     * to'liq cho'ziladi.
+     */
+    height:82vh;
+  }
+
+  .roomTopicPickerLayout{
+    flex-direction:row;
+    gap:14px;
+    /*
+     * DIQQAT: align-items ataylab qo'yilmaydi
+     * (standart qiymati "stretch" bo'ladi) — shu
+     * orqali ikkala ustun (sidebar va mavzular
+     * ro'yxati) modalning TO'LIQ balandligini
+     * egallaydi. Aks holda (flex-start bo'lganda)
+     * ustunlar faqat o'z ichidagi kontent balandligiga
+     * qisqarib qolar, natijada o'ng tomondagi ro'yxat
+     * "overflow:hidden" ostida kesilib, pastdagi
+     * savolarni ko'rish va skroll qilish imkonsiz
+     * bo'lib qolardi.
+     */
+  }
+
+  .roomPickerSidebarCol{
+    flex:0 0 172px;
+    width:auto;
+    min-height:0;
+    /*
+     * Fan va kategoriya ENDI ikkita alohida
+     * skrolланадиган quti emas — BITTA yagona
+     * skrol maydoni. Fanlar har doim TO'LIQ
+     * (qisqarmasdan) ko'rinadi, tanlangan fanning
+     * kategoriyalari esa xuddi shu ustun ichida
+     * pastdan ulanib davom etadi; agar ikkalasi
+     * birgalikda modal balandligidan oshib ketsa,
+     * shu YAGONA ustunning o'zi skroll qiladi.
+     */
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding-right:4px;
+  }
+
+  .roomPickerSidebarCol::-webkit-scrollbar{width:5px}
+  .roomPickerSidebarCol::-webkit-scrollbar-track{background:transparent}
+  .roomPickerSidebarCol::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:10px}
+
+  .roomTopicPickerLayout .topicCategoryList{
+    flex:0 0 auto;
+    flex-direction:column;
+    align-items:stretch;
+    max-height:none;
+    overflow:visible;
+    width:100%;
+  }
+
+  .roomTopicPickerLayout .topicCategoryList .categoryChip{
+    flex:0 0 auto;
+  }
+
+  .roomTopicPickerList{
+    flex:1 1 auto;
+    min-width:0;
+    min-height:0;
+  }
+}
+
 
 /* ---------- MEHMON TEZKOR ISHGA TUSHIRISH (Jonli xona/Duel/Play) ---------- */
 /*

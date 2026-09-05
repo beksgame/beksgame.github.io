@@ -500,8 +500,8 @@ body{
 
 .playTimerCompact{
   flex:0 0 auto;
-  width:56px !important;
-  padding:12px 6px;
+  width:76px !important;
+  padding:12px 8px;
   border:1px solid var(--line2);
   border-radius:11px;
   background:rgba(255,255,255,.06);
