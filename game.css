@@ -711,17 +711,17 @@ select option { background:#101c31; color:#fff; }
 
 .winnerRow b { color:#67e8f9; }
 
-.winnerStats { margin-top:6px; color:#9db2c8; font-size:13px; font-weight:800; }
+.winnerStats { margin-top:6px; color:#9db2c8; font-size:15px; font-weight:800; }
 
-.winnerRowStats { color:#8fa3b9; font-size:11px; font-weight:800; white-space:nowrap; }
+.winnerRowStats { color:#8fa3b9; font-size:13px; font-weight:800; white-space:nowrap; }
 
 .soloHero { flex-direction:column; text-align:center; gap:8px; }
 
-.soloHero .winnerCrown { font-size:14px; margin-bottom:0; }
+.soloHero .winnerCrown { font-size:16px; margin-bottom:0; }
 
-.soloHero > div:nth-child(2) { font-size:22px; font-weight:900; color:#f1f6fb; }
+.soloHero > div:nth-child(2) { font-size:26px; font-weight:900; color:#f1f6fb; }
 
-.soloHero small { font-size:18px; font-weight:800; color:#bbf7d0; }
+.soloHero small { font-size:20px; font-weight:800; color:#bbf7d0; }
 
 @media(max-width:1050px) {
 
@@ -879,15 +879,15 @@ select option { background:#101c31; color:#fff; }
 
 #winnerText { font-size: clamp(42px, 6vw, 76px); }
 
-#restWinners { font-size: 22px; }
+#restWinners { font-size: 24px; }
 
-.winnerCrown { font-size: 14px; }
+.winnerCrown { font-size: 16px; }
 
-.winnerHero small { font-size: 18px; }
+.winnerHero small { font-size: 20px; }
 
-.winnerRow { font-size: 16px; }
+.winnerRow { font-size: 18px; }
 
-.winnerRow b { font-size: 17px; }
+.winnerRow b { font-size: 19px; }
 
 /* ==========================================================
    TABLET
@@ -1954,15 +1954,15 @@ body.categoriesDisabled .topicSidebarCol, body.categoriesDisabled #qcSubjectRow,
 
 .duelResultBox { width:min(680px,94vw); }
 
-.duelResultWinner { margin:6px 0 18px; text-align:center; color:#fff; font-size:26px; font-weight:950; }
+.duelResultWinner { margin:6px 0 18px; text-align:center; color:#fff; font-size:30px; font-weight:950; }
 
 .duelResultGrid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 
 .duelResultCard { display:flex; flex-direction:column; gap:6px; padding:16px; border:1px solid rgba(255,255,255,.12); border-radius:16px; background:rgba(255,255,255,.04); text-align:center; }
 
-.duelResultCard strong { font-size:21px; color:#f1f6fb; }
+.duelResultCard strong { font-size:24px; color:#f1f6fb; }
 
-.duelResultCard span { font-size:16px; font-weight:750; color:#b8cbdf; }
+.duelResultCard span { font-size:18px; font-weight:750; color:#b8cbdf; }
 
 .duelResultCard.isDuelWinner { border-color:rgba(32,217,255,.55); background:linear-gradient( 145deg, rgba(32,217,255,.20), rgba(255,255,255,.05) ); box-shadow:0 10px 26px rgba(32,217,255,.20); }
 
@@ -2209,3 +2209,63 @@ body.teacherLocked .gameBoardCard::after { content:"🔒 Boshqaruv qulflangan �
  */
 
 .guestQuickLaunchMode .appHeader, .guestQuickLaunchMode .app { display:none !important; }
+/* ==========================================================
+   O'YIN YAKUNI — ISHTIROKCHILAR OYNASI (#gameEndModal)
+   winnerModal'dagi katta (76px) shrift o'lchamlari faqat
+   #winnerText / #restWinners ID'lariga bog'langan edi, shu
+   sabab shu yerda alohida, ixcham modal uchun mos o'lchamlar
+   belgilanadi — gorizontal tor, lekin ism/statistikalar aniq
+   o'qiladigan bo'lishi uchun.
+========================================================== */
+
+#gameEndModal .modal-box{
+  width:min(520px,92vw);
+}
+
+#gameEndModal .winnerHero{
+  flex-direction:column;
+  text-align:center;
+  gap:8px;
+  margin-bottom:6px;
+}
+
+#gameEndModal .winnerAvatar{
+  width:84px;
+  height:84px;
+}
+
+#gameEndModal .gameEndName{
+  font-size:27px;
+  font-weight:900;
+  color:#f1f6fb;
+}
+
+#gameEndModal .winnerHero small{
+  font-size:18px;
+}
+
+#gameEndModal .winnerStats{
+  font-size:16px;
+}
+
+#gameEndModal .winnerRow{
+  font-size:18px;
+}
+
+#gameEndModal .winnerRow strong{
+  font-size:18px;
+}
+
+#gameEndModal .winnerRow b{
+  font-size:20px;
+}
+
+#gameEndModal .winnerRowStats{
+  font-size:14px;
+}
+
+@media(max-width:560px){
+  #gameEndModal .modal-box{
+    width:100%;
+  }
+}

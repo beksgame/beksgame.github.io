@@ -4750,7 +4750,7 @@ function showRoomWinnerModal(ranked) {
   winnerTimer = setTimeout(() => {
     modal.style.display = "none";
     stopConfetti();
-  }, 12000);
+  }, 10000);
 }
 
 /* =========================================================
@@ -6681,7 +6681,7 @@ function showSoloResultModal() {
     stopConfetti();
 
     afterGameModalClosed();
-  }, 3000);
+  }, 10000);
 }
 
 function showWinnerModal(sorted) {
@@ -6774,7 +6774,7 @@ function showWinnerModal(sorted) {
     stopConfetti();
 
     afterGameModalClosed();
-  }, 3000);
+  }, 10000);
 }
 
 /*
@@ -6812,26 +6812,67 @@ function openGameEndModal() {
 
   if (box) {
     if (teamsData.length) {
-      box.innerHTML = teamsData
-        .map((t) => {
-          const p = findParticipant(t.participantId);
+      const sorted = [...teamsData].sort((a, b) => b.score - a.score);
 
-          return `
-            <div class="team">
-              <img
-                class="teamAvatar"
-                src="${p?.image || t.image || avatarData(t.name)}"
-                alt=""
-              >
-              <strong>${escapeHtml(t.name)}</strong>
-              <span>${t.score || 0}</span>
-              <div class="teamStatLine">
-                ✅ ${t.correctCount || 0} · ❌ ${t.wrongCount || 0}
-              </div>
+      const first = sorted[0];
+
+      const fp = findParticipant(first.participantId);
+
+      box.innerHTML = `
+        <div class="winnerHero">
+          <img
+            class="winnerAvatar"
+            src="${fp?.image || first.image || avatarData(first.name)}"
+            alt=""
+          >
+
+          <div>
+            <div class="gameEndName">
+              ${escapeHtml(first.name)}
             </div>
-          `;
-        })
-        .join("");
+
+            <small>
+              ${first.score || 0} ball
+            </small>
+
+            <div class="winnerStats">
+              ✅ ${first.correctCount || 0} to‘g‘ri &nbsp; ❌ ${first.wrongCount || 0} xato
+            </div>
+          </div>
+        </div>
+
+        ${sorted
+          .slice(1)
+          .map((t, i) => {
+            const tp = findParticipant(t.participantId);
+
+            return `
+              <div class="winnerRow">
+                <span>
+                  #${i + 2}
+                </span>
+
+                <img
+                  src="${tp?.image || t.image || avatarData(t.name)}"
+                  alt=""
+                >
+
+                <strong>
+                  ${escapeHtml(t.name)}
+                </strong>
+
+                <b>
+                  ${t.score || 0}
+                </b>
+
+                <span class="winnerRowStats">
+                  ✅${t.correctCount || 0} ❌${t.wrongCount || 0}
+                </span>
+              </div>
+            `;
+          })
+          .join("")}
+      `;
     } else {
       box.innerHTML = `<div style="color:var(--muted);padding:20px;text-align:center;font-size:13.5px;">Yakka (solo) tartibda o'ynalgan edi.</div>`;
     }
