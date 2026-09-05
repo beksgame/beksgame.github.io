@@ -2,6 +2,28 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
+  <!--
+    MUHIM (ERTA PARDA): index.html'dagi "Jonli xona / Duel /
+    Play" tugmalari orqali kelingan bo'lsa, "Savollar maydoni"
+    (board) sahifa hali to'liq ochilmasdan oldin BIR ZUM
+    yalang'och ko'rinib qolmasligi kerak. Bu klass endi
+    Firebase autentifikatsiyasi (onAuthStateChanged) tugashini
+    KUTMASDAN — hali <body> ham chizilmasdan oldin — sinxron
+    ravishda qo'shiladi, shu sababli hech qanday "flash"
+    bo'lmaydi.
+  -->
+  <script>
+    (function () {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        var ls = p.get("liveStart") ||
+          (p.get("openRoom") === "1" ? "room" : null);
+        if (ls === "room" || ls === "duel" || ls === "play") {
+          document.documentElement.classList.add("guestQuickLaunchMode");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#08111f">
@@ -659,8 +681,15 @@
   </div>
 
 
-  <!-- XLSX doim game.js DAN OLDIN -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <!--
+    MUHIM: XLSX kutubxonasi endi bu yerda OLDINDAN
+    (bloklovchi tarzda) yuklanmaydi — u faqat Excel
+    import/export funksiyalari haqiqatan ishlatilganda,
+    game.js ichidagi loadXlsxLib() orqali talab bilan
+    yuklanadi. Bu barcha foydalanuvchilar (ayniqsa index
+    orqali kirgan mehmonlar) uchun sahifaning birinchi
+    marta tayyor bo'lishini tezlashtiradi.
+  -->
   <script type="module" src="game.js"></script>
 
 </body>

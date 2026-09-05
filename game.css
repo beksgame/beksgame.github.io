@@ -5990,7 +5990,16 @@ body.teacherLocked .gameBoardCard::after{
  * savollar kartasi bo'lgan board) UMUMAN ko'rsatilmaydi.
  * Faqat kerakli modal (ro'yxat, duel, play, xona) ko'rinadi.
  */
-body.guestQuickLaunchMode .appHeader,
-body.guestQuickLaunchMode .app{
+/*
+ * MUHIM: bu klass endi ikki joyda qo'yilishi mumkin —
+ * <html> elementida (sahifa yuklanishining ENG BOSHIDA,
+ * game.html <head>'dagi sinxron skript orqali — hali
+ * ehtimol <body> ham chizilmagan) VA/YOKI eski joyidek
+ * <body>'da (keyinroq, JS orqali). Shu sabab selektor
+ * "body." bilan CHEKLANMAGAN — ота элемент html ЁКИ body
+ * bo'lishidan qat'iy nazar ishlashi kerak.
+ */
+.guestQuickLaunchMode .appHeader,
+.guestQuickLaunchMode .app{
   display:none !important;
 }

@@ -2552,9 +2552,46 @@ async function createUserTopic(title, subject, category) {
  * (Firebase) va render qilishni
  * chaqiruvchi tomon bajaradi.
  */
+/*
+ * XLSX KUTUBXONASINI "DangEROSLY" (kerak bo'lganda)
+ * YUKLASH: ilgari bu ~ bir necha yuz KB'lik kutubxona
+ * game.html'da <script src> orqali HAR DOIM, hatto
+ * index'dan mehmon sifatida shunchaki Xona/Duel/Play
+ * o'ynayotgan foydalanuvchi uchun ham SINXRON (bloklovchi)
+ * ravishda yuklanardi — bu esa sahifaning birinchi marta
+ * tayyor bo'lishini (demak — flow-shield/board holatini)
+ * kechiktirar, natijada UI "sekin ochilyapti" tuyg'usini
+ * kuchaytirar edi. Endi bu kutubxona FAQAT admin/o'qituvchi
+ * haqiqatan ham Excel import/export funksiyasidan
+ * foydalanganda, talab bilan (on-demand) yuklanadi.
+ */
+let _xlsxLoadPromise = null;
+
+function loadXlsxLib() {
+
+  if (window.XLSX) {
+    return Promise.resolve();
+  }
+
+  if (!_xlsxLoadPromise) {
+    _xlsxLoadPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js";
+      s.onload = () => resolve();
+      s.onerror = () => {
+        _xlsxLoadPromise = null;
+        reject(new Error("Excel kutubxonasi yuklanmadi. Internetni tekshiring."));
+      };
+      document.head.appendChild(s);
+    });
+  }
+
+  return _xlsxLoadPromise;
+}
+
 function applyExcelFileToTopic(topic, file) {
 
-  return new Promise((resolve, reject) => {
+  return loadXlsxLib().then(() => new Promise((resolve, reject) => {
 
     const reader =
       new FileReader();
@@ -2681,7 +2718,7 @@ function applyExcelFileToTopic(topic, file) {
       file
     );
 
-  });
+  }));
 }
 
 /*
@@ -11427,7 +11464,15 @@ onAuthStateChanged(
 $("downloadTemplateBtn")
   ?.addEventListener(
     "click",
-    () => {
+    async () => {
+
+      try {
+        await loadXlsxLib();
+      } catch (e) {
+        alert("Excel kutubxonasi yuklanmadi. Internetni tekshirib, qayta urinib ko'ring.");
+        return;
+      }
+
       const wb =
         XLSX.utils.book_new();
 
