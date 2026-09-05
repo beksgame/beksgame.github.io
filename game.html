@@ -663,7 +663,8 @@
       <div id="duelResultContent"></div>
 
       <div class="modalActions">
-        <button class="bigBtn primaryBtn wideBtn" onclick="closeDuelResultModal()">Yopish</button>
+        <button class="bigBtn secondaryBtn" onclick="closeDuelResultModal()">Yopish</button>
+        <button class="bigBtn primaryBtn" onclick="continueDuelWithNewTopic()">🔄 Boshqa mavzu bilan davom etish</button>
       </div>
     </div>
   </div>
@@ -678,6 +679,32 @@
       <div id="restWinners"></div>
     </div>
     <canvas id="confetti"></canvas>
+  </div>
+
+  <!-- =========================
+       O'YIN YAKUNI — ISHTIROKCHILAR VA DAVOM ETISH
+       (winnerModal avtomatik yopilgach, index.html'dagi
+       "O'yin boshlash" orqali kelingan o'yinlar uchun
+       ochiladi — board hech qachon yalang'och qolmasligi
+       uchun)
+  ========================== -->
+  <div class="modal" id="gameEndModal">
+    <div class="modal-box">
+      <div class="modalHeader">
+        <div>
+          <span class="eyebrow">YAKUN</span>
+          <h2>📋 Ishtirokchilar</h2>
+        </div>
+        <button class="iconBtn" onclick="closeGameEndModal()">×</button>
+      </div>
+
+      <div id="gameEndParticipants" class="teams"></div>
+
+      <div class="modalActions">
+        <button class="bigBtn secondaryBtn" onclick="closeGameEndModal()">Yopish</button>
+        <button class="bigBtn primaryBtn" onclick="continueGameWithNewTopic()">🔄 Boshqa mavzu bilan davom etish</button>
+      </div>
+    </div>
   </div>
 
 

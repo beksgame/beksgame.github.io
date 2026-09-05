@@ -38,6 +38,16 @@ let questions = [[], [], [], [], []];
 let currentUserUid = null;
 let isGuestUser = false;
 let guestQuickLaunch = false;
+/*
+ * index.html'dagi "Jonli xona / Duel / O'yin boshlash"
+ * tugmalaridan (?liveStart=room|duel|play) kelingan
+ * bo'lsa — mehmon (guestQuickLaunch) yoki ro'yxatdan
+ * o'tgan foydalanuvchi bo'lishidan qat'iy nazar — TRUE
+ * bo'ladi. Bu sahifadagi HAR QANDAY "×"/"Yopish" (chiqish)
+ * tugmasi bosilganda index.html'ning asosiy maydoniga
+ * qaytarish uchun ishlatiladi.
+ */
+let launchedFromIndex = false;
 let currentCell = null;
 let currentValue = 0;
 let teamCount = 0;
@@ -351,6 +361,15 @@ let duelPlayers = {
   a: null,
   b: null,
 };
+
+/*
+ * Duel yakunida "🔄 Boshqa mavzu bilan davom etish"
+ * bosilganda, tanlangan 2 ishtirokchini shu yerda vaqtincha
+ * saqlaymiz — mavzular taxtasidan yangi mavzu tanlanishi
+ * bilanoq ular bilan yangi duel (statistikasi 0 dan)
+ * avtomatik boshlanadi.
+ */
+let pendingDuelContinuePlayers = null;
 
 let duelRound = {
   a: {
@@ -2949,6 +2968,23 @@ function openTopicIntro(topic) {
   }
 
   /*
+   * DUEL — "BOSHQA MAVZU BILAN DAVOM ETISH":
+   * duel yakunida foydalanuvchi shu tugmani bosgan
+   * bo'lsa, mavzu kartasiga bosish ODATDAGI intro
+   * oynasini ochmaydi — bir xil 2 ishtirokchi bilan
+   * to'g'ridan-to'g'ri yangi duelni (statistikasi
+   * 0 dan) ishga tushiradi.
+   */
+  if (pendingDuelContinuePlayers) {
+    const players = pendingDuelContinuePlayers;
+    pendingDuelContinuePlayers = null;
+
+    selectUserTopic(topic.id);
+    startDuel(topic, players.a, players.b);
+    return;
+  }
+
+  /*
    * Shu yerdan boshlab (Duel/Xona/Play qaysi biri
    * tanlanishidan qat'iy nazar) board hech qachon
    * "yalang'och" ko'rinib qolmasligi uchun parda ishga
@@ -3326,7 +3362,7 @@ function closeRoomSetupModal(viaConfirm = false) {
     hideFlowShield();
   }
 
-  if (!viaConfirm && guestQuickLaunch) {
+  if (!viaConfirm && launchedFromIndex) {
     window.location.href = "index.html";
   }
 }
@@ -3902,7 +3938,7 @@ async function endRoomAndDelete() {
   if (!roomCode) {
     closeRoomHostView();
 
-    if (guestQuickLaunch) {
+    if (launchedFromIndex) {
       window.location.href = "index.html";
     }
 
@@ -3919,7 +3955,7 @@ async function endRoomAndDelete() {
 
   await deleteRoomAndPlayers(codeToDelete);
 
-  if (guestQuickLaunch) {
+  if (launchedFromIndex) {
     window.location.href = "index.html";
   }
 }
@@ -5628,18 +5664,69 @@ function showDuelResult(winnerSide, a, b) {
   playWinSound();
 }
 
-function closeDuelResultModal() {
+function closeDuelResultModal(viaContinue = false) {
   const modal = $("duelResultModal");
 
   if (modal) {
     modal.style.display = "none";
   }
+
+  /*
+   * "🔄 Boshqa mavzu bilan davom etish" tugmasi bosilganda
+   * (viaContinue = true) — natija oynasi shunchaki yopiladi,
+   * chunki undan keyin mavzu tanlash ro'yxati (roomTopicPicker)
+   * ochiladi. index.html'ga faqat foydalanuvchi HAQIQATAN HAM
+   * "×"/"Yopish" bosib, duelni butunlay tugatganda qaytariladi.
+   */
+  if (viaContinue) return;
+
+  /*
+   * Agar bu duel index.html'dagi "Jonli xona / Duel / Play"
+   * orqali (mehmon yoki ro'yxatdan o'tgan foydalanuvchi
+   * bo'lishidan qat'iy nazar) boshlangan bo'lsa, natija
+   * oynasi yopilganda index.html asosiy sahifasiga
+   * qaytaramiz — aks holda game.html'da bo'sh (board'siz)
+   * maydon qolib ketadi.
+   */
+  if (launchedFromIndex) {
+    window.location.href = "index.html";
+  }
 }
 
 window.closeDuelResultModal = closeDuelResultModal;
 
+/*
+ * "🔄 Boshqa mavzu bilan davom etish" — duel natijasi
+ * oynasini yopib, mavzu tanlash RO'YXATINI (qidiruvli
+ * picker) ochadi. Bu — asosiy "board" render qilingan
+ * yoki qilinmaganidan (mehmon/tezkor kirish holatlarida
+ * board umuman render qilinmaydi) qat'iy nazar har doim
+ * ishlaydi. Aynan shu 2 ishtirokchi (duelPlayers.a/b)
+ * saqlanib qoladi — ro'yxatdan yangi mavzu tanlashi
+ * bilanoq, statistikasi 0 dan boshlangan yangi duel
+ * avtomatik boshlanadi (qarang: selectTopicForRoomOpen).
+ */
+function continueDuelWithNewTopic() {
+  if (!duelPlayers.a || !duelPlayers.b) {
+    closeDuelResultModal(true);
+    return;
+  }
+
+  pendingDuelContinuePlayers = {
+    a: duelPlayers.a,
+    b: duelPlayers.b,
+  };
+
+  closeDuelResultModal(true);
+
+  roomPickerTargetMode = "duel";
+  openRoomTopicPicker();
+}
+
+window.continueDuelWithNewTopic = continueDuelWithNewTopic;
+
 function exitDuel() {
-  if (guestQuickLaunch) {
+  if (launchedFromIndex) {
     window.location.href = "index.html";
     return;
   }
@@ -6431,7 +6518,7 @@ function closeModal(userInitiated = true) {
    *     sahifa index.html'ga o'tib ketadi va g'olib
    *     modali/statistika HECH QACHON ko'rinmaydi.
    */
-  if (userInitiated && guestQuickLaunch) {
+  if (userInitiated && launchedFromIndex) {
     window.location.href = "index.html";
     return;
   }
@@ -6592,34 +6679,9 @@ function showSoloResultModal() {
     modal.style.display = "none";
 
     stopConfetti();
-    resetBoardOnly();
 
-    /*
-     * Mehmon (guestQuickLaunch) uchun asosiy
-     * "board" umuman ko'rsatilmaydi — shu sabab
-     * o'yin tugagach ularga keyingi mavzuni
-     * tanlash uchun ro'yxat DARHOL qayta
-     * ochilishi kerak, aks holda ekran bo'sh
-     * qolib, faqat sahifani yangilagandagina
-     * ro'yxat chiqardi.
-     *
-     * Ro'yxatdan o'tgan foydalanuvchi index.html'dagi
-     * "O'yin boshlash" orqali (?liveStart=play) kelgan
-     * bo'lsa ham xuddi shu "guestQuickLaunchMode"
-     * klassi body'ga qo'shilgan bo'ladi (board bir
-     * zum yalang'och ko'rinmasligi uchun) — lekin bu
-     * klass o'yin tugagach hech qachon olib
-     * tashlanmagani sabab, board (savol kartalari)
-     * doim bo'sh/ko'rinmas bo'lib qolar edi. Endi
-     * bunday foydalanuvchi uchun klass shu yerda
-     * olib tashlanadi, va board qaytadan ko'rinadi.
-     */
-    if (guestQuickLaunch) {
-      openRoomTopicPicker();
-    } else {
-      document.body.classList.remove("guestQuickLaunchMode");
-    }
-  }, 12000);
+    afterGameModalClosed();
+  }, 3000);
 }
 
 function showWinnerModal(sorted) {
@@ -6710,15 +6772,115 @@ function showWinnerModal(sorted) {
     modal.style.display = "none";
 
     stopConfetti();
-    resetBoardOnly();
 
-    if (guestQuickLaunch) {
-      openRoomTopicPicker();
-    } else {
-      document.body.classList.remove("guestQuickLaunchMode");
-    }
-  }, 12000);
+    afterGameModalClosed();
+  }, 3000);
 }
+
+/*
+ * winnerModal (g'olib e'lon qilish/konfetti) o'z-o'zidan
+ * yopilgach chaqiriladi. Board darhol "yalang'och" (bo'sh)
+ * ko'rinib qolmasligi uchun avval tozalanadi (resetBoardOnly),
+ * so'ng — agar bu o'yin index.html'dagi "O'yin boshlash"
+ * orqali boshlangan bo'lsa — alohida "gameEndModal" ochiladi:
+ * u yerda ishtirokchilar ro'yxati (endi 0 holatida) va
+ * "Yopish" / "Boshqa mavzu bilan davom etish" tugmalari bor.
+ * Aks holda (oddiy, index'dan kelmagan ro'yxatdan o'tgan
+ * foydalanuvchi) — avvalgidek shunchaki o'z board'i ko'rinadi.
+ */
+function afterGameModalClosed() {
+  resetBoardOnly();
+
+  if (launchedFromIndex) {
+    openGameEndModal();
+    return;
+  }
+
+  document.body.classList.remove("guestQuickLaunchMode");
+}
+
+/*
+ * "gameEndModal" — ishtirokchilar ro'yxatini (ballari
+ * endi 0'dan boshlanadi) ko'rsatadi.
+ */
+function openGameEndModal() {
+  const modal = $("gameEndModal");
+
+  const box = $("gameEndParticipants");
+
+  if (!modal) return;
+
+  if (box) {
+    if (teamsData.length) {
+      box.innerHTML = teamsData
+        .map((t) => {
+          const p = findParticipant(t.participantId);
+
+          return `
+            <div class="team">
+              <img
+                class="teamAvatar"
+                src="${p?.image || t.image || avatarData(t.name)}"
+                alt=""
+              >
+              <strong>${escapeHtml(t.name)}</strong>
+              <span>${t.score || 0}</span>
+              <div class="teamStatLine">
+                ✅ ${t.correctCount || 0} · ❌ ${t.wrongCount || 0}
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    } else {
+      box.innerHTML = `<div style="color:var(--muted);padding:20px;text-align:center;font-size:13.5px;">Yakka (solo) tartibda o'ynalgan edi.</div>`;
+    }
+  }
+
+  modal.style.display = "flex";
+}
+
+/*
+ * "×" / "Yopish" — gameEndModal'ni yopish. index.html'dagi
+ * "O'yin boshlash" orqali kelingan bo'lsa, index.html asosiy
+ * sahifasiga qaytaramiz.
+ */
+function closeGameEndModal() {
+  const modal = $("gameEndModal");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+  if (launchedFromIndex) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  document.body.classList.remove("guestQuickLaunchMode");
+}
+
+window.closeGameEndModal = closeGameEndModal;
+
+/*
+ * "🔄 Boshqa mavzu bilan davom etish" — gameEndModal
+ * yopiladi va mavzu tanlash ro'yxati ochiladi, shu bilan
+ * bir xil ishtirokchilar (teamsData) bilan yangi mavzuda
+ * o'yinni davom ettirish mumkin bo'ladi.
+ */
+function continueGameWithNewTopic() {
+  const modal = $("gameEndModal");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+
+  roomPickerTargetMode = "play";
+
+  openRoomTopicPicker();
+}
+
+window.continueGameWithNewTopic = continueGameWithNewTopic;
 
 function playWinSound() {
   winnerSound?.play().catch(() => {});
@@ -7188,12 +7350,23 @@ function closeRoomTopicPickerModal(viaSelection = false) {
   }
 
   /*
+   * Duel "boshqa mavzu bilan davom etish" rejimida
+   * ochilgan bo'lsa-yu, foydalanuvchi hech narsa
+   * tanlamasdan yopib qo'ysa — bu rejim bekor qilinadi
+   * (aks holda keyinroq boshqa joyda mavzu tanlanganda
+   * kutilmagan duel boshlanib qolishi mumkin edi).
+   */
+  if (!viaSelection && pendingDuelContinuePlayers) {
+    pendingDuelContinuePlayers = null;
+  }
+
+  /*
    * Mehmon (index.html'dagi Jonli xona/Duel/Play orqali
    * kelgan) hech narsa tanlamasdan ro'yxatni yopsa —
    * uning uchun ko'rsatiladigan boshqa hech qanday
    * ekran yo'q, shu sabab index.html'ga qaytaramiz.
    */
-  if (!viaSelection && guestQuickLaunch) {
+  if (!viaSelection && launchedFromIndex) {
     window.location.href = "index.html";
     return;
   }
@@ -7362,6 +7535,22 @@ function selectTopicForRoomOpen(topic) {
   const wasSwap = roomTopicSwapMode;
 
   closeRoomTopicPickerModal(true);
+
+  /*
+   * DUEL — "BOSHQA MAVZU BILAN DAVOM ETISH": ro'yxatdan
+   * mavzu tanlanishi bilanoq, saqlangan 2 ishtirokchi
+   * bilan to'g'ridan-to'g'ri yangi duel (statistikasi
+   * 0 dan) boshlanadi — oddiy "duel" rejimi bosqichlarini
+   * (ism kiritish va h.k.) qayta o'tmaydi.
+   */
+  if (pendingDuelContinuePlayers) {
+    const players = pendingDuelContinuePlayers;
+    pendingDuelContinuePlayers = null;
+
+    selectUserTopic(topic.id);
+    startDuel(topic, players.a, players.b);
+    return;
+  }
 
   if (wasSwap) {
     swapRoomTopic(topic);
@@ -8089,6 +8278,7 @@ onAuthStateChanged(auth, async (user) => {
    */
   if (hasValidLiveStart) {
     document.body.classList.add("guestQuickLaunchMode");
+    launchedFromIndex = true;
   }
 
   if (isGuestUser) {
