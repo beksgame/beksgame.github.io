@@ -4,16 +4,16 @@
 ========================================================== */
 
 :root{
-  --bg:#07111f;
-  --bg2:#0b1930;
-  --panel:rgba(14,27,48,.78);
-  --line:rgba(255,255,255,.12);
-  --line2:rgba(255,255,255,.18);
-  --text:#f7f9fc;
-  --muted:#9eacc0;
-  --cyan:#20d9ff;
-  --purple:#8c5cff;
-  --shadow:0 18px 50px rgba(0,0,0,.28);
+  --bg:#ffffff;
+  --bg2:#f4f7fb;
+  --panel:#ffffff;
+  --line:#e3e8f0;
+  --line2:#cdd6e3;
+  --text:#16202f;
+  --muted:#66748b;
+  --cyan:#0891b2;
+  --purple:#7c4dff;
+  --shadow:0 1px 2px rgba(16,24,40,.05);
 }
 
 *{box-sizing:border-box}
@@ -34,10 +34,7 @@ body{
   padding:24px;
   color:var(--text);
   font-family:Inter,"Segoe UI",Arial,sans-serif;
-  background:
-    radial-gradient(circle at 10% 5%,rgba(32,217,255,.13),transparent 25%),
-    radial-gradient(circle at 90% 8%,rgba(140,92,255,.16),transparent 27%),
-    linear-gradient(135deg,var(--bg),var(--bg2));
+  background:var(--bg);
 }
 
 /* .authWrap olib tashlandi — endi header (.appHeader) ishlatiladi */
@@ -50,7 +47,7 @@ body{
 
 .gamesCard{
   padding:22px 22px 18px;
-  border-radius:22px;
+  border-radius:8px;
   border:1px solid var(--line2);
   background:
     radial-gradient(circle at 50% 0,rgba(140,92,255,.09),transparent 40%),
@@ -83,7 +80,7 @@ body{
   min-height:48px;
   padding:12px 16px;
   border:none;
-  border-radius:13px;
+  border-radius:8px;
   cursor:pointer;
   color:#fff;
   font-size:15px;
@@ -148,9 +145,9 @@ body{
   display:grid;
   place-items:center;
   border:1px solid var(--line2);
-  border-radius:22px;
-  background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.04));
-  box-shadow:0 12px 32px rgba(0,0,0,.22);
+  border-radius:8px;
+  background:linear-gradient(145deg,rgba(15,23,42,0.175),rgba(15,23,42,0.05));
+  box-shadow:0 12px 32px rgba(15,23,42,0.088);
   overflow:hidden;
 }
 
@@ -193,7 +190,7 @@ body{
   display:flex;
   gap:12px;
   padding:16px;
-  border-radius:22px;
+  border-radius:8px;
   border:1px solid var(--line2);
   background:
     radial-gradient(circle at 50% 0,rgba(32,217,255,.08),transparent 40%),
@@ -207,7 +204,7 @@ body{
   min-height:46px;
   padding:10px 12px;
   border:1px solid var(--line2);
-  border-radius:13px;
+  border-radius:8px;
   cursor:pointer;
   font-size:13.5px;
   font-weight:850;
@@ -229,7 +226,7 @@ body{
 
 .authRegisterActionBtn{
   color:var(--text);
-  background:rgba(255,255,255,.05);
+  background:rgba(15,23,42,0.062);
 }
 
 .authRegisterActionBtn:hover{
@@ -253,8 +250,8 @@ body{
   padding:9px 13px;
   font-size:13.5px;
   border:1px solid var(--line2);
-  border-radius:11px;
-  background:rgba(255,255,255,.06);
+  border-radius:8px;
+  background:rgba(15,23,42,0.075);
   color:var(--text);
   outline:none;
   transition:.2s;
@@ -277,7 +274,7 @@ body{
 
 /* Error messages */
 .formError {
-  color:#ff8a95;
+  color:#ad0010;
   font-size:13px;
   margin-top:10px;
 }
@@ -304,7 +301,7 @@ body{
   position:relative;
   width:min(380px,100%);
   padding:28px 24px;
-  border-radius:22px;
+  border-radius:8px;
   border:1px solid var(--line2);
   background:
     radial-gradient(circle at 50% 0,rgba(32,217,255,.09),transparent 40%),
@@ -329,10 +326,10 @@ body{
 .miniModalGuide{
   margin:0 0 16px;
   padding:12px 14px;
-  border-radius:12px;
+  border-radius:8px;
   border:1px solid rgba(32,217,255,.25);
   background:rgba(32,217,255,.06);
-  color:#cfe9f7;
+  color:#196995;
   font-size:12.5px;
   font-weight:600;
   line-height:1.55;
@@ -358,8 +355,8 @@ body{
   width:100%;
   padding:12px 14px;
   border:1px solid var(--line2);
-  border-radius:11px;
-  background:rgba(255,255,255,.06);
+  border-radius:8px;
+  background:rgba(15,23,42,0.075);
   color:var(--text);
   font-size:14px;
   outline:none;
@@ -400,7 +397,7 @@ body{
   width:100%;
   padding:14px 16px;
   margin-top:12px;
-  border-radius:14px;
+  border-radius:8px;
   border:none;
   cursor:pointer;
   text-align:left;
@@ -430,7 +427,7 @@ body{
 
 .miniModalBtn.secondaryModalBtn{
   color:var(--text);
-  background:rgba(255,255,255,.07);
+  background:rgba(15,23,42,0.088);
   border:1px solid var(--line2);
 }
 
@@ -472,8 +469,8 @@ body{
   width:100%;
   padding:12px 14px;
   border:1px solid var(--line2);
-  border-radius:11px;
-  background:rgba(255,255,255,.06);
+  border-radius:8px;
+  background:rgba(15,23,42,0.075);
   color:var(--text);
   font-size:14px;
   outline:none;
@@ -503,8 +500,8 @@ body{
   width:76px !important;
   padding:12px 8px;
   border:1px solid var(--line2);
-  border-radius:11px;
-  background:rgba(255,255,255,.06);
+  border-radius:8px;
+  background:rgba(15,23,42,0.075);
   color:var(--text);
   font-size:14px;
   text-align:center;
@@ -570,16 +567,16 @@ body{
 ========================================================== */
 
 :root{
-  --bg:#07111f;
-  --bg2:#0b1930;
-  --panel:rgba(14,27,48,.78);
-  --line:rgba(255,255,255,.12);
-  --line2:rgba(255,255,255,.18);
-  --text:#f7f9fc;
-  --muted:#9eacc0;
-  --cyan:#20d9ff;
-  --purple:#8c5cff;
-  --shadow:0 18px 50px rgba(0,0,0,.28);
+  --bg:#ffffff;
+  --bg2:#f4f7fb;
+  --panel:#ffffff;
+  --line:#e3e8f0;
+  --line2:#cdd6e3;
+  --text:#16202f;
+  --muted:#66748b;
+  --cyan:#0891b2;
+  --purple:#7c4dff;
+  --shadow:0 1px 2px rgba(16,24,40,.05);
 }
 
 *{box-sizing:border-box}
@@ -593,10 +590,7 @@ body{
   min-height:100vh;
   color:var(--text);
   font-family:Inter,"Segoe UI",Arial,sans-serif;
-  background:
-    radial-gradient(circle at 10% 5%,rgba(32,217,255,.13),transparent 25%),
-    radial-gradient(circle at 90% 8%,rgba(140,92,255,.16),transparent 27%),
-    linear-gradient(135deg,var(--bg),var(--bg2));
+  background:var(--bg);
 }
 
 .playWrap{
@@ -644,7 +638,7 @@ body{
 .playLogoMark{
   width:56px;
   height:56px;
-  border-radius:16px;
+  border-radius:8px;
   overflow:hidden;
   display:grid;
   place-items:center;
@@ -682,7 +676,7 @@ body{
 
 .joinCard{
   padding:28px 24px;
-  border-radius:22px;
+  border-radius:8px;
   border:1px solid var(--line2);
   background:
     radial-gradient(circle at 50% 0,rgba(32,217,255,.09),transparent 40%),
@@ -711,8 +705,8 @@ body{
   width:100%;
   padding:14px 16px;
   border:1px solid var(--line2);
-  border-radius:12px;
-  background:rgba(255,255,255,.06);
+  border-radius:8px;
+  background:rgba(15,23,42,0.075);
   color:var(--text);
   font-size:16px;
   outline:none;
@@ -739,7 +733,7 @@ body{
 
 .joinError{
   margin-top:12px;
-  color:#ff8a95;
+  color:#ad0010;
   font-size:13px;
   font-weight:700;
 }
@@ -753,7 +747,7 @@ body{
   padding:14px;
   font-size:16px;
   font-weight:900;
-  border-radius:14px;
+  border-radius:8px;
   border:none;
   cursor:pointer;
   transition:.2s;
@@ -772,7 +766,7 @@ body{
 
 .secondaryPlayBtn{
   color:var(--text);
-  background:rgba(255,255,255,.07);
+  background:rgba(15,23,42,0.088);
   border:1px solid var(--line2);
 }
 
@@ -780,7 +774,7 @@ body{
 
 .lobbyCard{
   padding:44px 26px;
-  border-radius:22px;
+  border-radius:8px;
   border:1px solid var(--line2);
   background:var(--panel);
   backdrop-filter:blur(16px);
@@ -832,9 +826,9 @@ body{
   margin-top:16px;
   padding:10px;
   border:1px solid rgba(255,83,100,.35);
-  border-radius:12px;
+  border-radius:8px;
   background:rgba(255,83,100,.08);
-  color:#ff8a95;
+  color:#ad0010;
   font-size:13px;
   font-weight:800;
   cursor:pointer;
@@ -849,11 +843,11 @@ body{
 .lobbyPlayerChip{
   padding:6px 12px;
   border:1px solid var(--line2);
-  border-radius:999px;
-  background:rgba(255,255,255,.05);
+  border-radius:8px;
+  background:rgba(15,23,42,0.062);
   font-size:12px;
   font-weight:800;
-  color:#e8f3ff;
+  color:#0053ad;
 }
 
 /* ---------- DOIMIY CHIQISH TUGMASI (X) ---------- */
@@ -899,7 +893,7 @@ body{
 
   border:1px solid var(--line2);
   border-radius:50%;
-  background:rgba(255,255,255,.06);
+  background:rgba(15,23,42,0.075);
 
   color:var(--muted);
   font-size:15px;
@@ -910,8 +904,8 @@ body{
 }
 
 .roomExitFab:hover{
-  background:rgba(255,255,255,.12);
-  border-color:rgba(255,255,255,.3);
+  background:rgba(15,23,42,0.15);
+  border-color:rgba(15,23,42,0.375);
   color:var(--text);
 }
 
@@ -932,7 +926,7 @@ body{
 #revealScreen.screen,
 #roundDoneScreen.screen{
   padding:26px 22px;
-  border-radius:22px;
+  border-radius:8px;
   border:1px solid var(--line2);
   background:
     radial-gradient(circle at 50% 0,rgba(32,217,255,.09),transparent 40%),
@@ -956,7 +950,7 @@ body{
 }
 
 .qRoundLabel{
-  color:#67e8f9;
+  color:#0794a7;
   font-size:13px;
   font-weight:950;
   letter-spacing:1px;
@@ -973,11 +967,11 @@ body{
   padding:6px 14px;
   text-align:center;
 
-  border-radius:999px;
+  border-radius:8px;
   border:1px solid rgba(255,83,100,.4);
   background:rgba(255,83,100,.10);
 
-  color:#ff8a95;
+  color:#ad0010;
   font-size:18px;
   font-weight:950;
 }
@@ -985,7 +979,7 @@ body{
 .qTextBox{
   padding:22px 20px;
   margin-bottom:16px;
-  border-radius:18px;
+  border-radius:8px;
   border:1px solid var(--line2);
   background:var(--panel);
   backdrop-filter:blur(16px);
@@ -1010,7 +1004,7 @@ body{
   min-height:84px;
   padding:16px 14px;
   border:none;
-  border-radius:16px;
+  border-radius:8px;
   color:#fff;
   font-size:17px;
   font-weight:850;
@@ -1041,10 +1035,10 @@ body{
 .qWaitingNote{
   margin-top:16px;
   padding:12px 16px;
-  border-radius:12px;
+  border-radius:8px;
   background:rgba(53,220,140,.10);
   border:1px solid rgba(53,220,140,.30);
-  color:#8affbc;
+  color:#00ad4a;
   font-size:13px;
   font-weight:800;
   text-align:center;
@@ -1062,7 +1056,7 @@ body{
 }
 
 .revealMark.isCorrect{color:#35dc8c}
-.revealMark.isWrong{color:#ff5364}
+.revealMark.isWrong{color:#ad0011}
 
 .revealCorrectAnswer{
   margin-bottom:20px;
@@ -1086,18 +1080,18 @@ body{
   padding:20px 34px;
   margin-bottom:14px;
 
-  border-radius:18px;
+  border-radius:8px;
   border:1px solid rgba(32,217,255,.35);
   background:
     linear-gradient(
       145deg,
       rgba(32,217,255,.14),
-      rgba(255,255,255,.03)
+      rgba(15,23,42,0.037)
     );
 }
 
 .revealScoreLabel{
-  color:#67e8f9;
+  color:#0794a7;
   font-size:11.5px;
   font-weight:950;
   letter-spacing:1.4px;
@@ -1129,13 +1123,13 @@ body{
 .endedRankCard{
   padding:26px 22px;
   margin-bottom:18px;
-  border-radius:18px;
+  border-radius:8px;
   border:1px solid rgba(32,217,255,.35);
   background:
     linear-gradient(
       145deg,
       rgba(32,217,255,.16),
-      rgba(255,255,255,.03)
+      rgba(15,23,42,0.037)
     );
 }
 
@@ -1174,10 +1168,10 @@ body{
 
 .smallLightBtn{
   padding:8px 14px;
-  border-radius:10px;
+  border-radius:8px;
   border:1px solid rgba(140,92,255,.45);
   background:rgba(140,92,255,.14);
-  color:#e4d9ff;
+  color:#3200ad;
   font-size:12.5px;
   font-weight:800;
   cursor:pointer;
@@ -1206,8 +1200,8 @@ body{
   padding:13px 16px;
 
   border:1px solid var(--line2);
-  border-radius:12px;
-  background:rgba(255,255,255,.04);
+  border-radius:8px;
+  background:rgba(15,23,42,0.05);
 
   font-size:17px;
 }
@@ -1223,20 +1217,20 @@ body{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  color:#f1f6fb;
+  color:#275787;
   font-size:17px;
 }
 
 .endedLeaderRow span:first-child,
 .liveLeaderRow span:first-child{
-  color:#8fa3b9;
+  color:#385575;
   font-weight:900;
   font-size:19px;
 }
 
 .endedLeaderRow span:last-child,
 .liveLeaderRow span:last-child{
-  color:#67e8f9;
+  color:#0794a7;
   font-weight:900;
   font-size:19px;
 }
@@ -1265,18 +1259,18 @@ body{
 .qParticipantChip{
   padding:6px 12px;
   border:1px solid var(--line2);
-  border-radius:999px;
-  background:rgba(255,255,255,.05);
+  border-radius:8px;
+  background:rgba(15,23,42,0.062);
   font-size:12px;
   font-weight:800;
-  color:#9eacc0;
+  color:#385175;
   transition:.2s;
 }
 
 .qParticipantChip.answered{
   border-color:rgba(53,220,140,.4);
   background:rgba(53,220,140,.10);
-  color:#8affbc;
+  color:#00ad4a;
 }
 
 .qParticipantChip.isMe{
@@ -1307,13 +1301,13 @@ body{
 .winBannerCard{
   width:min(380px,100%);
   padding:34px 28px;
-  border-radius:24px;
+  border-radius:8px;
   text-align:center;
   border:1px solid rgba(32,217,255,.4);
   background:
     radial-gradient(circle at 50% 0,rgba(32,217,255,.16),transparent 45%),
     var(--panel);
-  box-shadow:0 24px 60px rgba(0,0,0,.45);
+  box-shadow:0 24px 60px rgba(15,23,42,0.18);
   animation:winBannerPop .35s cubic-bezier(.2,1.4,.4,1);
 }
 
@@ -1344,7 +1338,7 @@ body{
 .winBannerStats{
   font-size:14px;
   font-weight:800;
-  color:#67e8f9;
+  color:#0794a7;
   margin-bottom:20px;
 }
 
@@ -1357,9 +1351,9 @@ body{
 .roomChatBox{
   margin-top:18px;
   padding:14px;
-  border-radius:16px;
+  border-radius:8px;
   border:1px solid var(--line2);
-  background:rgba(255,255,255,.04);
+  background:rgba(15,23,42,0.05);
   text-align:left;
 }
 
@@ -1391,9 +1385,9 @@ body{
 .chatBubble{
   max-width:88%;
   padding:8px 12px;
-  border-radius:12px;
+  border-radius:8px;
   border:1px solid var(--line2);
-  background:rgba(255,255,255,.05);
+  background:rgba(15,23,42,0.062);
   align-self:flex-start;
 }
 
@@ -1411,17 +1405,17 @@ body{
 .chatBubbleName{
   display:block;
   margin-bottom:2px;
-  color:#67e8f9;
+  color:#0794a7;
   font-size:11px;
   font-weight:800;
 }
 
 .chatBubble.isHost .chatBubbleName{
-  color:#c9b6ff;
+  color:#2d00ad;
 }
 
 .chatBubbleText{
-  color:#f1f6fb;
+  color:#275787;
   font-size:13.5px;
   line-height:1.35;
   word-break:break-word;
@@ -1436,8 +1430,8 @@ body{
   flex:1;
   padding:10px 12px;
   border:1px solid var(--line2);
-  border-radius:10px;
-  background:rgba(255,255,255,.06);
+  border-radius:8px;
+  background:rgba(15,23,42,0.075);
   color:var(--text);
   font-size:13.5px;
   outline:none;
@@ -1452,7 +1446,7 @@ body{
   min-width:44px;
   padding:0 14px;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
   color:#04121f;
   font-size:15px;
   font-weight:900;
