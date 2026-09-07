@@ -538,4 +538,185 @@
   .userPerms{
     grid-template-columns:1fr;
   }
-}
+}[data-theme="dark"] .deniedCard { max-width:460px;
+  margin:80px auto 0;
+  padding:36px 30px;
+  text-align:center;
+  border:1px solid var(--line2);
+  border-radius:var(--radius);
+  background:rgba(8,18,33,.62);
+  box-shadow:var(--shadow); }
+[data-theme="dark"] .adminSettingsCard { margin-bottom:22px;
+  padding:20px 22px;
+  border:1px solid var(--line2);
+  border-radius:var(--radius);
+  background:rgba(8,18,33,.5);
+  box-shadow:var(--shadowSmall); }
+[data-theme="dark"] .settingsField input, [data-theme="dark"] .settingsField textarea { width:100%;
+  padding:10px 12px;
+  border-radius:11px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:#f1f6fb;
+  font-size:13.5px;
+  font-family:inherit;
+  resize:vertical; }
+[data-theme="dark"] .messageRow { display:grid;
+  grid-template-columns:minmax(140px,190px) 1fr;
+  align-items:start;
+  gap:10px 14px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:rgba(255,255,255,.04); }
+[data-theme="dark"] .messageEmail { color:#f1f6fb;
+  font-size:12.5px;
+  font-weight:850;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap; }
+[data-theme="dark"] .messageDeleteBtn { margin-top:2px;
+  width:26px;
+  height:26px;
+  border-radius:8px;
+  border:1px solid rgba(255,83,100,.35);
+  background:rgba(255,83,100,.1);
+  color:#ff8a95;
+  font-size:12px;
+  cursor:pointer; }
+[data-theme="dark"] .messageText { color:#dbe6f2;
+  font-size:12.5px;
+  line-height:1.45;
+  white-space:pre-wrap;
+  word-break:break-word; }
+[data-theme="dark"] .messageExistingReply { padding:6px 9px;
+  border-radius:9px;
+  border:1px solid rgba(32,211,122,.3);
+  background:rgba(32,211,122,.08);
+  color:#c9ffe0;
+  font-size:11.5px;
+  line-height:1.4;
+  white-space:pre-wrap;
+  word-break:break-word; }
+[data-theme="dark"] .messageStatusPending { color:#ffe4a8;
+  font-size:11px;
+  font-weight:800; }
+[data-theme="dark"] .messageReplyInput { flex:1 1 auto;
+  min-width:0;
+  padding:7px 10px;
+  border-radius:9px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.05);
+  color:#f1f6fb;
+  font-size:12px;
+  font-family:inherit;
+  resize:vertical;
+  min-height:34px;
+  max-height:80px; }
+[data-theme="dark"] .messageReplyBtn { flex:0 0 auto;
+  min-height:34px;
+  padding:0 14px;
+  border-radius:9px;
+  border:1px solid rgba(32,217,255,.4);
+  background:rgba(32,217,255,.12);
+  color:#bdf3ff;
+  font-size:11.5px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap; }
+[data-theme="dark"] .adminStatChip { padding:10px 16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+  font-size:12.5px;
+  font-weight:800;
+  color:var(--muted); }
+[data-theme="dark"] .adminStatChip strong { color:#fff;
+  font-size:16px;
+  margin-right:6px; }
+[data-theme="dark"] .userRow { display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:rgba(255,255,255,.04);
+  transition:.15s; }
+[data-theme="dark"] .userRow:hover { border-color:var(--line2);
+  background:rgba(255,255,255,.06); }
+[data-theme="dark"] .userAvatar { width:42px;
+  height:42px;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:950;
+  color:#04121f;
+  background:linear-gradient(135deg,#20d9ff,#4f8cff 60%,#8c5cff); }
+[data-theme="dark"] .userName { display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:14.5px;
+  font-weight:850;
+  color:#f1f6fb;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap; }
+[data-theme="dark"] .roleBadge { flex:0 0 auto;
+  padding:3px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.4px;
+  text-transform:uppercase; }
+[data-theme="dark"] .adminToggleBtn { flex:0 0 auto;
+  min-height:38px;
+  padding:8px 12px;
+  border-radius:11px;
+  border:1px solid rgba(140,92,255,.4);
+  background:rgba(140,92,255,.10);
+  color:#e4d9ff;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:.15s; }
+[data-theme="dark"] .permToggleLabel { font-size:12.5px;
+  font-weight:700;
+  color:#dbe6f2; }
+[data-theme="dark"] .toggleTrack { width:38px;
+  height:21px;
+  border-radius:999px;
+  background:rgba(255,255,255,.14);
+  border:1px solid var(--line2);
+  position:relative;
+  transition:.2s;
+  flex:0 0 auto; }
+[data-theme="dark"] .toggleThumb { position:absolute;
+  top:1px;
+  left:1px;
+  width:17px;
+  height:17px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.35);
+  transition:.2s; }
+[data-theme="dark"] .adminToast { position:fixed;
+  left:50%;
+  bottom:26px;
+  transform:translateX(-50%) translateY(20px);
+  padding:12px 20px;
+  border-radius:12px;
+  border:1px solid rgba(53,220,140,.4);
+  background:rgba(12,30,22,.95);
+  color:#8affbc;
+  font-size:13px;
+  font-weight:800;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s;
+  z-index:2000; }
+[data-theme="dark"] .adminToast.isError { border-color:rgba(255,83,100,.45);
+  color:#ff8a95; }

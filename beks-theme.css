@@ -1,0 +1,589 @@
+/* ==========================================================
+   BEKS GAME — QUVNOQ TEMA (beks-theme.css)
+   ----------------------------------------------------------
+   Bu fayl game.css / admin.css / index.css DAN KEYIN yuklanadi
+   va faqat KO'RINISHNI (rang, radius, joylashuv) o'zgartiradi.
+   Hech qanday id/class o'chirilmagan yoki qo'shilmagan —
+   shuning uchun game.js / admin.js / i18n.js ishlashiga
+   BUTUNLAY TA'SIR QILMAYDI.
+
+   IKKITA REJIM:
+   - "pointer:fine" (kompyuter, sichqoncha)  -> ixcham, list
+     ko'rinish, kartalar kichikroq, rasm/ikon shart emas.
+   - "pointer:coarse" (telefon, planshet,
+      katta touch ekranlar)                 -> yorqin, katta,
+     yumaloq kartalar, kattaroq tugmalar.
+========================================================== */
+
+:root{
+  --bg:#fbf7ff;
+  --bg2:#eef2ff;
+  --panel:#ffffff;
+  --panel2:#faf8ff;
+  --line:#ece5fb;
+  --line2:#dccdf7;
+  --text:#241c3a;
+  --muted:#7b7599;
+  --cyan:#12b3c9;
+  --blue:#3aa0ff;
+  --purple:#8c5cff;
+  --green:#22c55e;
+  --red:#ff5364;
+  --gold:#ffb703;
+  --shadow:0 14px 30px rgba(110,70,220,.10);
+  --shadowSmall:0 6px 14px rgba(110,70,220,.09);
+  --radius:20px;
+  --radiusSmall:14px;
+
+  --pal1-bg:#E6F1FB; --pal1-fg:#0C447C; --pal1-fill:#3aa0ff;
+  --pal2-bg:#EEEDFE; --pal2-fg:#3C3489; --pal2-fill:#8c5cff;
+  --pal3-bg:#FDECE3; --pal3-fg:#9A431B; --pal3-fill:#ff8a4c;
+  --pal4-bg:#FBEAF0; --pal4-fg:#993556; --pal4-fill:#ef5d99;
+  --pal5-bg:#EAF3DE; --pal5-fg:#3B6D11; --pal5-fill:#22c55e;
+  --pal6-bg:#FDF3D9; --pal6-fg:#8A5A06; --pal6-fill:#ffb703;
+}
+
+[data-theme="dark"]{
+  --bg:#160f2c;
+  --bg2:#1b1440;
+  --panel:#1c1640;
+  --panel2:#221a4d;
+  --line:rgba(255,255,255,.10);
+  --line2:rgba(255,255,255,.16);
+  --text:#f3eefe;
+  --muted:#a79bd1;
+  --cyan:#34d6e6;
+  --blue:#5fb2ff;
+  --purple:#a685ff;
+  --green:#3ddc84;
+  --red:#ff7a88;
+  --gold:#ffc94d;
+  --shadow:0 16px 34px rgba(0,0,0,.40);
+  --shadowSmall:0 8px 16px rgba(0,0,0,.30);
+
+  --pal1-bg:rgba(58,160,255,.16);  --pal1-fg:#bfe0ff;
+  --pal2-bg:rgba(140,92,255,.18);  --pal2-fg:#ddd2ff;
+  --pal3-bg:rgba(255,138,76,.16);  --pal3-fg:#ffd7bd;
+  --pal4-bg:rgba(239,93,153,.16);  --pal4-fg:#ffd3e4;
+  --pal5-bg:rgba(34,197,94,.16);   --pal5-fg:#c6f3d5;
+  --pal6-bg:rgba(255,183,3,.18);   --pal6-fg:#ffe6ad;
+}
+
+/* ---------------------------------------------------------
+   ASOSIY YUZALAR
+--------------------------------------------------------- */
+
+body{ font-family:"Nunito","Segoe UI",Inter,Arial,sans-serif; }
+
+button{ border-radius:var(--radiusSmall); }
+button:active{ transform:scale(.96); }
+
+input,select,textarea{
+  border-radius:var(--radiusSmall) !important;
+  border:1.5px solid var(--line2) !important;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--blue) !important;
+  box-shadow:0 0 0 4px rgba(58,160,255,.16) !important;
+}
+
+/* ---------------------------------------------------------
+   HEADER / BREND
+--------------------------------------------------------- */
+
+.appHeader,.brandWrap{ padding:2px 0; }
+
+/* Logotip o'zi rangli — orqasiga qo'shimcha rang QO'YILMAYDI,
+   faqat yumshoq soya beriladi (avvalgi versiyada logotipga
+   qo'yilgan gradient fon uni "buzilgandek" ko'rsatgan edi). */
+.brandMark{
+  border-radius:16px !important;
+  border:none !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+
+.brand-main{ letter-spacing:-.5px; }
+.brand-f{ color:var(--pal3-fill); }
+
+.topBtn{
+  border-radius:999px !important;
+  border:1.5px solid var(--line) !important;
+  background:var(--panel) !important;
+  box-shadow:var(--shadowSmall) !important;
+  font-weight:800 !important;
+}
+.topBtn:hover{ border-color:var(--blue) !important; background:var(--pal1-bg) !important; transform:translateY(-2px); }
+.dangerBtn:hover{ border-color:var(--red) !important; background:var(--pal4-bg) !important; }
+
+/* ---------------------------------------------------------
+   TUGMALAR (umumiy)
+--------------------------------------------------------- */
+
+.bigBtn,.roomBtn,.duelBtn,.wideBtn,.smallBtn,.smallLightBtn,
+.gameModeBtn,.authActionBtn,.miniModalBtn,.playBtn,
+.primaryPlayBtn,.secondaryPlayBtn,.adminToggleBtn,
+.messageReplyBtn,.messageDeleteBtn,.roomModeOptionBtn{
+  border-radius:16px !important;
+}
+
+.primaryBtn,.primaryModalBtn,.primaryPlayBtn{
+  background:linear-gradient(135deg,var(--blue),var(--purple)) !important;
+  border:none !important;
+  color:#fff !important;
+  box-shadow:0 10px 22px rgba(58,160,255,.30) !important;
+}
+.primaryBtn:hover,.primaryModalBtn:hover,.primaryPlayBtn:hover{ transform:translateY(-2px); filter:brightness(1.04); }
+
+.secondaryBtn,.secondaryModalBtn,.secondaryPlayBtn{
+  background:var(--pal1-bg) !important;
+  color:var(--pal1-fg) !important;
+  border:none !important;
+}
+
+.dangerBtn,.resetAllStatsBtn{
+  background:var(--pal4-bg) !important;
+  color:var(--pal4-fg) !important;
+  border:none !important;
+}
+
+.gameModeBtn,.roomModeBtn{ font-weight:900 !important; }
+.roomModeBtn{ background:linear-gradient(135deg,var(--blue),#2f6fed) !important; }
+.duelModeBtn{ background:linear-gradient(135deg,var(--pal4-fill),#c81f3a) !important; }
+.playModeBtn{ background:linear-gradient(135deg,var(--green),#0c9a5c) !important; }
+
+.authActionBtn{ border-radius:16px !important; font-weight:800 !important; }
+.authLoginActionBtn{ background:linear-gradient(135deg,var(--blue),var(--purple)) !important; }
+.authRegisterActionBtn{ background:var(--pal1-bg) !important; color:var(--pal1-fg) !important; }
+
+/* ---------------------------------------------------------
+   BEYJLAR / CHIPLAR
+--------------------------------------------------------- */
+
+.eyebrow{ color:var(--purple) !important; font-weight:900 !important; }
+
+.sectionBadge{
+  border-radius:999px !important;
+  border:none !important;
+  background:var(--pal1-bg) !important;
+  color:var(--pal1-fg) !important;
+}
+
+.statusDot{ box-shadow:0 0 0 4px var(--pal5-bg) !important; }
+
+.turnBadge{
+  border-radius:999px !important;
+  background:var(--pal6-fill) !important;
+  color:#412402 !important;
+}
+
+.roleBadge.isAdmin{ border-radius:999px !important; }
+
+.categoryChip{ border-radius:999px !important; font-weight:800 !important; }
+.categoryChip small{ border-radius:999px !important; }
+
+/* ---------------------------------------------------------
+   KARTA / PANEL YUZALARI (umumiy)
+--------------------------------------------------------- */
+
+.modal-box,.panel,.board,.gameBoardCard,.adminSettingsCard,
+.joinCard,.liveEntryCard,.lobbyCard,.deniedCard,
+.introParticipantCard,.qParticipantCard,.participantsBox,
+.duelResultCard,.roomLeaderRow,.endedRankCard,
+.messageRow,.userRow,.roomHostBox,.roomSetupBox,
+.topicBoardAddCard{
+  border-radius:22px !important;
+}
+
+.modal-box{ box-shadow:0 30px 70px rgba(90,50,200,.22) !important; }
+
+/* ---------------------------------------------------------
+   MAVZULAR TAXTASI (topicBoard)
+   MOBIL / TOUCH: rangli kattaroq kartalar (grid)
+========================================================= */
+
+.topicBoardCard{
+  border-radius:20px !important;
+  border:none !important;
+  color:var(--text) !important;
+}
+.topicBoardCard:nth-child(6n+1){ background:var(--pal1-bg) !important; }
+.topicBoardCard:nth-child(6n+2){ background:var(--pal2-bg) !important; }
+.topicBoardCard:nth-child(6n+3){ background:var(--pal3-bg) !important; }
+.topicBoardCard:nth-child(6n+4){ background:var(--pal4-bg) !important; }
+.topicBoardCard:nth-child(6n+5){ background:var(--pal5-bg) !important; }
+.topicBoardCard:nth-child(6n+0){ background:var(--pal6-bg) !important; }
+
+.topicBoardCard .topicBoardInfo strong{ color:var(--text) !important; }
+.topicBoardCard .topicBoardInfo span,
+.topicBoardCard .topicBoardInfo small{ color:var(--muted) !important; }
+
+.topicBoardIcon{
+  border-radius:14px !important;
+  background:rgba(255,255,255,.55) !important;
+}
+
+.topicBoardCard.selected{
+  box-shadow:0 0 0 3px var(--blue) inset, var(--shadow) !important;
+}
+
+.topicBoardAddCard{
+  border:2px dashed var(--line2) !important;
+  background:var(--panel2) !important;
+}
+
+/* KOMPYUTER (sichqoncha) — ixcham RO'YXAT ko'rinishi, rasm shart emas */
+@media (hover:hover) and (pointer:fine){
+  .topicBoard{
+    display:flex !important;
+    flex-direction:column;
+    gap:6px;
+    max-height:392px !important;
+  }
+  .topicBoardCard{
+    min-height:0 !important;
+    padding:10px 14px !important;
+    border-radius:14px !important;
+    gap:12px;
+  }
+  .topicBoardCard:hover{ transform:translateX(3px) !important; }
+  .topicBoardIcon{
+    width:28px !important; height:28px !important; min-width:28px !important;
+    font-size:13px !important; border-radius:8px !important;
+    background:rgba(255,255,255,.7) !important;
+  }
+  .topicBoardInfo{
+    flex-direction:row !important;
+    align-items:baseline !important;
+    gap:10px !important;
+  }
+  .topicBoardInfo strong{ font-size:14px !important; }
+  .topicBoardInfo span,.topicBoardInfo small{ font-size:11px !important; }
+  .topicBoardAddCard{ min-height:0 !important; padding:10px 14px !important; flex-direction:row !important; }
+}
+
+/* TOUCH (telefon / planshet / katta touch ekran) — kattaroq, rangli kartalar */
+@media (pointer:coarse){
+  .topicBoard{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)) !important; }
+  .topicBoardCard{ min-height:104px !important; padding:14px !important; }
+  .topicBoardIcon{ width:44px !important; height:44px !important; min-width:44px !important; font-size:22px !important; }
+}
+
+/* ---------------------------------------------------------
+   JAMOALAR (teams)
+========================================================= */
+
+.team{ border-radius:20px !important; border:none !important; }
+.team:nth-child(6n+1){ background:linear-gradient(160deg,var(--pal1-fill),#2f6fed) !important; }
+.team:nth-child(6n+2){ background:linear-gradient(160deg,var(--pal2-fill),#6a3ff5) !important; }
+.team:nth-child(6n+3){ background:linear-gradient(160deg,var(--pal3-fill),#e0632a) !important; }
+.team:nth-child(6n+4){ background:linear-gradient(160deg,var(--pal4-fill),#c81f6d) !important; }
+.team:nth-child(6n+5){ background:linear-gradient(160deg,var(--pal5-fill),#0c9a5c) !important; }
+.team:nth-child(6n+0){ background:linear-gradient(160deg,var(--pal6-fill),#e0972a) !important; }
+.team strong{ color:#fff !important; }
+
+/* ---------------------------------------------------------
+   SAVOL JAVOB VARIANTLARI (game.html, index.html, duel, room)
+========================================================= */
+
+.answerOption,.qOptionBtn,.duelAnswerBtn,
+.roomAnswerButtons .qOptionBtn{
+  border-radius:18px !important;
+  border:none !important;
+  font-weight:800 !important;
+}
+
+.answerOption{ background:var(--pal1-bg) !important; color:var(--pal1-fg) !important; }
+.answerOption:nth-child(2){ background:var(--pal4-bg) !important; color:var(--pal4-fg) !important; }
+.answerOption:nth-child(3){ background:var(--pal5-bg) !important; color:var(--pal5-fg) !important; }
+.answerOption:nth-child(4){ background:var(--pal6-bg) !important; color:var(--pal6-fg) !important; }
+.answerOption .answerLetter{ border-radius:12px !important; }
+
+.answerOption.correct{ background:var(--pal5-bg) !important; box-shadow:0 0 0 3px var(--green) inset !important; }
+.answerOption.wrong{ background:var(--pal4-bg) !important; box-shadow:0 0 0 3px var(--red) inset !important; }
+
+.qOptionBtn.optA,.roomAnswerButtons .optA{ background:linear-gradient(150deg,var(--pal4-fill),#c81f3a) !important; }
+.qOptionBtn.optB,.roomAnswerButtons .optB{ background:linear-gradient(150deg,var(--pal1-fill),#0a7fb8) !important; }
+.qOptionBtn.optC,.roomAnswerButtons .optC{ background:linear-gradient(150deg,var(--pal6-fill),#d97a12) !important; }
+.qOptionBtn.optD,.roomAnswerButtons .optD{ background:linear-gradient(150deg,var(--pal5-fill),#0c9a5c) !important; }
+
+/* Touch ekranlarda javob tugmalari kattaroq (barmoq bilan bosish qulay) */
+@media (pointer:coarse){
+  .answerOption,.qOptionBtn,.duelAnswerBtn,.roomAnswerButtons .qOptionBtn{
+    min-height:78px !important;
+    font-size:16px !important;
+  }
+}
+/* Kompyuterda (sichqoncha) — ixchamroq, zich */
+@media (hover:hover) and (pointer:fine){
+  .answerOption{ min-height:58px !important; padding:8px 12px !important; }
+  .qOptionBtn,.duelAnswerBtn,.roomAnswerButtons .qOptionBtn{ min-height:56px !important; }
+}
+
+/* ---------------------------------------------------------
+   TIMER
+========================================================= */
+
+#timer,.qTimerRing,.roomTimerRing,.duelPlayerScore #duelATimer,.duelPlayerScore #duelBTimer{
+  border-radius:999px !important;
+}
+
+/* ---------------------------------------------------------
+   G'OLIB / DUEL NATIJASI
+========================================================= */
+
+.winnerCard{ border-radius:28px !important; }
+.winnerAvatar{ border-radius:20px !important; }
+.winnerRow{ border-radius:16px !important; }
+
+.duelArena{ border-radius:26px !important; }
+.duelResultCard{ border-radius:18px !important; }
+.duelResultCard.isDuelWinner{ box-shadow:0 0 0 3px var(--gold) inset !important; }
+
+/* ---------------------------------------------------------
+   ADMIN PANEL
+========================================================= */
+
+.userAvatar{ border-radius:14px !important; }
+.adminStatChip{ border-radius:16px !important; }
+.adminStatChip:nth-child(6n+1){ background:var(--pal1-bg) !important; }
+.adminStatChip:nth-child(6n+2){ background:var(--pal2-bg) !important; }
+.adminStatChip:nth-child(6n+3){ background:var(--pal3-bg) !important; }
+.adminStatChip:nth-child(6n+4){ background:var(--pal5-bg) !important; }
+
+.toggleTrack{ border-radius:999px !important; border:none !important; background:var(--line2) !important; }
+.toggleSwitch input:checked + .toggleTrack{ background:linear-gradient(135deg,var(--blue),var(--purple)) !important; }
+.toggleThumb{ box-shadow:var(--shadowSmall) !important; }
+
+.messageDeleteBtn{ border-radius:12px !important; }
+
+/* ---------------------------------------------------------
+   TOUCH EKRANLAR UCHUN UMUMIY KATTALASHTIRISH
+   (planshet / katta touch monitor / telefon)
+========================================================= */
+
+@media (pointer:coarse){
+  .bigBtn,.roomBtn,.duelBtn,.wideBtn,.gameModeBtn,.authActionBtn,
+  .miniModalBtn,.playBtn,.primaryPlayBtn,.secondaryPlayBtn,
+  .adminToggleBtn,.topBtn{
+    min-height:52px !important;
+    font-size:15px !important;
+  }
+  input,select{ min-height:52px !important; font-size:15px !important; }
+}
+
+/* Kompyuterda tugmalar ixchamroq va zichroq turadi */
+@media (hover:hover) and (pointer:fine){
+  .bigBtn,.roomBtn,.duelBtn,.wideBtn,.gameModeBtn,.authActionBtn,
+  .miniModalBtn,.playBtn,.primaryPlayBtn,.secondaryPlayBtn{
+    min-height:42px !important;
+  }
+}
+
+/* ==========================================================
+   TUZATISH 1 — QORONG'I REJIMDA HEADER TUGMALARI
+   (avval oq fonda oq/xira matn bo'lib qolgan edi)
+========================================================= */
+
+[data-theme="dark"] .topBtn{
+  background:rgba(255,255,255,.08) !important;
+  border-color:var(--line2) !important;
+  color:var(--text) !important;
+}
+[data-theme="dark"] .topBtn:hover{
+  background:rgba(255,255,255,.16) !important;
+  border-color:var(--blue) !important;
+}
+[data-theme="dark"] .dangerBtn{
+  background:var(--pal4-bg) !important;
+  color:var(--pal4-fg) !important;
+}
+[data-theme="dark"] .dangerBtn:hover{
+  background:rgba(255,122,136,.22) !important;
+}
+
+/* ==========================================================
+   TUZATISH 2 — TIL / QORONG'I REJIM TUGMALARI
+   Bular header ichida EMAS, sahifaga alohida (position:fixed)
+   qo'shilgan (i18n.js orqali) — shu sabab avval header
+   tugmalari ustiga chiqib qolardi. Endi pastki o'ng burchakka
+   ko'chiriladi va yangi uslubga moslanadi.
+========================================================= */
+
+.beksLangSwitch{
+  top:16px !important;
+  bottom:auto !important;
+  right:16px !important;
+  z-index:2500 !important;
+}
+.beksLangBtn,.beksThemeBtn{
+  border-radius:999px !important;
+  border:none !important;
+  background:var(--panel) !important;
+  color:var(--text) !important;
+  box-shadow:var(--shadow) !important;
+}
+.beksLangBtn:hover,.beksThemeBtn:hover{
+  background:var(--pal1-bg) !important;
+  color:var(--pal1-fg) !important;
+}
+.beksLangMenu{
+  border-radius:16px !important;
+  border:none !important;
+  background:var(--panel) !important;
+  box-shadow:var(--shadow) !important;
+}
+
+/* ---------------------------------------------------------
+   O'YIN MAYDONINI TORAYTIRISH — ikki chekada bo'sh joy
+   qoladi, shu bo'sh joyda tepa-o'ngdagi tema/til tugmalari
+   header (Boshqaruv/Murojaat/Profil/Chiqish) bilan
+   TO'QNASHMAYDI. Faqat KENG ekranlarda ishlaydi — tor
+   ekranda (planshet/telefon) bo'sh joy yetmagani uchun
+   tugmalar pastki-o'ng burchakka tushib qoladi.
+--------------------------------------------------------- */
+
+@media (min-width:1180px){
+  .app,.appHeader{
+    width:min(1440px, calc(100% - 280px)) !important;
+  }
+}
+
+@media (max-width:1179px){
+  .beksLangSwitch{
+    top:auto !important;
+    bottom:16px !important;
+    right:16px !important;
+  }
+}
+
+@media (pointer:coarse) and (max-width:1179px){
+  .beksLangSwitch{ bottom:14px !important; right:14px !important; }
+}
+
+/* ==========================================================
+   TUZATISH 3 — MAVZULAR RO'YXATI: edit/o'chirish tugmalari
+   endi kartaning DOIM ko'rinadigan qismi (qatorga sig'adi,
+   chetga chiqib ketmaydi), va tartib nomi bo'yicha (raqamlar
+   to'g'ri hisobga olingan holda) chiqadi — bu game.js'da
+   sortTopicsByNewest() orqali ta'minlangan.
+========================================================= */
+
+.topicBoardCardActions{
+  position:static !important;
+  opacity:1 !important;
+  transform:none !important;
+  margin-left:auto !important;
+  flex:0 0 auto !important;
+}
+.cardIconBtn{
+  width:30px !important;
+  height:30px !important;
+  min-height:30px !important;
+  border-radius:10px !important;
+}
+
+/* Kompyuter — ixcham RO'YXAT, lekin action tugmalar sig'adigan balandlikda */
+@media (hover:hover) and (pointer:fine){
+  .topicBoardCard{
+    min-height:48px !important;
+    padding:8px 10px 8px 14px !important;
+  }
+  .topicBoardInfo{ flex:1 1 auto !important; }
+}
+
+/* ==========================================================
+   TUZATISH 4 — MAVZULAR RO'YXATI: TELEFON vs PLANSHET
+   Telefon (tor ekran)   -> bitta ustunli RO'YXAT, lekin
+                            o'qish/bosish uchun yetarlicha katta.
+   Planshet/katta touch  -> rangli KARTALAR (grid).
+========================================================= */
+
+@media (pointer:coarse) and (max-width:640px){
+  .topicBoard{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:8px !important;
+    max-height:min(70vh,460px) !important;
+  }
+  .topicBoardCard{
+    min-height:0 !important;
+    padding:12px 12px 12px 14px !important;
+    border-radius:16px !important;
+    gap:12px !important;
+  }
+  .topicBoardIcon{
+    width:34px !important; height:34px !important; min-width:34px !important;
+    font-size:16px !important; border-radius:10px !important;
+  }
+  .topicBoardInfo strong{ font-size:14.5px !important; }
+  .topicBoardInfo span,.topicBoardInfo small{ font-size:11.5px !important; }
+  .cardIconBtn{ width:32px !important; height:32px !important; min-height:32px !important; font-size:13px !important; }
+}
+
+@media (pointer:coarse) and (min-width:641px){
+  .topicBoard{ grid-template-columns:repeat(auto-fill,minmax(160px,1fr)) !important; }
+  .topicBoardCard{ min-height:108px !important; padding:14px !important; flex-direction:column !important; align-items:flex-start !important; }
+  .topicBoardCardActions{ margin-left:0 !important; align-self:flex-end !important; }
+}
+
+/* ==========================================================
+   TUZATISH 5 — MOBIL SOZLAMALAR BLOKI (Savol qo'shish /
+   Ball / Bonus) chalkashib ketishi. Har bir bo'lim to'liq
+   kenglikda, ustma-ust joylashadi; yordamchi izoh matnlari
+   (qcHint) joy tejash uchun mobilda yashiriladi.
+========================================================= */
+
+@media (max-width:640px){
+  .controlDockWide{
+    display:flex !important;
+    flex-direction:column !important;
+  }
+  .controlDockWide .toolBox,
+  .controlDockWide .toolColStack{
+    width:100% !important;
+  }
+  .controlDock .toolRow,
+  .controlDock .inlineForm,
+  .controlDock .bonusRow{
+    flex-wrap:wrap !important;
+  }
+  .controlDock .pointToolBox input,
+  .controlDock .pointToolBox select,
+  .controlDock .bonusRow input,
+  .controlDock .bonusRow select{
+    width:100% !important;
+  }
+  .qcHint{ display:none !important; }
+}
+
+/* ==========================================================
+   TUZATISH 6 — ISHTIROKCHI KARTALARI: mobilda ham
+   GORIZONTAL qator (avatar + ism + ball bir qatorda),
+   avvalgidek vertikal ustma-ust EMAS.
+========================================================= */
+
+@media (max-width:820px){
+  .liveParticipantsPanel .participantsBox{
+    display:flex !important;
+    flex-direction:column !important;
+  }
+  .liveParticipantsPanel .participant{
+    display:grid !important;
+    grid-template-columns:26px 40px minmax(0,1fr) auto !important;
+    grid-template-areas:none !important;
+    align-items:center !important;
+    justify-items:stretch !important;
+    text-align:left !important;
+    gap:8px !important;
+    min-height:0 !important;
+    padding:8px 10px !important;
+    border-radius:14px !important;
+  }
+  .participantAvatarWrap{ width:40px !important; height:40px !important; min-width:40px !important; }
+  .participantInfo{ width:auto !important; text-align:left !important; }
+  .liveParticipantsPanel .participantName{ white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; font-size:13px !important; }
+  .liveParticipantsPanel .participantActions{ flex-direction:row !important; }
+  .panelHeadActions{ flex-wrap:wrap !important; }
+  .panelHeadActions .bigBtn{ flex:1 1 auto !important; }
+}

@@ -2761,13 +2761,10 @@ function renderBoard() {
   }
 
   /*
-   * ENG OXIRGI QO'SHILGAN MAVZU
-   * BIRINCHI CHIQADI (createdAt
-   * bo'yicha kamayish tartibida).
+   * Mavzular nomi (harf/raqam) bo'yicha
+   * o'sish tartibida ko'rsatiladi.
    */
-  const sortedTopics = [...userTopics].sort(
-    (a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0),
-  );
+  const sortedTopics = sortTopicsByNewest(userTopics);
 
   /*
    * FANLAR VA KATEGORIYALAR —
@@ -7287,7 +7284,18 @@ $("boardTopicSearch")?.addEventListener("input", () => renderBoard());
 ========================================================= */
 
 function sortTopicsByNewest(list) {
-  return [...list].sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
+  /*
+   * TARTIBLASH: mavzular nomi (harf/raqam) bo'yicha
+   * o'sish tartibida ko'rsatiladi (masalan 2-2-2, 2-3-1,
+   * 3-1-1 ...). "numeric:true" ichidagi raqamlarni ham
+   * to'g'ri (matn sifatida emas, son sifatida) taqqoslaydi.
+   */
+  return [...list].sort((a, b) =>
+    String(a.title || "").localeCompare(String(b.title || ""), undefined, {
+      numeric: true,
+      sensitivity: "base",
+    }),
+  );
 }
 
 function getRoomPickerTopics() {
