@@ -36,13 +36,13 @@ select option { background:#ffffff; color:var(--text); }
 
 .brand { display:flex; align-items:center; gap:13px; }
 
-.brandMark { width:50px; height:50px; display:grid; place-items:center; border:1px solid var(--line2); border-radius:8px; background:linear-gradient(145deg,rgba(15,23,42,0.175),rgba(15,23,42,0.05)); box-shadow:var(--shadowSmall); }
+.brandMark { width:84px; height:84px; display:grid; place-items:center; border:1px solid var(--line2); border-radius:14px; background:linear-gradient(145deg,rgba(15,23,42,0.175),rgba(15,23,42,0.05)); box-shadow:var(--shadowSmall); }
 
-.brandMark img { width:34px; height:34px; object-fit:contain; }
+.brandMark img { width:100%; height:100%; object-fit:contain; }
 
-.brand-main { font-size:28px; line-height:1; font-weight:950; letter-spacing:-1px; }
+.brand-main { font-size:36px; line-height:1; font-weight:950; letter-spacing:-1px; }
 
-.brand-sub { margin-top:5px; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
+.brand-sub { display:none; margin-top:5px; color:var(--muted); font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; }
 
 .brand-f { color:var(--cyan); }
 
@@ -472,11 +472,11 @@ select option { background:#ffffff; color:var(--text); }
 
   .app { width:calc(100% - 20px); }
 
-  .brand-main { font-size:23px; }
+  .brand-main { font-size:34px; }
 
   .brand-sub { font-size:9px; }
 
-  .brandMark { width:43px; height:43px; }
+  .brandMark { width:72px; height:72px; }
 
   .gameHero { padding:22px; min-height:145px; align-items:flex-start; flex-direction:column; }
 
@@ -512,7 +512,7 @@ select option { background:#ffffff; color:var(--text); }
 
   .topBtn { min-height:36px; padding:7px 9px; font-size:11px; }
 
-  .brand-main { font-size:20px; }
+  .brand-main { font-size:32px; }
 
   .brand-sub { display:none; }
 
