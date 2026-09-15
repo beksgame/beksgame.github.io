@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Beks Game — Admin konsepti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1220; --paper:#f6f4ee; --panel:#ffffff;
+    --line:rgba(12,18,32,.10); --line2:rgba(12,18,32,.16);
+    --muted:#6b7180; --blue:#3a78ff; --coral:#ff5f45; --green:#2dbe96; --gold:#cdaa28;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Manrope',sans-serif;background:var(--paper);color:var(--ink);min-width:1240px}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 48px;border-bottom:1px solid var(--line)}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:800;font-size:16px}
+  .logo span{width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,var(--blue),#7b4dff)}
+  .hdrActions{display:flex;gap:10px}
+  .hdrActions button{padding:9px 16px;border-radius:5px;border:1px solid var(--line2);background:#fff;font-weight:800;font-size:12.5px;cursor:pointer;font-family:'Manrope',sans-serif}
+  .hdrActions .danger{border-color:rgba(255,95,69,.4);color:#c73a25}
+
+  .wrap{max-width:1300px;margin:0 auto;padding:36px 48px 70px}
+
+  .statsRow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:30px}
+  .statCard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px}
+  .statCard b{display:block;font-family:'Sora',sans-serif;font-size:24px;font-weight:800}
+  .statCard span{font-size:11.5px;font-weight:800;color:var(--muted);letter-spacing:.2px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px}
+  .cardHead{margin-bottom:16px}
+  .eyebrow{font-size:11px;font-weight:900;letter-spacing:1px;color:var(--coral)}
+  .cardHead h3{font-family:'Sora',sans-serif;font-size:16px;font-weight:800;margin-top:4px}
+
+  .fieldGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field span{font-size:11px;font-weight:800;color:var(--muted)}
+  .field input{padding:10px 12px;border-radius:6px;border:1px solid var(--line2);font-size:13.5px;font-family:inherit}
+  .saveBtn{margin-top:16px;padding:10px 20px;border-radius:6px;border:none;background:var(--ink);color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:'Manrope',sans-serif}
+
+  .sectionTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .sectionTitle h2{font-family:'Sora',sans-serif;font-size:19px;font-weight:800}
+  .searchBox{padding:9px 14px;border-radius:6px;border:1px solid var(--line2);font-size:13px;width:240px;font-family:inherit}
+
+  .userRow{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-bottom:8px}
+  .uAvatar{width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#20d9ff,#4f8cff 60%,#8c5cff);display:flex;align-items:center;justify-content:center;font-weight:900;font-family:'Sora',sans-serif;color:#04121f}
+  .uInfo{flex:1;min-width:0}
+  .uName{font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px}
+  .uMeta{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px}
+  .badge{font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;letter-spacing:.3px}
+  .badge.admin{background:#ffe3a8;color:#6b4a00}
+  .toggleBtn{padding:8px 14px;border-radius:6px;border:1px solid var(--line2);background:#fff;font-weight:800;font-size:11.5px;cursor:pointer;font-family:'Manrope',sans-serif}
+
+  .msgRow{padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--panel);display:grid;grid-template-columns:170px 1fr;gap:14px}
+  .msgRow.pending{border-color:rgba(205,170,40,.4)}
+  .msgFrom{font-size:12px;font-weight:800}
+  .msgDate{font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px}
+  .msgText{font-size:12.5px;line-height:1.5}
+  .msgStatus{font-size:10.5px;font-weight:800;color:#a8790a;margin-top:6px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span></span>BEKS GAME — Boshqaruv paneli</div>
+  <div class="hdrActions">
+    <button>← O'yinga qaytish</button>
+    <button class="danger">↪ Chiqish</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="statsRow">
+    <div class="statCard"><b>3,800+</b><span>FOYDALANUVCHI</span></div>
+    <div class="statCard"><b>12,400+</b><span>O'TKAZILGAN O'YIN</span></div>
+    <div class="statCard"><b>6</b><span>FAOL XONA</span></div>
+    <div class="statCard"><b>4</b><span>YECHILMAGAN MUROJAAT</span></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="cardHead"><span class="eyebrow">LIMITLAR</span><h3>Bepul foydalanish limitlari</h3></div>
+      <div class="fieldGrid">
+        <div class="field"><span>Bepul mavzu/savol limiti</span><input value="10"></div>
+        <div class="field"><span>Bepul ishtirokchi limiti</span><input value="10"></div>
+      </div>
+      <button class="saveBtn">💾 Saqlash</button>
+    </div>
+    <div class="card">
+      <div class="cardHead"><span class="eyebrow">STANDART</span><h3>O'yin standartlari (global)</h3></div>
+      <div class="fieldGrid">
+        <div class="field"><span>Standart ball</span><input value="100"></div>
+        <div class="field"><span>Savol vaqti (soniya)</span><input value="10"></div>
+      </div>
+      <button class="saveBtn">💾 Saqlash</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:30px">
+    <div class="cardHead"><span class="eyebrow">MUROJAATLAR</span><h3>Foydalanuvchilar murojaatlari</h3></div>
+    <div class="msgRow pending">
+      <div><div class="msgFrom">aziz.k@gmail.com</div><div class="msgDate">14-sen, 09:20</div></div>
+      <div><div class="msgText">Ball hisoblanishi kechikib qolmoqda, tekshirib bera olasizmi?</div><div class="msgStatus">⏳ Javob kutilmoqda</div></div>
+    </div>
+    <div class="msgRow">
+      <div><div class="msgFrom">malika.n@gmail.com</div><div class="msgDate">13-sen, 18:04</div></div>
+      <div><div class="msgText">Rahmat, muammo hal bo'ldi ✅</div></div>
+    </div>
+  </div>
+
+  <div class="sectionTitle">
+    <h2>Foydalanuvchilar</h2>
+    <input class="searchBox" placeholder="Ism, email yoki UID bo'yicha qidirish...">
+  </div>
+
+  <div class="userRow">
+    <div class="uAvatar">A</div>
+    <div class="uInfo"><div class="uName">Aziz Karimov <span class="badge admin">ADMIN</span></div><div class="uMeta">aziz.k@gmail.com · UID: 8f2a91</div></div>
+    <button class="toggleBtn">Admin huquqini olib tashlash</button>
+  </div>
+  <div class="userRow">
+    <div class="uAvatar">M</div>
+    <div class="uInfo"><div class="uName">Malika Nosirova</div><div class="uMeta">malika.n@gmail.com · UID: 3c8d12</div></div>
+    <button class="toggleBtn">Admin qilish</button>
+  </div>
+  <div class="userRow">
+    <div class="uAvatar">S</div>
+    <div class="uInfo"><div class="uName">Sardor Yusupov</div><div class="uMeta">sardor.y@gmail.com · UID: 9a11e0</div></div>
+    <button class="toggleBtn">Admin qilish</button>
+  </div>
+
+</div>
+
+</body>
+</html>

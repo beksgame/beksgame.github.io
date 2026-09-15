@@ -191,3 +191,202 @@
 [data-theme="dark"] .adminPaneArea > #adminUsersSection {
   background: var(--panel) !important;
 }
+
+/* ==========================================================
+   5) SAVOLLAR MAYDONI: IXCHAM KARTA GRID + SODDA RO'YXAT
+   ----------------------------------------------------------
+   a) O'ng tomon (mavzular): oldingi "auto-fill" grid ba'zan
+      1 ustunli qator-qatorga aylanib qolardi. Endi desktopda
+      QAT'IY 5 USTUNLI, ixcham (kichraytirilgan) karta grid,
+      aylanish balandligi "Ishtirokchilar" ro'yxati bilan bir
+      xil (620px) — shundan ortig'i vertikal scroll bilan
+      ochiladi.
+
+   b) Chap tomon (Fanlar / Kategoriyalar): rangli chiplar
+      o'rniga BITTA yaxlit, sodda ro'yxat ko'rinishiga
+      o'tkazildi (oq/neytral fon, ingichka ajratuvchi chiziqlar,
+      tanlangan band — chapda ko'k chiziq + och-ko'k fon).
+      Fan va Kategoriya ro'yxatlari BITTA umumiy scroll ostida
+      birlashtirildi, balandligi ham 620px — Ishtirokchilar
+      ro'yxati bilan bir xil.
+========================================================== */
+@media (min-width: 1180px) {
+
+  /* ---- a) Karta grid: 5 ustun, kontentga mos balandlik ----
+     Avval barcha kartalarga QATTIQ (145px) balandlik
+     berilgani uchun kontent kam bo'lganda pastda ortiqcha
+     bo'sh joy qolib, karta "to'rtburchak/quti"dek ko'rinardi.
+     Endi balandlik olib tashlandi — karta o'z ichidagi
+     matn miqdoriga qarab TABIIY (kontentga mos) balandlikda
+     bo'ladi. */
+  .topicBoardLayout .topicBoard {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    grid-auto-rows: min-content !important;
+    gap: 10px !important;
+    max-height: 620px !important;
+    align-content: start !important;
+  }
+
+  .topicBoard .topicBoardCard {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 10px !important;
+    gap: 6px !important;
+  }
+
+  /* Yuqori qator: chapda kichik kitob belgisi, o'ngda
+     Tahrirlash / O'chirish tugmalari — bir xil qatorda. */
+  .topicBoard .topicBoardTopRow {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100%;
+  }
+
+  .topicBoard .topicBoardIcon {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    font-size: 13px !important;
+    border-radius: 7px !important;
+  }
+
+  .topicBoard .topicBoardCardActions {
+    position: static !important;
+    opacity: 1 !important;
+    transform: none !important;
+    flex: 0 0 auto !important;
+  }
+
+  /* Info blok: mavzu nomi -> savollar soni -> fan/kategoriya,
+     har biri o'z alohida qatorida, tik (vertikal) tartibda. */
+  .topicBoard .topicBoardInfo {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    width: 100%;
+  }
+
+  .topicBoard .topicBoardInfo strong {
+    font-size: 13px !important;
+    white-space: normal !important;
+    line-height: 1.28 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .topicBoard .topicBoardCount {
+    display: block;
+    color: #0090ad;
+    font-size: 10px;
+    font-weight: 800;
+  }
+
+  .topicBoard .topicBoardMeta {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topicBoard .topicBoardInfo small {
+    font-size: 9px !important;
+  }
+
+  /* "+ Yangi mavzu" kartasi ham bo'sh joysiz, ixcham bo'lsin */
+  .topicBoard .topicBoardAddCard {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 16px 10px !important;
+    gap: 6px !important;
+  }
+
+  .topicBoard .topicBoardAddIcon {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 16px !important;
+  }
+
+  /* ---- b) Chap panel: sodda, yaxlit ro'yxat ---- */
+  .topicSidebarCol {
+    flex: 0 0 224px !important;
+    gap: 0 !important;
+    border: 1px solid var(--line2);
+    border-radius: var(--radius);
+    background: var(--panel);
+    max-height: 620px;
+    overflow-y: auto;
+    padding: 6px;
+  }
+
+  .topicSidebarCol .topicCategoryList {
+    max-height: none !important;
+    overflow: visible !important;
+    gap: 0 !important;
+    margin-top: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  /* Fan va Kategoriya ro'yxatlari orasida ozgina bo'shliq */
+  .topicSidebarCol #boardCategoryList:not(:empty) {
+    margin-top: 10px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid var(--line2) !important;
+  }
+
+  /* Har bir band — rangsiz, chiziq bilan ajratilgan qator */
+  .topicSidebarCol .categoryChip {
+    border: none !important;
+    border-bottom: 1px solid var(--line2) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--text) !important;
+    padding: 13px 10px !important;
+    font-size: 13.5px !important;
+    font-weight: 750 !important;
+    box-shadow: none !important;
+  }
+
+  .topicSidebarCol .categoryChip:last-child {
+    border-bottom: none !important;
+  }
+
+  .topicSidebarCol .categoryChip:hover {
+    background: rgba(32, 217, 255, 0.07) !important;
+    transform: none !important;
+  }
+
+  .topicSidebarCol .categoryChip small {
+    background: transparent !important;
+    color: var(--muted) !important;
+    font-weight: 750 !important;
+    font-size: 12px !important;
+    padding: 0 !important;
+  }
+
+  /* Tanlangan band — chapda ko'k chiziq + och-ko'k fon,
+     rangdan qat'i nazar (catPurple/catTeal/... hammasi
+     bir xil ko'rinadi, "fanlarniki bilan bir xil"). */
+  .topicSidebarCol .categoryChip.active {
+    background: rgba(47, 107, 255, 0.10) !important;
+    border-left: 3px solid #2f6bff !important;
+    padding-left: 8px !important;
+    color: var(--text) !important;
+  }
+
+  .topicSidebarCol .categoryChip.active small {
+    background: rgba(47, 107, 255, 0.16) !important;
+    color: #2f6bff !important;
+    padding: 3px 9px !important;
+    border-radius: 999px !important;
+  }
+}

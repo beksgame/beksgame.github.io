@@ -2933,8 +2933,15 @@ function renderBoard() {
     );
 
     card.innerHTML = `
-      <div class="topicBoardIcon">
-        📚
+      <div class="topicBoardTopRow">
+        <div class="topicBoardIcon">
+          📚
+        </div>
+
+        <div class="topicBoardCardActions">
+          <button type="button" class="cardIconBtn editBtn" title="Tahrirlash">✏️</button>
+          <button type="button" class="cardIconBtn deleteBtn" title="O‘chirish">🗑️</button>
+        </div>
       </div>
 
       <div class="topicBoardInfo">
@@ -2943,16 +2950,19 @@ function renderBoard() {
           ${escapeHtml(topic.title)}
         </strong>
 
-        <span>
-          ${total} ta savol${
-            categorySettingsState.enabled
-              ? " · " +
-                escapeHtml(getTopicSubject(topic)) +
-                " / " +
-                escapeHtml(getTopicCategory(topic))
-              : ""
-          }
+        <span class="topicBoardCount">
+          ${total} ta savol
         </span>
+
+        ${
+          categorySettingsState.enabled
+            ? `
+              <span class="topicBoardMeta">
+                ${escapeHtml(getTopicSubject(topic))} / ${escapeHtml(getTopicCategory(topic))}
+              </span>
+            `
+            : ""
+        }
 
         ${
           topic.id === currentUserTopicId
@@ -2964,11 +2974,6 @@ function renderBoard() {
             : ""
         }
 
-      </div>
-
-      <div class="topicBoardCardActions">
-        <button type="button" class="cardIconBtn editBtn" title="Tahrirlash">✏️</button>
-        <button type="button" class="cardIconBtn deleteBtn" title="O‘chirish">🗑️</button>
       </div>
 
       <div class="topicStartOverlay">
@@ -8333,12 +8338,48 @@ $("logoutBtn")?.addEventListener("click", () =>
 
 /* ================= INIT ================= */
 
+/*
+ * MUHIM (XATOLIK TUZATILDI): oyna/tab uzoq vaqt fonda
+ * (background) turib qolsa — masalan, foydalanuvchi
+ * Windows'da boshqa dastur yoki brauzer oynasini ochsa —
+ * ba'zi brauzerlar sahifani vaqtincha "to'xtatib qo'yadi"
+ * yoki sessiyani tiklash biroz sekinlashadi. Shu daqiqada
+ * Firebase onAuthStateChanged BIR MARTA "user = null" bilan
+ * chaqirilishi mumkin, garchi foydalanuvchi haqiqatda hali
+ * ham tizimga kirgan bo'lsa ham (sessiya faqat tiklanish
+ * jarayonida). Avval bu holatda DARHOL index.html'ga
+ * qaytarilardi — shu sabab o'yin qayerda to'xtagan bo'lsa,
+ * o'sha joyda emas, bosh sahifada ochilib qolardi.
+ *
+ * Endi: agar "user=null" kelsa-yu, lekin brauzer xotirasida
+ * (localStorage) oldin saqlangan "uid" bo'lsa — sessiya
+ * chindan ham yo'qolganini bir necha soniyadan keyin qayta
+ * tekshiramiz, shundan keyingina index.html'ga qaytariladi.
+ */
+let _authNullGraceUsed = false;
+
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
+    const hadPriorSession = !!localStorage.getItem("uid");
+
+    if (hadPriorSession && !_authNullGraceUsed) {
+      _authNullGraceUsed = true;
+
+      setTimeout(() => {
+        if (!auth.currentUser) {
+          location.href = "index.html";
+        }
+      }, 1500);
+
+      return;
+    }
+
     location.href = "index.html";
 
     return;
   }
+
+  _authNullGraceUsed = false;
 
   currentUserUid = user.uid;
 
