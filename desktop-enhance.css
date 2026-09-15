@@ -160,22 +160,29 @@
     padding:30px 0 46px;
   }
   .landingKicker{
-    font-weight:800;font-size:12.5px;letter-spacing:.2px;
-    color:var(--red);margin-bottom:12px;
+    font-weight:900;font-size:12.5px;letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#2a7dff;margin-bottom:12px;
   }
+  .landingHeroCopy.room-mode .landingKicker{ color:#2a7dff; }
+  .landingHeroCopy.duel-mode .landingKicker{ color:#d250be; }
+  .landingHeroCopy.play-mode .landingKicker{ color:#1fa87e; }
   .landingHeadline{
     margin:0;
     font-size:46px;line-height:1.05;letter-spacing:-1px;
-    font-weight:950;color:var(--text);
+    font-weight:950;color:#111827;
     max-width:480px;
   }
-  .landingHeadline em{
-    font-style:normal;color:var(--blue);
+  .landingHeadlineAccent{
+    color:#2a7dff;
   }
+  .landingHeroCopy.duel-mode .landingHeadlineAccent{ color:#d250be; }
+  .landingHeroCopy.play-mode .landingHeadlineAccent{ color:#1fa87e; }
   .landingSub{
-    margin:16px 0 0;max-width:420px;
-    font-size:14.5px;line-height:1.6;font-weight:600;
-    color:var(--muted);
+    margin:16px 0 0;max-width:440px;
+    font-size:18px;line-height:1.5;font-weight:800;
+    color:#111827 !important;
+    letter-spacing:-.02em;
   }
 
   body:not(:has(#liveRoomApp:not(.hidden))) .landingDesktop .landingHeroDecor{
@@ -317,16 +324,19 @@
   #gamesWrap .gameModeBlock{
     margin:0;
     padding:22px 20px;
-    border-radius:4px !important;
+    border-radius:12px !important;
     border:1px solid var(--line2);
     background:var(--panel);
     box-shadow:var(--shadowSmall);
-    transition:transform .15s, box-shadow .15s;
+    transition:transform .15s, box-shadow .15s, border-color .15s;
   }
   #gamesWrap .gameModeBlock:hover{
     transform:translateY(-3px);
     box-shadow:var(--shadow);
   }
+  #gamesWrap .gameModeBlock.room-mode{ border-color:rgba(42,125,255,.28); }
+  #gamesWrap .gameModeBlock.duel-mode{ border-color:rgba(210,80,190,.28); }
+  #gamesWrap .gameModeBlock.play-mode{ border-color:rgba(31,168,126,.28); }
   #gamesWrap .gameModeBtn{
     display:inline-block;
     width:auto;
@@ -334,8 +344,16 @@
     padding:9px 15px;
     font-size:13px;
     margin-bottom:12px;
-    border-radius:3px !important;
+    border-radius:6px !important;
+    transition:all .2s ease;
   }
+  #gamesWrap .gameModeBtn.is-active{
+    transform:translateY(-1px) scale(1.02);
+    box-shadow:0 10px 22px rgba(12,18,32,.14);
+  }
+  #gamesWrap .gameModeBlock.room-mode .gameModeBtn.is-active{ box-shadow:0 12px 26px rgba(42,125,255,.22); }
+  #gamesWrap .gameModeBlock.duel-mode .gameModeBtn.is-active{ box-shadow:0 12px 26px rgba(210,80,190,.22); }
+  #gamesWrap .gameModeBlock.play-mode .gameModeBtn.is-active{ box-shadow:0 12px 26px rgba(31,168,126,.22); }
   #gamesWrap .gameModeGuide{
     margin:0;
     text-align:left;

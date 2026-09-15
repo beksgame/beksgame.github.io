@@ -26,9 +26,10 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Beks Game — O‘yin bilan tez o‘rganing">
   <meta name="twitter:description" content="Bilim va o‘quv mavzularini o‘yin shaklida mashq qiling.">
-  <meta name="twitter:image" content="https://beksgame.github.io/logo.svg">
+  <meta name="twitter:image" content="https://beksgame.github.io/logo.svg?v=2026-09-15">
 
-  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  <link rel="icon" type="image/svg+xml" href="logo.svg?v=2026-09-15">
+  <link rel="shortcut icon" type="image/svg+xml" href="logo.svg?v=2026-09-15">
   <link rel="stylesheet" href="index.css?v=3">
   <link rel="stylesheet" href="beks-theme.css?v=1">
   <link rel="stylesheet" href="desktop-shape.css?v=1">
@@ -52,10 +53,10 @@
        Mobilda desktop-enhance.css ularni default holda
        yashiradi (display:none), shuning uchun mobil ko'rinish
        bilan hech qanday aloqasi yo'q. -->
-  <div class="landingHeroCopy" id="landingHeroCopy">
-    <div class="landingKicker">● JONLI VIKTORINA PLATFORMASI</div>
-    <h1 class="landingHeadline">O‘ynab <em>o‘rganing</em>.</h1>
-    <p class="landingSub">Xona oching, kod ulashing — o‘quvchilar telefonidan qo‘shiladi va bir vaqtning o‘zida bellashadi. Ball, vaqt va bonus — barchasi jonli ekranda.</p>
+  <div class="landingHeroCopy room-mode" id="landingHeroCopy">
+    <div class="landingKicker">● Jonli xona</div>
+    <h1 class="landingHeadline">O‘ynab <span class="landingHeadlineAccent">o‘rganasiz</span></h1>
+    <p class="landingSub">Xona oching, kod ulashing — o‘quvchilar telefonidan bir vaqtning o‘zida qo‘shiladi va bellashadi.</p>
   </div>
 
   <div class="landingHeroDecor" aria-hidden="true">
@@ -396,6 +397,74 @@
 
     </div>
   </div>
+
+  <script>
+    (function () {
+      const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 1180px)').matches;
+      if (!isDesktop) return;
+
+      const modeMeta = [
+        {
+          kicker: 'Jonli xona',
+          title: 'O‘ynab <span class="landingHeadlineAccent">o‘rganasiz</span>',
+          sub: 'Xona oching, kod ulashing — o‘quvchilar telefonidan bir vaqtning o‘zida qo‘shiladi va bellashadi.',
+          className: 'room-mode'
+        },
+        {
+          kicker: 'Birga bir',
+          title: 'Tez <span class="landingHeadlineAccent">o‘rganasiz</span>',
+          sub: 'Ikki kishi bir qurilmada navbat bilan bellashadi. Ism yozilmasa, avtomatik nomlar ishlatiladi.',
+          className: 'duel-mode'
+        },
+        {
+          kicker: 'O‘yin boshlash',
+          title: 'Zerikmay <span class="landingHeadlineAccent">o‘rganasiz</span>',
+          sub: 'Yakka mashq yoki guruhli o‘yin orqali reyting qurib, vaqtni qiziqarli o‘tkazasiz.',
+          className: 'play-mode'
+        }
+      ];
+
+      const heroCopy = document.querySelector('.landingHeroCopy');
+      const kicker = document.querySelector('.landingKicker');
+      const heroText = document.querySelector('.landingSub');
+      const heroHeadline = document.querySelector('.landingHeadline');
+      const buttons = Array.from(document.querySelectorAll('.gameModeBtn'));
+      const cards = Array.from(document.querySelectorAll('#gamesWrap .gameModeBlock'));
+      let currentIndex = 0;
+
+      function setMode(index) {
+        currentIndex = index;
+        const mode = modeMeta[index] || modeMeta[0];
+
+        if (kicker) kicker.textContent = '● ' + mode.kicker;
+        if (heroText) heroText.textContent = mode.sub;
+        if (heroHeadline) heroHeadline.innerHTML = mode.title;
+        if (heroCopy) {
+          heroCopy.classList.remove('room-mode', 'duel-mode', 'play-mode');
+          heroCopy.classList.add(mode.className);
+        }
+
+        buttons.forEach((button, i) => {
+          button.classList.toggle('is-active', i === index);
+        });
+
+        cards.forEach((card, i) => {
+          card.classList.toggle('is-active', i === index);
+        });
+      }
+
+      if (buttons.length) {
+        setMode(0);
+        buttons.forEach((button, index) => {
+          button.addEventListener('click', () => setMode(index));
+        });
+
+        window.setInterval(() => {
+          setMode((currentIndex + 1) % buttons.length);
+        }, 6000);
+      }
+    })();
+  </script>
 
   <script type="module">
   import { auth, db } from "./firebase.js";
