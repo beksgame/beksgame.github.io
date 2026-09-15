@@ -39,6 +39,13 @@ const defaultBonusMultiplierSelect = $("defaultBonusMultiplierSelect");
 const defaultStreakBonusCheckbox = $("defaultStreakBonusCheckbox");
 const saveGameDefaultsBtn = $("saveGameDefaultsBtn");
 
+const arenaBackgroundUrlInput = $("arenaBackgroundUrlInput");
+const clearArenaBackgroundBtn = $("clearArenaBackgroundBtn");
+const heroEyebrowInput = $("heroEyebrowInput");
+const heroTitleInput = $("heroTitleInput");
+const heroSubtitleInput = $("heroSubtitleInput");
+const saveAppearanceBtn = $("saveAppearanceBtn");
+
 const categoriesEnabledCheckbox = $("categoriesEnabledCheckbox");
 const usersCanAddCategoriesCheckbox = $("usersCanAddCategoriesCheckbox");
 const subjectsInput = $("subjectsInput");
@@ -124,6 +131,7 @@ onAuthStateChanged(auth, async user => {
 
   await Promise.all([loadUsers(), loadAppSettings()]);
   startMessagesListener();
+  loadDashboardStats();
 });
 
 $("adminLogoutBtn")?.addEventListener("click", async () => {
@@ -188,6 +196,42 @@ function renderStats() {
     <div class="adminStatChip"><strong>${restricted}</strong>kamida bitta cheklovi bor</div>
     <div class="adminStatChip"><strong>${admins}</strong>administrator</div>
   `;
+
+  const dashUsers = $("adminDashUsers");
+  if (dashUsers) dashUsers.textContent = total ? total + "+" : "0";
+}
+
+/* ================= BOSH KO'RINISH (dashboard) statistikasi ================= */
+
+async function loadDashboardStats() {
+  const gamesEl = $("adminDashGames");
+  const roomsEl = $("adminDashRooms");
+
+  try {
+    const statsSnap = await getDoc(doc(db, "stats", "global"));
+    const gamesPlayed = statsSnap.exists() ? Number(statsSnap.data().gamesPlayed) || 0 : 0;
+    if (gamesEl) gamesEl.textContent = gamesPlayed ? gamesPlayed + "+" : "0";
+  } catch (e) {
+    console.warn("Statistikani yuklashda xatolik (o'yinlar):", e);
+    if (gamesEl) gamesEl.textContent = "—";
+  }
+
+  try {
+    const roomsSnap = await getDocs(collection(db, "rooms"));
+    const now = Date.now();
+    let active = 0;
+    roomsSnap.forEach(d => {
+      const data = d.data();
+      const notFinished = data.status !== "finished";
+      const notExpired =
+        !data.expiresAt || (data.expiresAt.toMillis ? data.expiresAt.toMillis() : data.expiresAt) > now;
+      if (notFinished && notExpired) active++;
+    });
+    if (roomsEl) roomsEl.textContent = String(active);
+  } catch (e) {
+    console.warn("Statistikani yuklashda xatolik (xonalar):", e);
+    if (roomsEl) roomsEl.textContent = "—";
+  }
 }
 
 function renderUsers(list) {
@@ -418,6 +462,18 @@ async function loadAppSettings() {
       defaultStreakBonusCheckbox.checked = data.streakBonusEnabled === true;
     }
 
+    if (arenaBackgroundUrlInput) {
+      arenaBackgroundUrlInput.value =
+        typeof data.arenaBackgroundUrl === "string" ? data.arenaBackgroundUrl : "";
+    }
+
+    {
+      const t = data.customTexts || {};
+      if (heroEyebrowInput) heroEyebrowInput.value = typeof t.eyebrow === "string" ? t.eyebrow : "";
+      if (heroTitleInput) heroTitleInput.value = typeof t.title === "string" ? t.title : "";
+      if (heroSubtitleInput) heroSubtitleInput.value = typeof t.subtitle === "string" ? t.subtitle : "";
+    }
+
     if (categoriesEnabledCheckbox) {
       categoriesEnabledCheckbox.checked = data.categoriesEnabled !== false;
     }
@@ -551,6 +607,64 @@ saveGameDefaultsBtn?.addEventListener("click", async () => {
   }
 });
 
+/* ================= KO'RINISH: FON VA MATNLAR (GLOBAL) =================
+ *
+ * Xuddi shu "settings/app" hujjatiga { arenaBackgroundUrl,
+ * customTexts:{eyebrow,title,subtitle} } maydonlari qo'shiladi.
+ * game.js buni applySiteAppearance() orqali o'qib, "Live Quiz
+ * Arena" (game.html bosh sahifasi) fonini va sarlavha
+ * matnlarini shunga moslab qo'yadi. Matn maydoni bo'sh
+ * qoldirilsa, o'sha joyda standart matn ishlatiladi.
+ */
+
+saveAppearanceBtn?.addEventListener("click", async () => {
+  const arenaBackgroundUrl = (arenaBackgroundUrlInput?.value || "").trim();
+
+  const customTexts = {
+    eyebrow: (heroEyebrowInput?.value || "").trim(),
+    title: (heroTitleInput?.value || "").trim(),
+    subtitle: (heroSubtitleInput?.value || "").trim()
+  };
+
+  saveAppearanceBtn.disabled = true;
+
+  try {
+    await setDoc(
+      doc(db, "settings", "app"),
+      { arenaBackgroundUrl, customTexts },
+      { merge: true }
+    );
+
+    showToast("✅ Ko'rinish saqlandi");
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Xatolik: " + err.message, true);
+  } finally {
+    saveAppearanceBtn.disabled = false;
+  }
+});
+
+clearArenaBackgroundBtn?.addEventListener("click", async () => {
+  if (arenaBackgroundUrlInput) arenaBackgroundUrlInput.value = "";
+
+  clearArenaBackgroundBtn.disabled = true;
+
+  try {
+    await setDoc(
+      doc(db, "settings", "app"),
+      { arenaBackgroundUrl: "" },
+      { merge: true }
+    );
+
+    showToast("✅ Fon olib tashlandi");
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Xatolik: " + err.message, true);
+  } finally {
+    clearArenaBackgroundBtn.disabled = false;
+  }
+});
+
 /* ================= FANLAR (YO'NALISHLAR) VA KATEGORIYALASH =================
  *
  * Xuddi shu "settings/app" hujjatiga { categoriesEnabled,
@@ -668,6 +782,15 @@ function startMessagesListener() {
 
 function renderMessages() {
   if (!adminMessagesList) return;
+
+  const pending = supportMessages.filter(m => !m.adminReply).length;
+  const badge = $("adminNavMsgBadge");
+  if (badge) {
+    badge.textContent = String(pending);
+    badge.classList.toggle("hidden", pending === 0);
+  }
+  const dashPending = $("adminDashPending");
+  if (dashPending) dashPending.textContent = String(pending);
 
   if (!supportMessages.length) {
     adminMessagesList.innerHTML =

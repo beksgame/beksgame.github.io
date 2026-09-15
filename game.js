@@ -25,6 +25,7 @@ import {
   where,
   deleteField,
   Timestamp,
+  increment,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 /* =========================================================
@@ -33,6 +34,10 @@ import {
    Flow: participant -> team -> one question -> score -> next participant
          -> next NEW question -> winner -> games/wins -> Firebase
 ========================================================= */
+
+/* A/B/C/D javob variantlari uchun rangli belgi (dizayn konsepti
+   bo'yicha: A-ko'k, B-siyoh-pushti, C-yashil, D-oltin). */
+const OPT_LETTER_CLASSES = ["optA", "optB", "optC", "optD"];
 
 let questions = [[], [], [], [], []];
 let currentUserUid = null;
@@ -586,6 +591,60 @@ async function fetchAppSettingsOnce() {
   return _appSettingsFetchPromise;
 }
 
+/*
+ * SAYT KO'RINISHI (settings/app -> arenaBackgroundUrl, customTexts):
+ * Administrator boshqaruv panelidan "Live Quiz Arena" (bosh
+ * o'yin sahifasi) uchun fon rasm manzilini va bosh sarlavha /
+ * kichik matnlarni o'zgartira oladi. Hech narsa
+ * belgilanmagan bo'lsa, hammasi o'zgarishsiz (standart)
+ * qoladi.
+ */
+async function applySiteAppearance() {
+  try {
+    const s = await fetchAppSettingsOnce();
+    if (!s) return;
+
+    // ---- FON RASM ----
+    const bgUrl = typeof s.arenaBackgroundUrl === "string" ? s.arenaBackgroundUrl.trim() : "";
+
+    if (bgUrl) {
+      document.body.style.backgroundImage =
+        `linear-gradient(rgba(4,8,16,.55), rgba(4,8,16,.55)), url("${bgUrl}")`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.backgroundPosition = "center";
+      document.body.style.backgroundAttachment = "fixed";
+      document.body.style.backgroundRepeat = "no-repeat";
+    } else {
+      document.body.style.backgroundImage = "";
+      document.body.style.backgroundSize = "";
+      document.body.style.backgroundPosition = "";
+      document.body.style.backgroundAttachment = "";
+      document.body.style.backgroundRepeat = "";
+    }
+
+    // ---- MATNLAR (bosh sahifa sarlavhasi) ----
+    const t = s.customTexts || {};
+
+    const eyebrowEl = $("heroEyebrowText");
+    const titleEl = $("heroTitleText");
+    const subtitleEl = $("heroSubtitleText");
+
+    if (eyebrowEl && typeof t.eyebrow === "string" && t.eyebrow.trim()) {
+      eyebrowEl.textContent = t.eyebrow.trim();
+    }
+
+    if (titleEl && typeof t.title === "string" && t.title.trim()) {
+      titleEl.textContent = t.title.trim();
+    }
+
+    if (subtitleEl && typeof t.subtitle === "string" && t.subtitle.trim()) {
+      subtitleEl.textContent = t.subtitle.trim();
+    }
+  } catch (e) {
+    console.warn("applySiteAppearance:", e);
+  }
+}
+
 function toPositiveInt(value, fallback) {
   const n = Number(value);
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
@@ -666,6 +725,8 @@ function showLimitWarning(message) {
 /* ================= SETTINGS ================= */
 
 async function initSettings() {
+  applySiteAppearance();
+
   const defaults = await getAppDefaults();
 
   // ---- BALL (Ball qadami) ----
@@ -3575,6 +3636,17 @@ async function confirmOpenRoom() {
       expiresAt: Timestamp.fromMillis(Date.now() + 24 * 60 * 60 * 1000),
     });
 
+    /*
+     * ADMIN BOSHQARUV PANELIDAGI "O'TKAZILGAN O'YIN" statistikasi
+     * uchun global hisoblagich — faqat +1 qo'shadi, boshqa hech
+     * narsaga ta'sir qilmaydi (admin.js shu hujjatni o'qiydi).
+     */
+    setDoc(
+      doc(db, "stats", "global"),
+      { gamesPlayed: increment(1) },
+      { merge: true }
+    ).catch(() => {});
+
     if (!isTeacherMode) {
       await setDoc(doc(db, "rooms", code, "players", myHostPlayerId), {
         uid: currentUserUid,
@@ -5326,7 +5398,7 @@ function renderDuelSide(side, item) {
     const btn = document.createElement("button");
 
     btn.type = "button";
-    btn.className = "answerOption duelAnswerBtn";
+    btn.className = "answerOption duelAnswerBtn " + OPT_LETTER_CLASSES[i % OPT_LETTER_CLASSES.length];
 
     btn.dataset.answer = answer;
 
@@ -6023,7 +6095,7 @@ function renderAnswerOptions(options, correctAnswer) {
 
     btn.type = "button";
 
-    btn.className = "answerOption";
+    btn.className = "answerOption " + OPT_LETTER_CLASSES[i % OPT_LETTER_CLASSES.length];
 
     btn.dataset.answer = answer;
 

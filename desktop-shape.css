@@ -1,0 +1,65 @@
+/* ==========================================================
+   BEKS GAME — DESKTOP SHAPE SYSTEM (butun sayt uchun umumiy)
+   ----------------------------------------------------------
+   Bu fayl index.html, game.html, admin.html — UCHALASIGA HAM
+   ulanadi. Maqsad: "O'ynab o'rganing" bosh sahifasida
+   ishlatilgan zamonaviy, to'rtburchak (keskin burchakli)
+   uslubni BUTUN ilova bo'ylab (o'yin taxtasi, duel, admin,
+   modal oynalar) bir xilda qo'llash.
+
+   QANDAY ISHLAYDI:
+   beks-theme.css'da butun sayt --radius / --radiusSmall
+   o'zgaruvchilaridan va bir nechta umumiy !important
+   ro'yxatlardan (tugmalar, kartalar) foydalanadi. Biz faqat
+   o'sha O'ZGARUVCHILAR QIYMATINI va O'SHA RO'YXATLARNI qayta
+   belgilaymiz — hech qanday id/class qo'shilmaydi yoki
+   o'chirilmaydi, shuning uchun game.js/admin.js/i18n.js
+   ishlashiga SIRA ta'sir qilmaydi.
+
+   Shart: (hover:hover) and (pointer:fine) and (min-width:1180px)
+   — faqat kompyuter/katta ekranda. Mobil/planshet mutlaqo
+   o'zgarishsiz qoladi.
+========================================================== */
+
+@media (hover:hover) and (pointer:fine) and (min-width:1180px){
+
+  /* ---- 1) Umumiy dizayn o'zgaruvchilari ----
+     Bu ikkita qatorning o'zi ko'plab panel/karta/taxta
+     elementlarini (masalan .gameHero, .teamsSection,
+     .duelArena va h.k. — ular var(--radius) ishlatadi)
+     avtomatik ravishda yassiroq/keskinroq qiladi. */
+  :root{
+    --radius:8px;
+    --radiusSmall:6px;
+  }
+
+  /* ---- 2) Umumiy tugmalar ro'yxati (beks-theme.css'dagi
+     bilan BIR XIL ro'yxat, faqat kichikroq radius bilan) ---- */
+  .bigBtn,.roomBtn,.duelBtn,.wideBtn,.smallBtn,.smallLightBtn,
+  .gameModeBtn,.authActionBtn,.miniModalBtn,.playBtn,
+  .primaryPlayBtn,.secondaryPlayBtn,.adminToggleBtn,
+  .messageReplyBtn,.messageDeleteBtn,.roomModeOptionBtn{
+    border-radius:5px !important;
+  }
+
+  button{ border-radius:6px; }
+
+  /* ---- 3) Umumiy karta/panel ro'yxati (xuddi shu tarzda) ---- */
+  .modal-box,.panel,.board,.gameBoardCard,.adminSettingsCard,
+  .joinCard,.liveEntryCard,.lobbyCard,.deniedCard,
+  .introParticipantCard,.qParticipantCard,.participantsBox,
+  .duelResultCard,.roomLeaderRow,.endedRankCard,
+  .messageRow,.userRow,.roomHostBox,.roomSetupBox,
+  .topicBoardAddCard{
+    border-radius:10px !important;
+  }
+
+  .topicBoardCard{ border-radius:10px !important; }
+  .topicBoardIcon{ border-radius:8px !important; }
+  .brandMark{ border-radius:10px !important; }
+
+  /* Pill/doira shaklidagi belgilar (topBtn, sectionBadge,
+     turnBadge, categoryChip, roleBadge) ATAYLAB tegilmaydi —
+     ular funksional "chip" bo'lgani uchun to'liq dumaloq
+     holida qolishi tabiiyroq va bezaklarga ziddiyat qilmaydi. */
+}

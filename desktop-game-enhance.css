@@ -1,0 +1,224 @@
+/* ==========================================================
+   BEKS GAME — DESKTOP ENHANCEMENT LAYER (GAME / BOARD SAHIFASI)
+   ----------------------------------------------------------
+   desktop-enhance.css (index.html uchun) bilan BIR XIL qoida:
+   - game.css / beks-theme.css DAN KEYIN yuklanadi
+   - hech qanday mavjud id/class/JS ulanishiga tegilmaydi
+   - faqat (hover:hover) and (pointer:fine) and (min-width:1180px)
+     bo'lganda ishga tushadi — mobil/planshet 100% eskicha qoladi
+   - #gameHeroBanner — YANGI, sof bezak blok (JS bilan bog'liq
+     emas), mobilda har doim yashirin turadi
+
+   Maqsad: index.html desktop-enhance bilan bir xil "hero +
+   keng maydon" tuyg'usini kirgandan keyingi (board) sahifasiga
+   ham olib kirish.
+========================================================== */
+
+/* ---------- Yangi hero blok: standart holatda yashirin ---------- */
+#gameHeroBanner{ display:none; }
+
+@media (hover:hover) and (pointer:fine) and (min-width:1180px){
+
+  body{ background:#f6f4ee; }
+  [data-theme="dark"] body{ background:#161320; }
+
+  .app{ width:100%; padding-bottom:60px; }
+  .appHeader{ width:min(1480px,calc(100% - 64px)); }
+
+  button,
+  button:hover,
+  button:focus-visible{
+    border-radius:0 !important;
+  }
+
+  /* ---------- HERO BANNER ---------- */
+  #gameHeroBanner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    width:min(1480px,calc(100% - 64px));
+    margin:0 auto 22px;
+    padding:34px 40px;
+    border-radius:22px;
+    border:1px solid var(--line2);
+    background:
+      radial-gradient(circle at 85% 20%, rgba(140,92,255,.16), transparent 55%),
+      linear-gradient(135deg, rgba(58,160,255,.10), rgba(140,92,255,.08));
+    box-shadow:var(--shadow);
+  }
+  [data-theme="dark"] #gameHeroBanner{
+    background:
+      radial-gradient(circle at 85% 20%, rgba(140,92,255,.22), transparent 55%),
+      linear-gradient(135deg, rgba(58,160,255,.14), rgba(140,92,255,.12));
+  }
+
+  #gameHeroBanner .gameHeroKicker{
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+    color:#7a4dff;
+  }
+  [data-theme="dark"] #gameHeroBanner .gameHeroKicker{ color:#b9a2ff; }
+
+  #gameHeroBanner h1{
+    margin:8px 0 0;
+    font-size:34px;
+    line-height:1.12;
+    font-weight:950;
+    letter-spacing:-.6px;
+    color:var(--text);
+  }
+
+  #gameHeroBanner p{
+    margin:10px 0 0;
+    max-width:560px;
+    font-size:14px;
+    line-height:1.55;
+    font-weight:600;
+    color:var(--muted);
+  }
+
+  #gameHeroBanner .gameHeroStatusPill{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:12px 18px;
+    border-radius:999px;
+    border:1px solid var(--line2);
+    background:var(--panel);
+    box-shadow:var(--shadowSmall);
+    font-size:12.5px;
+    font-weight:800;
+    color:var(--text);
+    white-space:nowrap;
+  }
+  #gameHeroBanner .gameHeroStatusPill .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:#2dbe96;
+    box-shadow:0 0 0 4px rgba(45,190,150,.22);
+  }
+
+  /* old inline status pill folds into the hero, so hide the
+     original small one to avoid duplication */
+  main > .heroStatus{ display:none; }
+
+  /* ---------- WIDE CONTENT WRAPPER ---------- */
+  .gameStage,
+  .teamsSection,
+  .topicLibrary,
+  .guestBanner{
+    width:100%;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .gameStage{
+    gap:0;
+    border:1px solid var(--line2);
+    background:var(--panel);
+  }
+
+  .gameBoardCard{
+    padding:26px 28px;
+    border-radius:0;
+    border:0;
+    box-shadow:none;
+    border-right:1px solid var(--line2);
+  }
+
+  .sectionHead .eyebrow{ color:#7a4dff; }
+  [data-theme="dark"] .sectionHead .eyebrow{ color:#b9a2ff; }
+
+  /* ---------- QUESTION BOARD: chip sidebar (unchanged logic,
+     just breathing room) ---------- */
+  .topicBoardLayout{
+    gap:0;
+    border:1px solid var(--line2);
+  }
+  .topicSidebarCol{ flex:0 0 200px; }
+  .topicSidebarCol{ border-right:1px solid var(--line2); }
+  .categoryChip{ border-radius:0; padding:12px 14px; }
+
+  /* ---------- QUESTION BOARD: rows instead of tight tiles ---------- */
+  .topicBoardLayout .topicBoard{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    max-height:520px;
+    border:1px solid var(--line2);
+  }
+
+  .topicBoardCard{
+    display:grid;
+    grid-template-columns:44px 1fr auto;
+    align-items:center;
+    gap:16px;
+    width:100%;
+    padding:14px 16px;
+    border-radius:0;
+    background:rgba(58,160,255,.06);
+    border:1px solid var(--line);
+    border-top:0;
+  }
+  .topicBoardCard:first-child{ border-top:0; }
+  .topicBoardCard:hover{
+    border-color:rgba(58,160,255,.4);
+    transform:translateY(-1px);
+  }
+  .topicBoardCard.selected{
+    border-color:var(--blue);
+    box-shadow:0 0 0 2px rgba(58,160,255,.28);
+    background:rgba(58,160,255,.1);
+  }
+  .topicBoardCard .topicBoardIcon{
+    width:44px;height:44px;border-radius:12px;
+    display:grid;place-items:center;
+    font-size:19px;
+    background:var(--panel);
+    box-shadow:var(--shadowSmall);
+  }
+  .topicBoardCard .topicBoardInfo{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .topicBoardCard .topicBoardInfo strong{ font-size:14.5px; }
+  .topicBoardCard .topicBoardInfo span{ font-size:12.5px; color:var(--muted); }
+  .topicBoardCard .topicBoardInfo small{
+    padding:2px 8px;
+    border-radius:999px;
+    background:rgba(45,190,150,.16);
+    color:#0c7a43;
+    font-weight:900;
+    font-size:10px;
+    letter-spacing:.3px;
+  }
+  [data-theme="dark"] .topicBoardCard .topicBoardInfo small{ color:#8affbc; }
+
+  /* ---------- LIVE LEADERBOARD PANEL ---------- */
+  .liveParticipantsPanel{
+    border-radius:0;
+    padding:22px;
+    box-shadow:none;
+  }
+  .liveParticipantsPanel .participant{
+    border-radius:0;
+  }
+  .liveParticipantsPanel .participantsBox{
+    gap:0;
+    border:1px solid var(--line2);
+  }
+  .liveParticipantsPanel .participant{
+    border:0;
+    border-top:1px solid var(--line2);
+  }
+  .liveParticipantsPanel .participant:first-child{ border-top:0; }
+
+  /* ---------- TEAMS / TOPIC LIBRARY cards ---------- */
+  .teamsSection,
+  .topicLibrary{ border-radius:22px; padding:26px 28px; }
+}

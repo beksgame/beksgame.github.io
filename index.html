@@ -31,9 +31,62 @@
   <link rel="icon" type="image/svg+xml" href="logo.svg">
   <link rel="stylesheet" href="index.css?v=3">
   <link rel="stylesheet" href="beks-theme.css?v=1">
-  <script src="i18n.js?v=3"></script>
+  <link rel="stylesheet" href="desktop-shape.css?v=1">
+  <link rel="stylesheet" href="desktop-enhance.css?v=3">
+  <script src="i18n.js?v=4"></script>
 </head>
 <body>
+
+  <!-- =========================
+       DESKTOP LANDING WRAPPER
+       Faqat kompyuter/katta ekranda (desktop-enhance.css
+       ichida, pointer:fine va min-width:1180px sharti bilan)
+       ishlaydigan qo'shimcha joylashuv o'ramasi. Mobilda bu
+       div oddiy shaffof konteyner bo'lib qoladi — hech narsa
+       o'zgarmaydi. Ichidagi barcha mavjud elementlar (id/class)
+       AYNAN saqlanadi, faqat CSS orqali qayta joylashtiriladi.
+  ========================== -->
+  <div class="landingDesktop" id="landingDesktopWrap">
+
+  <!-- Faqat desktopda ko'rinadigan bezak/matn bloklari.
+       Mobilda desktop-enhance.css ularni default holda
+       yashiradi (display:none), shuning uchun mobil ko'rinish
+       bilan hech qanday aloqasi yo'q. -->
+  <div class="landingHeroCopy" id="landingHeroCopy">
+    <div class="landingKicker">● JONLI VIKTORINA PLATFORMASI</div>
+    <h1 class="landingHeadline">O‘ynab <em>o‘rganing</em>.</h1>
+    <p class="landingSub">Xona oching, kod ulashing — o‘quvchilar telefonidan qo‘shiladi va bir vaqtning o‘zida bellashadi. Ball, vaqt va bonus — barchasi jonli ekranda.</p>
+  </div>
+
+  <div class="landingHeroDecor" aria-hidden="true">
+    <div class="landingBoard">
+      <div class="landingBoardTop">
+        <span class="landingBoardTag">QUESTION</span>
+        <div class="landingBoardTimer">07</div>
+      </div>
+      <div class="landingBoardMeta">1-savol / 24 tadan</div>
+      <div class="landingBoardQ">O‘zbekistonning poytaxti qaysi shahar?</div>
+      <div class="landingBoardGrid">
+        <div class="landingBoardOpt landingBoardOpt--a"><span class="landingOptLetter">A</span>Toshkent</div>
+        <div class="landingBoardOpt landingBoardOpt--b"><span class="landingOptLetter">B</span>Samarqand</div>
+        <div class="landingBoardOpt landingBoardOpt--c"><span class="landingOptLetter">C</span>Buxoro</div>
+        <div class="landingBoardOpt landingBoardOpt--d"><span class="landingOptLetter">D</span>Andijon</div>
+      </div>
+    </div>
+    <div class="landingFloatBadge landingFloatBadge--1">
+      <span class="landingFloatAvatar">A</span>
+      <span class="landingFloatInfo"><b>Aziz</b><small>120 ball</small></span>
+      <span class="landingFloatTag">NAVBAT</span>
+    </div>
+    <div class="landingFloatBadge landingFloatBadge--2"><span class="landingLiveDot"></span>4 ishtirokchi jonli</div>
+  </div>
+
+  <div class="landingStats" id="landingStats">
+    <div class="landingStatCell"><b id="landingStatGames">—</b><span>O‘TKAZILGAN O‘YIN</span></div>
+    <div class="landingStatCell"><b id="landingStatUsers">—</b><span>FOYDALANUVCHI</span></div>
+    <div class="landingStatCell"><b>3 ta</b><span>REJIM: XONA / DUEL / YAKKA</span></div>
+    <div class="landingStatCell"><b>0 so‘m</b><span>BOSHLASH UCHUN</span></div>
+  </div>
 
   <div class="brandWrap" id="authHeader">
 
@@ -81,6 +134,8 @@
       <button type="button" class="authActionBtn authRegisterActionBtn" id="registerOpenBtn" data-i18n="auth.register">📝 Ro‘yxatdan o‘tish</button>
     </div>
   </div>
+
+  </div><!-- /.landingDesktop -->
 
   <!-- =========================
        KIRISH MODALI

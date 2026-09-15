@@ -1,0 +1,193 @@
+/* ==========================================================
+   BEKS GAME — QO'SHIMCHA TUZATISHLAR (beks-fix.css)
+   ----------------------------------------------------------
+   Ushbu fayl BOSHQA barcha CSS fayllardan (game.css,
+   beks-theme.css, desktop-shape.css, desktop-enhance.css /
+   admin-desktop-enhance.css) KEYIN ulanadi. Hech qanday
+   mavjud selektor o'chirilmaydi yoki qayta yozilmaydi — faqat
+   quyidagi muammolar tuzatiladi:
+
+   1) Katta ekranda ".app" / ".appHeader" / ".pageWrap"
+      turlicha kenglikda bo'lib, logotip va tugmalar pastdagi
+      kontent bilan tekis kelmay qolgan — endi uchalasi ham
+      bir xil kenglikda.
+
+   2) "LIVE QUIZ ARENA" sarlavhasi, "Savollar maydoni" (gameStage)
+      va savol oynasidagi (questionModalWrap) — har bir blok
+      o'zaro alohida-alohida to'rtburchak bo'lib, orasida
+      bo'shliq bor edi. Endi hammasi concept-game-question.html
+      uslubida — bir-biriga TEGIB turadi, orasida faqat BITTA
+      INGICHKA CHIZIQ qoladi.
+
+   3) Jonli xona ochilganda "XONA KODI" matni och (light)
+      mavzuda oq rangda, deyarli oq fonda yozilgani uchun
+      ko'rinmay qolar edi.
+
+   4) Boshqaruv panelida (admin.html) chap menyu bilan o'ng
+      panel orasidagi bo'shliq ham xuddi shu uslubda BITTA
+      CHIZIQQA almashtirildi.
+========================================================== */
+
+/* ---------- 3) XONA KODI RANGI TUZATILDI ----------
+   Oldin .roomCodeValue doimo color:#fff edi — bu faqat
+   to'q (dark) mavzuda ishlagan. Endi rang mavzu
+   o'zgaruvchisidan (--text) olinadi, shuning uchun ikkala
+   mavzuda ham har doim ko'rinadi. */
+.roomCodeValue {
+  color: var(--text) !important;
+}
+
+/* ---------- 1) KATTA EKRANDA TO'LIQ KENGLIK + LOGO/TUGMALAR TEKISLANISHI ----------
+   MUAMMO: beks-theme.css ".app,.appHeader" ikkalasiga BIR XIL
+   kenglik (min(1440px, calc(100% - 280px))) berardi. Bu faylning
+   oldingi versiyasi FAQAT ".app"ni kengaytirgani uchun,
+   ".appHeader" (yuqoridagi "Beks Game" logotipi va o'ng
+   tomondagi tugmalar) eski (torroq) kenglikda qolib ketgan —
+   shu sabab logo pastdagi taxta bilan bir chiziqqa to'g'ri
+   kelmay, o'ngga siljib ko'ringan, o'ng tomondagi tugmalar esa
+   taxtaning o'ng chetiga yetmay, "bo'sh joy qolib chapga
+   surilgan" holatda ko'ringan.
+
+   TUZATISH: ".app" (game.html), ".appHeader" (ikkala sahifa)
+   va ".pageWrap" (admin.html) — UCHALASIGA HAM aynan BIR XIL
+   formula beriladi, shu bilan header har doim pastdagi
+   kontent bilan chap va o'ng chetlaridan mukammal
+   tekislanadi. Foydalanuvchi ANIQ "100% kenglik" so'ragani
+   uchun endi katta chetlash (280px) OLIB TASHLANDI — faqat
+   juda kichik (32px) chekka bo'shlig'i qoladi. Bu kenglik
+   o'ng yuqori burchakdagi til/tema tugmachasi bilan
+   to'qnashmasligi uchun, o'sha tugmacha pastki-o'ng
+   burchakka (header qatoridan butunlay pastga) ko'chirildi —
+   quyidagi qoidaga qarang. */
+@media (min-width: 1180px) {
+  .app,
+  .appHeader,
+  .pageWrap {
+    width: calc(100% - 32px) !important;
+    max-width: none !important;
+  }
+}
+
+/* Til/tema tugmachasi ENDI KATTA EKRANDA HAM pastki-o'ng
+   burchakda turadi (avval faqat tor ekranlarda shunday edi,
+   keng ekranda esa header qatori bilan bir balandlikda —
+   yuqoridagi o'zgarishdan keyin bu endi header tugmalari
+   bilan to'qnashib qolar edi). Shu bilan header endi hech
+   qanday joy zahira qilmasdan to'liq (100%) kengaya oladi. */
+@media (min-width: 1180px) {
+  .beksLangSwitch {
+    top: auto !important;
+    bottom: 16px !important;
+    right: 16px !important;
+  }
+}
+
+/* ---------- 2) BLOKLAR ORASIDAGI BO'SHLIQ -> BITTA CHIZIQ ----------
+   Quyidagi ikkita joyda "asosiy blok" (savollar maydoni /
+   savol oynasi) va "Ishtirokchilar" paneli orasida gap bor
+   edi. Endi ular BIR-BIRIGA TEGIB turadi va faqat ORASIDA
+   BITTA INGICHKA CHIZIQ (chap panelning border-left'i)
+   ko'rinadi — xuddi concept-game-question.html'dagi kabi.
+   Faqat katta ekranda ishlaydi; mobil/planshetda ular
+   avvalgidek vertikal ustun-ustun (gap bilan) qolaveradi,
+   chunki u yerda "yopishib qolish" muammosi yo'q. */
+@media (hover: hover) and (pointer: fine) and (min-width: 1180px) {
+
+  /* -- "Savollar maydoni" ekrani: taxta + jonli reyting -- */
+  .gameStage {
+    gap: 0 !important;
+  }
+
+  .gameStage .gameBoardCard {
+    border-right: none !important;
+    border-radius: var(--radius) 0 0 var(--radius) !important;
+  }
+
+  .gameStage .liveParticipantsPanel {
+    border-left: 1px solid var(--line) !important;
+    border-radius: 0 var(--radius) var(--radius) 0 !important;
+  }
+
+  /* -- Savol oynasi (modal): savol/variantlar + ishtirokchilar -- */
+  .questionModalWrap {
+    gap: 0 !important;
+  }
+
+  .questionModalWrap .questionBox {
+    border-right: none !important;
+    border-radius: var(--radius) 0 0 var(--radius) !important;
+  }
+
+  .questionModalWrap .participantsSideBox {
+    border-left: 1px solid var(--line2) !important;
+    border-radius: 0 var(--radius) var(--radius) 0 !important;
+  }
+
+  /* soloMode'da (ishtirokchilar paneli ko'rsatilmaydigan holat)
+     savol qutisi to'liq to'rtburchak bo'lib qolishi kerak */
+  .questionModalWrap.soloMode .questionBox {
+    border-right: 1px solid var(--line2) !important;
+    border-radius: var(--radius) !important;
+  }
+
+  /* -- "LIVE QUIZ ARENA" sarlavha bloki (.gameHero) endi
+     pastidagi Savollar maydoni + Ishtirokchilar blokiga
+     ham TEGIB turadi, orasida faqat gameBoardCard/
+     liveParticipantsPanel'ning yuqori chegarasidan hosil
+     bo'lgan BITTA CHIZIQ qoladi. */
+  .gameHero {
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    border-radius: var(--radius) var(--radius) 0 0 !important;
+  }
+
+  .gameStage .gameBoardCard {
+    border-radius: 0 0 0 var(--radius) !important;
+  }
+
+  .gameStage .liveParticipantsPanel {
+    border-radius: 0 0 var(--radius) 0 !important;
+  }
+}
+
+/* ---------- 4) BOSHQARUV PANELI (admin.html): chap menyu + o'ng panel ----------
+   admin-desktop-enhance.css'da ".adminSidebarNav" (chap menyu)
+   bilan ".adminPaneArea" (o'ng — tanlangan bo'lim) orasida
+   30px bo'shliq bor edi, ikkalasi ham alohida-alohida
+   to'rtburchak qutilar edi. Endi ular ham bir-biriga tegib
+   turadi, orasida chap menyuning o'ng chegarasi — BITTA
+   INGICHKA CHIZIQ — qoladi, xuddi yuqoridagi 2-bandda
+   tuzatilgan bloklar kabi. */
+@media (hover: hover) and (pointer: fine) and (min-width: 1180px) {
+  #adminPanel {
+    column-gap: 0 !important;
+  }
+
+  .adminSidebarNav {
+    border-radius: var(--radius) 0 0 var(--radius) !important;
+  }
+
+  .adminPaneArea > .adminSettingsCard,
+  .adminPaneArea > #adminUsersSection {
+    border-left: none !important;
+    border-radius: 0 var(--radius) var(--radius) 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* #adminUsersSection ("Foydalanuvchilar" bo'limi) asli
+     alohida karta (border/fon) emas edi — endi boshqa
+     bo'limlar (Limitlar, Standartlar va h.k.) bilan bir xil
+     ko'rinishda, to'liq to'rtburchak panel bo'lishi uchun
+     unga ham xuddi shunday karta ko'rinishi beriladi. */
+  .adminPaneArea > #adminUsersSection {
+    padding: 20px 22px;
+    border: 1px solid var(--line2);
+    border-left: none !important;
+    background: #ffffff;
+    box-shadow: var(--shadowSmall);
+  }
+}
+
+[data-theme="dark"] .adminPaneArea > #adminUsersSection {
+  background: var(--panel) !important;
+}

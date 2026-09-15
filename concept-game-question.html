@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Beks Game — O'yin konsepti: Savol ekrani</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1220; --panel:#131b30; --panel2:#0e1830;
+    --line:rgba(255,255,255,.08); --text:#eef1f7; --muted:#8b93a8;
+    --blue:#3a78ff; --coral:#ff5f45; --green:#2dbe96; --purple:#d250be; --gold:#cdaa28;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Manrope',sans-serif;background:var(--ink);color:var(--text);min-width:1240px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--line)}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:800;font-size:15px}
+  .logo span{width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,var(--blue),var(--purple))}
+  .progressWrap{display:flex;align-items:center;gap:16px}
+  .progressText{font-size:12.5px;font-weight:800;color:var(--muted)}
+  .progressBar{width:220px;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+  .progressBar i{display:block;height:100%;width:38%;background:var(--blue);border-radius:3px}
+  .exitBtn{width:36px;height:36px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-size:15px;cursor:pointer}
+
+  .main{flex:1;display:grid;grid-template-columns:1fr 320px;gap:0;overflow:hidden}
+
+  .qArea{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;position:relative}
+  .qTag{font-size:12px;font-weight:900;letter-spacing:1.5px;color:#a78bfa;margin-bottom:18px}
+  .qTimer{
+    position:absolute;top:36px;right:56px;
+    width:56px;height:56px;border-radius:50%;border:3px solid var(--coral);
+    display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:20px;font-weight:800;
+  }
+  .qText{font-family:'Sora',sans-serif;font-size:34px;font-weight:800;text-align:center;max-width:720px;line-height:1.3;margin-bottom:42px}
+  .qGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:760px}
+  .qOpt{
+    display:flex;align-items:center;gap:14px;
+    padding:20px 22px;border-radius:10px;cursor:pointer;
+    font-size:16px;font-weight:800;transition:.15s;border:1px solid transparent;
+  }
+  .qOpt:hover{transform:translateY(-2px)}
+  .qLetter{width:32px;height:32px;border-radius:8px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:900;font-size:14px;color:#fff}
+  .qOpt--a{background:rgba(58,120,255,.14);border-color:rgba(58,120,255,.32)} .qOpt--a .qLetter{background:var(--blue)}
+  .qOpt--b{background:rgba(210,80,190,.14);border-color:rgba(210,80,190,.32)} .qOpt--b .qLetter{background:var(--purple)}
+  .qOpt--c{background:rgba(45,190,150,.14);border-color:rgba(45,190,150,.32)} .qOpt--c .qLetter{background:var(--green)}
+  .qOpt--d{background:rgba(205,170,40,.16);border-color:rgba(205,170,40,.34)} .qOpt--d .qLetter{background:var(--gold)}
+  .qFooter{display:flex;gap:12px;margin-top:36px}
+  .qFooter button{padding:12px 22px;border-radius:6px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-weight:800;font-size:13px;cursor:pointer;font-family:'Manrope',sans-serif}
+
+  .sidebar{background:var(--panel2);border-left:1px solid var(--line);padding:26px 20px;overflow-y:auto}
+  .sidebar h3{font-family:'Sora',sans-serif;font-size:12.5px;font-weight:800;letter-spacing:1.2px;color:#a78bfa;margin-bottom:18px;text-align:center}
+  .pRow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);margin-bottom:10px}
+  .pRow.isTurn{border-color:var(--coral)}
+  .pAvatar{width:38px;height:38px;border-radius:8px;flex:0 0 auto;background:linear-gradient(135deg,#20d9ff,#4f8cff 60%,#8c5cff);display:flex;align-items:center;justify-content:center;font-weight:900;font-family:'Sora',sans-serif;color:#04121f}
+  .pInfo{flex:1;min-width:0}
+  .pName{display:flex;align-items:center;gap:6px;font-weight:800;font-size:13.5px}
+  .pName .tag{font-size:8.5px;font-weight:900;background:var(--coral);color:#2a0800;padding:2px 6px;border-radius:4px;letter-spacing:.3px}
+  .pBall{font-size:11.5px;color:var(--muted);font-weight:700;margin-top:2px}
+  .pRank{font-family:'Sora',sans-serif;font-weight:800;font-size:13px;color:var(--muted);width:18px;text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span></span>BEKS GAME</div>
+  <div class="progressWrap">
+    <span class="progressText">SAVOL 9 / 24</span>
+    <div class="progressBar"><i></i></div>
+  </div>
+  <button class="exitBtn">✕</button>
+</header>
+
+<div class="main">
+  <div class="qArea">
+    <div class="qTimer">07</div>
+    <div class="qTag">QUESTION</div>
+    <div class="qText">Foydalanuvchi so'zi til biriktiruvi bo'yicha qaysi turkumga kiradi?</div>
+    <div class="qGrid">
+      <div class="qOpt qOpt--a"><span class="qLetter">A</span>Ot</div>
+      <div class="qOpt qOpt--b"><span class="qLetter">B</span>Sifat</div>
+      <div class="qOpt qOpt--c"><span class="qLetter">C</span>Fe'l</div>
+      <div class="qOpt qOpt--d"><span class="qLetter">D</span>Ravish</div>
+    </div>
+    <div class="qFooter">
+      <button>Yopish</button>
+      <button>⏭ Javob bermadim</button>
+    </div>
+  </div>
+  <div class="sidebar">
+    <h3>ISHTIROKCHILAR</h3>
+    <div class="pRow isTurn">
+      <div class="pRank">1</div>
+      <div class="pAvatar">A</div>
+      <div class="pInfo"><div class="pName">Aziz <span class="tag">NAVBAT</span></div><div class="pBall">320 ball</div></div>
+    </div>
+    <div class="pRow">
+      <div class="pRank">2</div>
+      <div class="pAvatar">M</div>
+      <div class="pInfo"><div class="pName">Mahliyo</div><div class="pBall">280 ball</div></div>
+    </div>
+    <div class="pRow">
+      <div class="pRank">3</div>
+      <div class="pAvatar">D</div>
+      <div class="pInfo"><div class="pName">Dilnoza</div><div class="pBall">150 ball</div></div>
+    </div>
+    <div class="pRow">
+      <div class="pRank">4</div>
+      <div class="pAvatar">S</div>
+      <div class="pInfo"><div class="pName">Sardor</div><div class="pBall">90 ball</div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

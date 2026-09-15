@@ -1,82 +1,90 @@
 /* ==========================================================
-   BEKS GAME — QUVNOQ TEMA (beks-theme.css)
+   BEKS GAME — "INK / PAPER" TEMASI (beks-theme.css)
    ----------------------------------------------------------
    Bu fayl game.css / admin.css / index.css DAN KEYIN yuklanadi
-   va faqat KO'RINISHNI (rang, radius, joylashuv) o'zgartiradi.
-   Hech qanday id/class o'chirilmagan yoki qo'shilmagan —
-   shuning uchun game.js / admin.js / i18n.js ishlashiga
-   BUTUNLAY TA'SIR QILMAYDI.
+   va faqat KO'RINISHNI (rang, radius, shrift, joylashuv)
+   o'zgartiradi. Hech qanday id/class o'chirilmagan yoki
+   qo'shilmagan — shuning uchun game.js / admin.js / i18n.js
+   ishlashiga BUTUNLAY TA'SIR QILMAYDI.
+
+   Dizayn manbasi: concept-admin-v2-sidebar.html,
+   concept-game-question.html, concept-game-duel.html.
 
    IKKITA REJIM:
    - "pointer:fine" (kompyuter, sichqoncha)  -> ixcham, list
      ko'rinish, kartalar kichikroq, rasm/ikon shart emas.
    - "pointer:coarse" (telefon, planshet,
-      katta touch ekranlar)                 -> yorqin, katta,
-     yumaloq kartalar, kattaroq tugmalar.
+      katta touch ekranlar)                 -> yorqin, katta
+     tugmalar (rang uslubi bir xil qoladi).
 ========================================================== */
 
-:root{
-  --bg:#fbf7ff;
-  --bg2:#eef2ff;
-  --panel:#ffffff;
-  --panel2:#faf8ff;
-  --line:#ece5fb;
-  --line2:#dccdf7;
-  --text:#241c3a;
-  --muted:#7b7599;
-  --cyan:#12b3c9;
-  --blue:#3aa0ff;
-  --purple:#8c5cff;
-  --green:#22c55e;
-  --red:#ff5364;
-  --gold:#ffb703;
-  --shadow:0 14px 30px rgba(110,70,220,.10);
-  --shadowSmall:0 6px 14px rgba(110,70,220,.09);
-  --radius:20px;
-  --radiusSmall:14px;
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap');
 
-  --pal1-bg:#E6F1FB; --pal1-fg:#0C447C; --pal1-fill:#3aa0ff;
-  --pal2-bg:#EEEDFE; --pal2-fg:#3C3489; --pal2-fill:#8c5cff;
-  --pal3-bg:#FDECE3; --pal3-fg:#9A431B; --pal3-fill:#ff8a4c;
-  --pal4-bg:#FBEAF0; --pal4-fg:#993556; --pal4-fill:#ef5d99;
-  --pal5-bg:#EAF3DE; --pal5-fg:#3B6D11; --pal5-fill:#22c55e;
-  --pal6-bg:#FDF3D9; --pal6-fg:#8A5A06; --pal6-fill:#ffb703;
+:root{
+  --bg:#f6f4ee;
+  --bg2:#efece2;
+  --panel:#ffffff;
+  --panel2:#faf9f4;
+  --line:rgba(12,18,32,.10);
+  --line2:rgba(12,18,32,.18);
+  --text:#0c1220;
+  --muted:#6b7180;
+  --cyan:#0b90a8;
+  --blue:#3a78ff;
+  --purple:#7c4dff;
+  --magenta:#d250be;
+  --green:#1fa87e;
+  --red:#ff5f45;
+  --gold:#b8901f;
+  --shadow:0 16px 34px rgba(12,18,32,.10);
+  --shadowSmall:0 6px 16px rgba(12,18,32,.07);
+  --radius:10px;
+  --radiusSmall:8px;
+
+  --pal1-bg:rgba(58,120,255,.10); --pal1-fg:#1d4bb0; --pal1-fill:#3a78ff;
+  --pal2-bg:rgba(210,80,190,.10); --pal2-fg:#9c2f8c; --pal2-fill:#d250be;
+  --pal3-bg:rgba(255,95,69,.10); --pal3-fg:#c73a25; --pal3-fill:#ff5f45;
+  --pal4-bg:rgba(255,95,69,.12); --pal4-fg:#c73a25; --pal4-fill:#ff5f45;
+  --pal5-bg:rgba(31,168,126,.12); --pal5-fg:#137355; --pal5-fill:#1fa87e;
+  --pal6-bg:rgba(184,144,31,.14); --pal6-fg:#8a6a17; --pal6-fill:#cdaa28;
 }
 
 [data-theme="dark"]{
-  --bg:#160f2c;
-  --bg2:#1b1440;
-  --panel:#1c1640;
-  --panel2:#221a4d;
-  --line:rgba(255,255,255,.10);
+  --bg:#0c1220;
+  --bg2:#0e1830;
+  --panel:#131b30;
+  --panel2:#0e1830;
+  --line:rgba(255,255,255,.08);
   --line2:rgba(255,255,255,.16);
-  --text:#f3eefe;
-  --muted:#a79bd1;
-  --cyan:#34d6e6;
-  --blue:#5fb2ff;
-  --purple:#a685ff;
-  --green:#3ddc84;
-  --red:#ff7a88;
-  --gold:#ffc94d;
-  --shadow:0 16px 34px rgba(0,0,0,.40);
-  --shadowSmall:0 8px 16px rgba(0,0,0,.30);
+  --text:#eef1f7;
+  --muted:#8b93a8;
+  --cyan:#3ad0e6;
+  --blue:#5c8fff;
+  --purple:#a78bfa;
+  --magenta:#e070c8;
+  --green:#35c797;
+  --red:#ff6b52;
+  --gold:#e0b93a;
+  --shadow:0 18px 40px rgba(0,0,0,.45);
+  --shadowSmall:0 8px 18px rgba(0,0,0,.32);
 
-  --pal1-bg:rgba(58,160,255,.16);  --pal1-fg:#bfe0ff;
-  --pal2-bg:rgba(140,92,255,.18);  --pal2-fg:#ddd2ff;
-  --pal3-bg:rgba(255,138,76,.16);  --pal3-fg:#ffd7bd;
-  --pal4-bg:rgba(239,93,153,.16);  --pal4-fg:#ffd3e4;
-  --pal5-bg:rgba(34,197,94,.16);   --pal5-fg:#c6f3d5;
-  --pal6-bg:rgba(255,183,3,.18);   --pal6-fg:#ffe6ad;
+  --pal1-bg:rgba(92,143,255,.16);  --pal1-fg:#bcd0ff;
+  --pal2-bg:rgba(224,112,200,.16); --pal2-fg:#f4c7ea;
+  --pal3-bg:rgba(255,107,82,.16);  --pal3-fg:#ffcabd;
+  --pal4-bg:rgba(255,107,82,.16);  --pal4-fg:#ffcabd;
+  --pal5-bg:rgba(53,199,151,.16);  --pal5-fg:#bdf3e0;
+  --pal6-bg:rgba(224,185,58,.18);  --pal6-fg:#ffe9ad;
 }
 
 /* ---------------------------------------------------------
    ASOSIY YUZALAR
 --------------------------------------------------------- */
 
-body{ font-family:"Nunito","Segoe UI",Inter,Arial,sans-serif; }
+body{ font-family:"Manrope","Segoe UI",Arial,sans-serif; }
+h1,h2,h3,.brand-main,.eyebrow,.appHeader .brand-main{ font-family:"Sora","Manrope",sans-serif; }
 
 button{ border-radius:var(--radiusSmall); }
-button:active{ transform:scale(.96); }
+button:active{ transform:scale(.97); }
 
 input,select,textarea{
   border-radius:var(--radiusSmall) !important;
@@ -84,7 +92,7 @@ input,select,textarea{
 }
 input:focus,select:focus,textarea:focus{
   border-color:var(--blue) !important;
-  box-shadow:0 0 0 4px rgba(58,160,255,.16) !important;
+  box-shadow:0 0 0 3px rgba(58,120,255,.16) !important;
 }
 
 /* ---------------------------------------------------------
@@ -97,18 +105,18 @@ input:focus,select:focus,textarea:focus{
    faqat yumshoq soya beriladi (avvalgi versiyada logotipga
    qo'yilgan gradient fon uni "buzilgandek" ko'rsatgan edi). */
 .brandMark{
-  border-radius:16px !important;
+  border-radius:8px !important;
   border:none !important;
   background:transparent !important;
   box-shadow:none !important;
 }
 
-.brand-main{ letter-spacing:-.5px; }
+.brand-main{ letter-spacing:-.5px; font-weight:800 !important; }
 .brand-f{ color:var(--pal3-fill); }
 
 .topBtn{
-  border-radius:999px !important;
-  border:1.5px solid var(--line) !important;
+  border-radius:var(--radiusSmall) !important;
+  border:1.5px solid var(--line2) !important;
   background:var(--panel) !important;
   box-shadow:var(--shadowSmall) !important;
   font-weight:800 !important;
@@ -124,21 +132,27 @@ input:focus,select:focus,textarea:focus{
 .gameModeBtn,.authActionBtn,.miniModalBtn,.playBtn,
 .primaryPlayBtn,.secondaryPlayBtn,.adminToggleBtn,
 .messageReplyBtn,.messageDeleteBtn,.roomModeOptionBtn{
-  border-radius:16px !important;
+  border-radius:var(--radiusSmall) !important;
+  font-weight:800 !important;
 }
 
 .primaryBtn,.primaryModalBtn,.primaryPlayBtn{
-  background:linear-gradient(135deg,var(--blue),var(--purple)) !important;
+  background:var(--text) !important;
   border:none !important;
-  color:#fff !important;
-  box-shadow:0 10px 22px rgba(58,160,255,.30) !important;
+  color:var(--bg) !important;
+  box-shadow:0 8px 18px rgba(12,18,32,.18) !important;
 }
-.primaryBtn:hover,.primaryModalBtn:hover,.primaryPlayBtn:hover{ transform:translateY(-2px); filter:brightness(1.04); }
+[data-theme="dark"] .primaryBtn,[data-theme="dark"] .primaryModalBtn,[data-theme="dark"] .primaryPlayBtn{
+  background:var(--blue) !important;
+  color:#fff !important;
+  box-shadow:0 8px 18px rgba(58,120,255,.30) !important;
+}
+.primaryBtn:hover,.primaryModalBtn:hover,.primaryPlayBtn:hover{ transform:translateY(-2px); filter:brightness(1.06); }
 
 .secondaryBtn,.secondaryModalBtn,.secondaryPlayBtn{
-  background:var(--pal1-bg) !important;
-  color:var(--pal1-fg) !important;
-  border:none !important;
+  background:transparent !important;
+  color:var(--text) !important;
+  border:1.5px solid var(--line2) !important;
 }
 
 .dangerBtn,.resetAllStatsBtn{
@@ -148,22 +162,22 @@ input:focus,select:focus,textarea:focus{
 }
 
 .gameModeBtn,.roomModeBtn{ font-weight:900 !important; }
-.roomModeBtn{ background:linear-gradient(135deg,var(--blue),#2f6fed) !important; }
-.duelModeBtn{ background:linear-gradient(135deg,var(--pal4-fill),#c81f3a) !important; }
-.playModeBtn{ background:linear-gradient(135deg,var(--green),#0c9a5c) !important; }
+.roomModeBtn{ background:var(--blue) !important; }
+.duelModeBtn{ background:var(--red) !important; }
+.playModeBtn{ background:var(--green) !important; }
 
-.authActionBtn{ border-radius:16px !important; font-weight:800 !important; }
-.authLoginActionBtn{ background:linear-gradient(135deg,var(--blue),var(--purple)) !important; }
+.authActionBtn{ border-radius:var(--radiusSmall) !important; font-weight:800 !important; }
+.authLoginActionBtn{ background:var(--blue) !important; }
 .authRegisterActionBtn{ background:var(--pal1-bg) !important; color:var(--pal1-fg) !important; }
 
 /* ---------------------------------------------------------
    BEYJLAR / CHIPLAR
 --------------------------------------------------------- */
 
-.eyebrow{ color:var(--purple) !important; font-weight:900 !important; }
+.eyebrow{ color:var(--red) !important; font-weight:900 !important; letter-spacing:1px !important; }
 
 .sectionBadge{
-  border-radius:999px !important;
+  border-radius:6px !important;
   border:none !important;
   background:var(--pal1-bg) !important;
   color:var(--pal1-fg) !important;
@@ -172,15 +186,15 @@ input:focus,select:focus,textarea:focus{
 .statusDot{ box-shadow:0 0 0 4px var(--pal5-bg) !important; }
 
 .turnBadge{
-  border-radius:999px !important;
-  background:var(--pal6-fill) !important;
-  color:#412402 !important;
+  border-radius:5px !important;
+  background:var(--red) !important;
+  color:#fff !important;
 }
 
-.roleBadge.isAdmin{ border-radius:999px !important; }
+.roleBadge.isAdmin{ border-radius:5px !important; }
 
-.categoryChip{ border-radius:999px !important; font-weight:800 !important; }
-.categoryChip small{ border-radius:999px !important; }
+.categoryChip{ border-radius:6px !important; font-weight:800 !important; }
+.categoryChip small{ border-radius:6px !important; }
 
 /* ---------------------------------------------------------
    KARTA / PANEL YUZALARI (umumiy)
@@ -192,10 +206,10 @@ input:focus,select:focus,textarea:focus{
 .duelResultCard,.roomLeaderRow,.endedRankCard,
 .messageRow,.userRow,.roomHostBox,.roomSetupBox,
 .topicBoardAddCard{
-  border-radius:22px !important;
+  border-radius:var(--radius) !important;
 }
 
-.modal-box{ box-shadow:0 30px 70px rgba(90,50,200,.22) !important; }
+.modal-box{ box-shadow:0 24px 60px rgba(12,18,32,.18) !important; }
 
 /* ---------------------------------------------------------
    MAVZULAR TAXTASI (topicBoard)
@@ -203,8 +217,8 @@ input:focus,select:focus,textarea:focus{
 ========================================================= */
 
 .topicBoardCard{
-  border-radius:20px !important;
-  border:none !important;
+  border-radius:var(--radius) !important;
+  border:1px solid var(--line) !important;
   color:var(--text) !important;
 }
 .topicBoardCard:nth-child(6n+1){ background:var(--pal1-bg) !important; }
@@ -219,12 +233,12 @@ input:focus,select:focus,textarea:focus{
 .topicBoardCard .topicBoardInfo small{ color:var(--muted) !important; }
 
 .topicBoardIcon{
-  border-radius:14px !important;
+  border-radius:8px !important;
   background:rgba(255,255,255,.55) !important;
 }
 
 .topicBoardCard.selected{
-  box-shadow:0 0 0 3px var(--blue) inset, var(--shadow) !important;
+  box-shadow:0 0 0 2px var(--blue) inset, var(--shadow) !important;
 }
 
 .topicBoardAddCard{
@@ -273,39 +287,49 @@ input:focus,select:focus,textarea:focus{
    JAMOALAR (teams)
 ========================================================= */
 
-.team{ border-radius:20px !important; border:none !important; }
-.team:nth-child(6n+1){ background:linear-gradient(160deg,var(--pal1-fill),#2f6fed) !important; }
-.team:nth-child(6n+2){ background:linear-gradient(160deg,var(--pal2-fill),#6a3ff5) !important; }
-.team:nth-child(6n+3){ background:linear-gradient(160deg,var(--pal3-fill),#e0632a) !important; }
-.team:nth-child(6n+4){ background:linear-gradient(160deg,var(--pal4-fill),#c81f6d) !important; }
-.team:nth-child(6n+5){ background:linear-gradient(160deg,var(--pal5-fill),#0c9a5c) !important; }
-.team:nth-child(6n+0){ background:linear-gradient(160deg,var(--pal6-fill),#e0972a) !important; }
+.team{ border-radius:12px !important; border:1px solid var(--line) !important; }
+.team:nth-child(6n+1){ background:linear-gradient(160deg,var(--pal1-fill),#1d4bb0) !important; }
+.team:nth-child(6n+2){ background:linear-gradient(160deg,var(--pal2-fill),#9c2f8c) !important; }
+.team:nth-child(6n+3){ background:linear-gradient(160deg,var(--pal3-fill),#c73a25) !important; }
+.team:nth-child(6n+4){ background:linear-gradient(160deg,#1fa87e,#137355) !important; }
+.team:nth-child(6n+5){ background:linear-gradient(160deg,var(--pal5-fill),#137355) !important; }
+.team:nth-child(6n+0){ background:linear-gradient(160deg,var(--pal6-fill),#8a6a17) !important; }
 .team strong{ color:#fff !important; }
 
 /* ---------------------------------------------------------
    SAVOL JAVOB VARIANTLARI (game.html, index.html, duel, room)
+   Konsept: har bir variant (A/B/C/D) o'ziga xos rangda —
+   ko'k / siyoh-pushti / yashil / oltin.
 ========================================================= */
 
 .answerOption,.qOptionBtn,.duelAnswerBtn,
 .roomAnswerButtons .qOptionBtn{
-  border-radius:18px !important;
-  border:none !important;
+  border-radius:var(--radiusSmall) !important;
+  border:1.5px solid transparent !important;
   font-weight:800 !important;
 }
 
-.answerOption{ background:var(--pal1-bg) !important; color:var(--pal1-fg) !important; }
-.answerOption:nth-child(2){ background:var(--pal4-bg) !important; color:var(--pal4-fg) !important; }
-.answerOption:nth-child(3){ background:var(--pal5-bg) !important; color:var(--pal5-fg) !important; }
-.answerOption:nth-child(4){ background:var(--pal6-bg) !important; color:var(--pal6-fg) !important; }
-.answerOption .answerLetter{ border-radius:12px !important; }
+.answerOption.optA,.qOptionBtn.optA,.roomAnswerButtons .optA{
+  background:rgba(58,120,255,.12) !important; border-color:rgba(58,120,255,.35) !important; color:var(--text) !important;
+}
+.answerOption.optB,.qOptionBtn.optB,.roomAnswerButtons .optB{
+  background:rgba(210,80,190,.12) !important; border-color:rgba(210,80,190,.35) !important; color:var(--text) !important;
+}
+.answerOption.optC,.qOptionBtn.optC,.roomAnswerButtons .optC{
+  background:rgba(31,168,126,.14) !important; border-color:rgba(31,168,126,.35) !important; color:var(--text) !important;
+}
+.answerOption.optD,.qOptionBtn.optD,.roomAnswerButtons .optD{
+  background:rgba(184,144,31,.16) !important; border-color:rgba(184,144,31,.38) !important; color:var(--text) !important;
+}
 
-.answerOption.correct{ background:var(--pal5-bg) !important; box-shadow:0 0 0 3px var(--green) inset !important; }
-.answerOption.wrong{ background:var(--pal4-bg) !important; box-shadow:0 0 0 3px var(--red) inset !important; }
+.answerOption .answerLetter{ border-radius:6px !important; color:#fff !important; }
+.answerOption.optA .answerLetter{ background:var(--blue) !important; }
+.answerOption.optB .answerLetter{ background:var(--magenta) !important; }
+.answerOption.optC .answerLetter{ background:var(--green) !important; }
+.answerOption.optD .answerLetter{ background:var(--gold) !important; }
 
-.qOptionBtn.optA,.roomAnswerButtons .optA{ background:linear-gradient(150deg,var(--pal4-fill),#c81f3a) !important; }
-.qOptionBtn.optB,.roomAnswerButtons .optB{ background:linear-gradient(150deg,var(--pal1-fill),#0a7fb8) !important; }
-.qOptionBtn.optC,.roomAnswerButtons .optC{ background:linear-gradient(150deg,var(--pal6-fill),#d97a12) !important; }
-.qOptionBtn.optD,.roomAnswerButtons .optD{ background:linear-gradient(150deg,var(--pal5-fill),#0c9a5c) !important; }
+.answerOption.correct{ background:rgba(31,168,126,.22) !important; border-color:var(--green) !important; box-shadow:0 0 0 2px var(--green) inset !important; }
+.answerOption.wrong{ background:rgba(255,95,69,.20) !important; border-color:var(--red) !important; box-shadow:0 0 0 2px var(--red) inset !important; }
 
 /* Touch ekranlarda javob tugmalari kattaroq (barmoq bilan bosish qulay) */
 @media (pointer:coarse){
@@ -321,38 +345,43 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* ---------------------------------------------------------
-   TIMER
+   TIMER — konsept bo'yicha doira ichida raqam
 ========================================================= */
 
 #timer,.qTimerRing,.roomTimerRing,.duelPlayerScore #duelATimer,.duelPlayerScore #duelBTimer{
   border-radius:999px !important;
 }
 
+.questionTop #timer{
+  width:56px !important; height:56px !important; min-width:56px !important;
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  border:3px solid var(--red) !important;
+  background:transparent !important;
+  color:var(--text) !important;
+  font-family:"Sora","Manrope",sans-serif !important;
+}
+
 /* ---------------------------------------------------------
    G'OLIB / DUEL NATIJASI
 ========================================================= */
 
-.winnerCard{ border-radius:28px !important; }
-.winnerAvatar{ border-radius:20px !important; }
-.winnerRow{ border-radius:16px !important; }
+.winnerCard{ border-radius:var(--radius) !important; }
+.winnerAvatar{ border-radius:var(--radiusSmall) !important; }
+.winnerRow{ border-radius:var(--radiusSmall) !important; }
 
-.duelArena{ border-radius:26px !important; }
-.duelResultCard{ border-radius:18px !important; }
+.duelArena{ border-radius:var(--radius) !important; }
+.duelResultCard{ border-radius:var(--radius) !important; }
 .duelResultCard.isDuelWinner{ box-shadow:0 0 0 3px var(--gold) inset !important; }
 
 /* ---------------------------------------------------------
    ADMIN PANEL
 ========================================================= */
 
-.userAvatar{ border-radius:14px !important; }
-.adminStatChip{ border-radius:16px !important; }
-.adminStatChip:nth-child(6n+1){ background:var(--pal1-bg) !important; }
-.adminStatChip:nth-child(6n+2){ background:var(--pal2-bg) !important; }
-.adminStatChip:nth-child(6n+3){ background:var(--pal3-bg) !important; }
-.adminStatChip:nth-child(6n+4){ background:var(--pal5-bg) !important; }
+.userAvatar{ border-radius:8px !important; }
+.adminStatChip{ border-radius:8px !important; background:var(--panel) !important; border:1px solid var(--line) !important; }
 
 .toggleTrack{ border-radius:999px !important; border:none !important; background:var(--line2) !important; }
-.toggleSwitch input:checked + .toggleTrack{ background:linear-gradient(135deg,var(--blue),var(--purple)) !important; }
+.toggleSwitch input:checked + .toggleTrack{ background:var(--blue) !important; }
 .toggleThumb{ box-shadow:var(--shadowSmall) !important; }
 
 .messageDeleteBtn{ border-radius:12px !important; }
@@ -587,3 +616,45 @@ input:focus,select:focus,textarea:focus{
   .panelHeadActions{ flex-wrap:wrap !important; }
   .panelHeadActions .bigBtn{ flex:1 1 auto !important; }
 }
+/* ==========================================================
+   KONSEPT: SAVOL VA DUEL EKRANLARI
+   (concept-game-question.html / concept-game-duel.html bilan
+   bir xil rang tizimi — ink/paper o'zgaruvchilar orqali,
+   shuning uchun kun/tun rejimida AVTOMATIK moslashadi.)
+========================================================== */
+
+[data-theme="dark"] .modal-box{
+  background:var(--panel) !important;
+  box-shadow:0 30px 90px rgba(0,0,0,.5) !important;
+}
+
+.questionModalBrand,.duelBrand{ color:var(--text) !important; font-family:"Sora","Manrope",sans-serif !important; }
+.questionModalBrand img,.duelBrand img{ border-radius:6px !important; }
+
+.questionTop .eyebrow{ color:var(--purple) !important; }
+.questionProgress{ color:var(--muted) !important; }
+
+#qText{ color:var(--text) !important; font-family:"Sora","Manrope",sans-serif !important; }
+#aText{ color:var(--green) !important; }
+
+.questionSidebarTitle,.duelRoundLabel{ color:var(--purple) !important; }
+
+.participantsSideBox{ background:var(--panel2) !important; border:1px solid var(--line) !important; }
+
+.participant{ background:var(--panel2) !important; border:1px solid var(--line) !important; }
+.participant .name{ color:var(--text) !important; }
+.rank{ background:none !important; color:var(--muted) !important; font-family:"Sora","Manrope",sans-serif !important; box-shadow:none !important; }
+
+.duelSide{ background:var(--panel) !important; }
+.duelSideB{ border-right:1px solid var(--line) !important; }
+.duelSideA{ border-left:1px solid var(--line) !important; }
+.duelCenter{ background:var(--bg) !important; border-left:1px solid var(--line) !important; border-right:1px solid var(--line) !important; }
+.duelPlayerBadge span{ color:var(--text) !important; font-family:"Sora","Manrope",sans-serif !important; }
+.duelPlayerScore{ color:var(--muted) !important; }
+.duelQText{ color:var(--text) !important; font-family:"Sora","Manrope",sans-serif !important; }
+.duelVs{ color:var(--muted) !important; font-family:"Sora","Manrope",sans-serif !important; }
+.duelProgressFillA,.duelProgressFillB{ background:var(--red) !important; box-shadow:none !important; }
+.duelProgressMid{ background:var(--line2) !important; }
+.duelArena{ background:var(--bg) !important; border:1px solid var(--line) !important; }
+
+[data-theme="dark"] .duelArena{ background:var(--bg) !important; }

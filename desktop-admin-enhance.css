@@ -1,0 +1,77 @@
+/* ==========================================================
+   BEKS GAME — DESKTOP ENHANCEMENT LAYER (ADMIN PANEL)
+   Xuddi desktop-game-enhance.css bilan bir xil qoida:
+   faqat katta ekran + sichqoncha, id/class/JS tegilmaydi,
+   mobil o'zgarmaydi.
+========================================================== */
+
+@media (hover:hover) and (pointer:fine) and (min-width:1180px){
+
+  body{ background:#f6f4ee; }
+  [data-theme="dark"] body{ background:#161320; }
+
+  .appHeader{ width:min(1480px,calc(100% - 64px)); }
+  .pageWrap{ width:min(1480px,calc(100% - 64px)); }
+
+  /* ---------- Top row becomes a hero-style banner ---------- */
+  .adminTopRow{
+    padding:28px 34px;
+    margin-bottom:22px;
+    border-radius:22px;
+    border:1px solid var(--line2);
+    background:
+      radial-gradient(circle at 85% 20%, rgba(140,92,255,.16), transparent 55%),
+      linear-gradient(135deg, rgba(58,160,255,.10), rgba(140,92,255,.08));
+    box-shadow:var(--shadow);
+  }
+  [data-theme="dark"] .adminTopRow{
+    background:
+      radial-gradient(circle at 85% 20%, rgba(140,92,255,.22), transparent 55%),
+      linear-gradient(135deg, rgba(58,160,255,.14), rgba(140,92,255,.12));
+  }
+  .adminTopRow .eyebrow{ color:#7a4dff; }
+  [data-theme="dark"] .adminTopRow .eyebrow{ color:#b9a2ff; }
+  .adminTopRow h2{ font-size:26px !important; }
+
+  /* ---------- Stat chips → stat cards ---------- */
+  .adminStatsRow{ gap:14px; margin-bottom:26px; }
+  .adminStatChip{
+    flex:1 1 180px;
+    padding:16px 18px;
+    border-radius:16px;
+    background:var(--panel);
+    box-shadow:var(--shadowSmall);
+  }
+  .adminStatChip strong{ display:block; font-size:24px; margin:4px 0 2px; }
+
+  /* ---------- Settings / messages cards ---------- */
+  .adminSettingsCard{ padding:26px 28px; border-radius:22px; }
+  .adminSettingsGrid{ gap:16px 22px; }
+
+  /* ---------- Two-column layout: settings on the left,
+     messages + users list flowing on the right, so the
+     page reads like a dashboard instead of a long stack ---------- */
+  #adminLimitsCard,
+  #adminGameDefaultsCard,
+  #adminCategoriesCard{
+    max-width:none;
+  }
+
+  /* ---------- Message rows ---------- */
+  .messageRow{
+    grid-template-columns:180px 1fr;
+    padding:14px 16px;
+    border-radius:14px;
+  }
+
+  /* ---------- Users list → cleaner rows ---------- */
+  .userRow{
+    padding:16px 18px;
+    border-radius:16px;
+  }
+  .userTop{ gap:16px; }
+  .userAvatar{ width:46px; height:46px; border-radius:13px; }
+
+  /* ---------- Denied screen ---------- */
+  .deniedCard{ border-radius:22px; }
+}

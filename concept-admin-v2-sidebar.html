@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Beks Game — Admin konsepti v2 (menyu bilan)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1220; --paper:#f6f4ee; --panel:#ffffff;
+    --line:rgba(12,18,32,.10); --line2:rgba(12,18,32,.16);
+    --muted:#6b7180; --blue:#3a78ff; --coral:#ff5f45; --green:#2dbe96; --gold:#cdaa28;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Manrope',sans-serif;background:var(--paper);color:var(--ink);min-width:1240px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Sora',sans-serif;font-weight:800;font-size:15.5px}
+  .logo span{width:19px;height:19px;border-radius:5px;background:linear-gradient(135deg,var(--blue),#7b4dff)}
+  .hdrActions{display:flex;gap:10px}
+  .hdrActions button{padding:9px 16px;border-radius:5px;border:1px solid var(--line2);background:#fff;font-weight:800;font-size:12.5px;cursor:pointer;font-family:'Manrope',sans-serif}
+  .hdrActions .danger{border-color:rgba(255,95,69,.4);color:#c73a25}
+
+  .body{flex:1;display:grid;grid-template-columns:250px 1fr;overflow:hidden}
+
+  /* ---- SIDEBAR MENU ---- */
+  .sidebar{background:#fff;border-right:1px solid var(--line);padding:22px 14px;overflow-y:auto}
+  .navGroup{margin-bottom:20px}
+  .navLabel{font-size:10.5px;font-weight:900;letter-spacing:1px;color:var(--muted);padding:0 10px;margin-bottom:8px}
+  .navItem{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 12px;border-radius:7px;cursor:pointer;
+    font-size:13.5px;font-weight:700;color:var(--ink);
+    margin-bottom:3px;border:1px solid transparent;
+  }
+  .navItem .ic{width:8px;height:8px;border-radius:2px;background:var(--line2);flex:0 0 auto}
+  .navItem:hover{background:rgba(12,18,32,.04)}
+  .navItem.active{background:#fff;border-color:var(--line2);box-shadow:0 4px 12px rgba(12,18,32,.06)}
+  .navItem.active .ic{background:var(--coral)}
+  .navBadge{
+    margin-left:auto;background:var(--coral);color:#fff;font-size:9.5px;font-weight:900;
+    padding:2px 6px;border-radius:5px;
+  }
+
+  /* ---- CONTENT ---- */
+  .content{padding:32px 44px;overflow-y:auto}
+  .paneTitle{margin-bottom:22px}
+  .eyebrow{font-size:11px;font-weight:900;letter-spacing:1px;color:var(--coral)}
+  .paneTitle h2{font-family:'Sora',sans-serif;font-size:21px;font-weight:800;margin-top:4px}
+
+  .pane{display:none;max-width:760px}
+  .pane.show{display:block}
+
+  .statsRow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:8px}
+  .statCard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px}
+  .statCard b{display:block;font-family:'Sora',sans-serif;font-size:22px;font-weight:800}
+  .statCard span{font-size:11px;font-weight:800;color:var(--muted)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;margin-bottom:16px}
+  .fieldGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field span{font-size:11px;font-weight:800;color:var(--muted)}
+  .field input,.field textarea{padding:10px 12px;border-radius:6px;border:1px solid var(--line2);font-size:13.5px;font-family:inherit}
+  .saveBtn{margin-top:16px;padding:10px 20px;border-radius:6px;border:none;background:var(--ink);color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:'Manrope',sans-serif}
+
+  .searchBox{padding:9px 14px;border-radius:6px;border:1px solid var(--line2);font-size:13px;width:260px;font-family:inherit;margin-bottom:16px}
+  .userRow{display:flex;align-items:center;gap:14px;padding:13px 15px;border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-bottom:8px}
+  .uAvatar{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#20d9ff,#4f8cff 60%,#8c5cff);display:flex;align-items:center;justify-content:center;font-weight:900;font-family:'Sora',sans-serif;color:#04121f;font-size:13px}
+  .uInfo{flex:1;min-width:0}
+  .uName{font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .uMeta{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+  .badge{font-size:9px;font-weight:900;padding:3px 8px;border-radius:5px;background:#ffe3a8;color:#6b4a00}
+  .toggleBtn{padding:8px 14px;border-radius:6px;border:1px solid var(--line2);background:#fff;font-weight:800;font-size:11.5px;cursor:pointer;font-family:'Manrope',sans-serif}
+
+  .msgRow{padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--panel)}
+  .msgRow.pending{border-color:rgba(205,170,40,.4)}
+  .msgFrom{font-size:12px;font-weight:800}
+  .msgDate{font-size:10.5px;color:var(--muted);font-weight:700;margin-top:2px}
+  .msgText{font-size:12.5px;line-height:1.5;margin-top:6px}
+  .msgStatus{font-size:10.5px;font-weight:800;color:#a8790a;margin-top:6px}
+
+  .toggleRow{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .toggleRow:last-child{border-bottom:none}
+  .toggleRow span{font-size:13px;font-weight:700}
+  .sw{width:38px;height:21px;border-radius:11px;background:var(--line2);position:relative;cursor:pointer}
+  .sw.on{background:var(--blue)}
+  .sw i{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.15s}
+  .sw.on i{left:19px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span></span>BEKS GAME — Boshqaruv paneli</div>
+  <div class="hdrActions">
+    <button>← O'yinga qaytish</button>
+    <button class="danger">↪ Chiqish</button>
+  </div>
+</header>
+
+<div class="body">
+  <div class="sidebar">
+    <div class="navGroup">
+      <div class="navLabel">UMUMIY</div>
+      <div class="navItem active" data-pane="dashboard"><span class="ic"></span>Bosh ko'rinish</div>
+    </div>
+    <div class="navGroup">
+      <div class="navLabel">SOZLAMALAR</div>
+      <div class="navItem" data-pane="limits"><span class="ic"></span>Limitlar</div>
+      <div class="navItem" data-pane="defaults"><span class="ic"></span>O'yin standartlari</div>
+      <div class="navItem" data-pane="subjects"><span class="ic"></span>Fanlar / kategoriyalash</div>
+    </div>
+    <div class="navGroup">
+      <div class="navLabel">BOSHQARUV</div>
+      <div class="navItem" data-pane="messages"><span class="ic"></span>Murojaatlar<span class="navBadge">4</span></div>
+      <div class="navItem" data-pane="users"><span class="ic"></span>Foydalanuvchilar</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="pane show" id="pane-dashboard">
+      <div class="paneTitle"><span class="eyebrow">UMUMIY</span><h2>Bosh ko'rinish</h2></div>
+      <div class="statsRow">
+        <div class="statCard"><b>3,800+</b><span>FOYDALANUVCHI</span></div>
+        <div class="statCard"><b>12,400+</b><span>O'TKAZILGAN O'YIN</span></div>
+        <div class="statCard"><b>6</b><span>FAOL XONA</span></div>
+        <div class="statCard"><b>4</b><span>YECHILMAGAN MUROJAAT</span></div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-limits">
+      <div class="paneTitle"><span class="eyebrow">LIMITLAR</span><h2>Bepul foydalanish limitlari</h2></div>
+      <div class="card">
+        <div class="fieldGrid">
+          <div class="field"><span>Bepul mavzu/savol limiti</span><input value="10"></div>
+          <div class="field"><span>Bepul ishtirokchi limiti</span><input value="10"></div>
+        </div>
+        <button class="saveBtn">💾 Sozlamalarni saqlash</button>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-defaults">
+      <div class="paneTitle"><span class="eyebrow">STANDART</span><h2>O'yin standartlari (global)</h2></div>
+      <div class="card">
+        <div class="fieldGrid">
+          <div class="field"><span>Standart ball</span><input value="100"></div>
+          <div class="field"><span>Savol vaqti (soniya)</span><input value="10"></div>
+          <div class="field"><span>Bonus savollar soni</span><input value="3"></div>
+          <div class="field"><span>Bonus ko'paytiruvchisi</span><input value="2x / 3x aralash"></div>
+        </div>
+        <div class="toggleRow"><span>🔥 Bonus rejimi standart bo'yicha yoqilgan</span><div class="sw on"><i></i></div></div>
+        <div class="toggleRow"><span>3 ta ketma-ket to'g'ri javob → keyingi savol 2X</span><div class="sw"><i></i></div></div>
+        <button class="saveBtn">💾 Standartlarni saqlash</button>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-subjects">
+      <div class="paneTitle"><span class="eyebrow">FANLAR</span><h2>Fanlar va kategoriyalash</h2></div>
+      <div class="card">
+        <div class="toggleRow"><span>Foydalanuvchilar uchun fan/kategoriyalash yoqilgan</span><div class="sw on"><i></i></div></div>
+        <div class="toggleRow"><span>Foydalanuvchilar o'z kategoriyasini qo'sha olsin</span><div class="sw"><i></i></div></div>
+        <div class="field" style="margin-top:16px"><span>Fanlar / yo'nalishlar</span><textarea rows="2">Ingliz tili, Koreys tili, Matematika</textarea></div>
+        <button class="saveBtn">💾 Saqlash</button>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-messages">
+      <div class="paneTitle"><span class="eyebrow">MUROJAATLAR</span><h2>Foydalanuvchilar murojaatlari</h2></div>
+      <div class="msgRow pending">
+        <div class="msgFrom">aziz.k@gmail.com <span style="color:var(--muted);font-weight:600">· 14-sen, 09:20</span></div>
+        <div class="msgText">Ball hisoblanishi kechikib qolmoqda, tekshirib bera olasizmi?</div>
+        <div class="msgStatus">⏳ Javob kutilmoqda</div>
+      </div>
+      <div class="msgRow">
+        <div class="msgFrom">malika.n@gmail.com <span style="color:var(--muted);font-weight:600">· 13-sen, 18:04</span></div>
+        <div class="msgText">Rahmat, muammo hal bo'ldi ✅</div>
+      </div>
+    </div>
+
+    <div class="pane" id="pane-users">
+      <div class="paneTitle"><span class="eyebrow">ADMIN</span><h2>Foydalanuvchilar</h2></div>
+      <input class="searchBox" placeholder="Ism, email yoki UID bo'yicha qidirish...">
+      <div class="userRow">
+        <div class="uAvatar">A</div>
+        <div class="uInfo"><div class="uName">Aziz Karimov <span class="badge">ADMIN</span></div><div class="uMeta">aziz.k@gmail.com · UID: 8f2a91</div></div>
+        <button class="toggleBtn">Admin huquqini olib tashlash</button>
+      </div>
+      <div class="userRow">
+        <div class="uAvatar">M</div>
+        <div class="uInfo"><div class="uName">Malika Nosirova</div><div class="uMeta">malika.n@gmail.com · UID: 3c8d12</div></div>
+        <button class="toggleBtn">Admin qilish</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.navItem').forEach(function(item){
+    item.addEventListener('click', function(){
+      document.querySelectorAll('.navItem').forEach(function(i){ i.classList.remove('active'); });
+      document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('show'); });
+      item.classList.add('active');
+      document.getElementById('pane-' + item.getAttribute('data-pane')).classList.add('show');
+    });
+  });
+  document.querySelectorAll('.sw').forEach(function(sw){
+    sw.addEventListener('click', function(){ sw.classList.toggle('on'); });
+  });
+</script>
+
+</body>
+</html>

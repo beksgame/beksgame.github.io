@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beks Game — Desktop preview (Game)</title>
+<link rel="stylesheet" href="game.css?v=3">
+<link rel="stylesheet" href="beks-theme.css?v=1">
+<link rel="stylesheet" href="desktop-shape.css?v=1">
+<link rel="stylesheet" href="desktop-game-enhance.css?v=1">
+</head>
+<body>
+
+  <header class="appHeader">
+    <div class="brand">
+      <div class="brandMark"><img src="logo.svg" alt="Beks Game"></div>
+      <div class="brandText">
+        <div class="brand-main">Beks Game</div>
+        <div class="brand-sub">Top <span class="brand-f">F</span>ast Education</div>
+      </div>
+    </div>
+    <div class="headerActions">
+      <button class="topBtn">🛠 Boshqaruv paneli</button>
+      <button class="topBtn">💬 Murojaat</button>
+      <button class="topBtn">👤 Profil</button>
+      <button class="topBtn dangerBtn">↪ Chiqish</button>
+    </div>
+  </header>
+
+  <!-- YANGI: faqat desktopda ko'rinadigan hero banner -->
+  <div id="gameHeroBanner">
+    <div>
+      <div class="gameHeroKicker">Live Quiz Arena</div>
+      <h1>Bilimingizni sinang.</h1>
+      <p>Jamoani tanlang, savolni oching va eng yuqori natijani qo‘lga kiriting.</p>
+    </div>
+    <div class="gameHeroStatusPill"><span class="dot"></span> O‘yin maydoni</div>
+  </div>
+
+  <!-- eski, hamma ekranda ishlaydigan status chizig'i (desktopda hero
+       ichiga ko'chgani uchun shu yerda avtomatik yashiriladi) -->
+  <div class="heroStatus"><div class="statusDot"></div><span>O‘yin maydoni</span></div>
+
+  <section class="gameStage">
+    <section class="gameBoardCard">
+      <div class="sectionHead">
+        <div>
+          <span class="eyebrow">QUESTION BOARD</span>
+          <h2>Savollar maydoni</h2>
+        </div>
+        <div class="boardSearch">
+          <input type="text" placeholder="🔍 Mavzu nomi bo‘yicha qidirish...">
+        </div>
+      </div>
+
+      <div class="topicBoardLayout">
+        <div class="topicSidebarCol">
+          <div class="topicCategoryList">
+            <div class="categoryChip catAllChip active"><span>Barchasi</span><small>61</small></div>
+            <div class="categoryChip catPurple"><span>Ingliz tili</span><small>2</small></div>
+            <div class="categoryChip catTeal"><span>Koreys tili</span><small>55</small></div>
+            <div class="categoryChip catCoral"><span>Matematika</span><small>1</small></div>
+            <div class="categoryChip catPink"><span>Umumiy</span><small>3</small></div>
+          </div>
+        </div>
+
+        <div class="topicBoard">
+          <div class="topicBoardCard selected">
+            <div class="topicBoardIcon">📚</div>
+            <div class="topicBoardInfo">
+              <strong>1-5-3</strong>
+              <span>42 ta savol · Koreys tili / Vitamin 1</span>
+              <small>✓ TANLANGAN</small>
+            </div>
+            <div class="topicBoardCardActions">
+              <button class="cardIconBtn editBtn">✏️</button>
+              <button class="cardIconBtn deleteBtn">🗑️</button>
+            </div>
+          </div>
+
+          <div class="topicBoardCard">
+            <div class="topicBoardIcon">📚</div>
+            <div class="topicBoardInfo"><strong>1000</strong><span>2 ta savol · Umumiy / Umumiy</span></div>
+            <div class="topicBoardCardActions">
+              <button class="cardIconBtn editBtn">✏️</button>
+              <button class="cardIconBtn deleteBtn">🗑️</button>
+            </div>
+          </div>
+
+          <div class="topicBoardCard">
+            <div class="topicBoardIcon">📚</div>
+            <div class="topicBoardInfo"><strong>Antonimlar 8</strong><span>30 ta savol · Koreys tili / Antonimlar</span></div>
+            <div class="topicBoardCardActions">
+              <button class="cardIconBtn editBtn">✏️</button>
+              <button class="cardIconBtn deleteBtn">🗑️</button>
+            </div>
+          </div>
+
+          <div class="topicBoardCard">
+            <div class="topicBoardIcon">📚</div>
+            <div class="topicBoardInfo"><strong>eventlug`at</strong><span>30 ta savol · Umumiy / Umumiy</span></div>
+            <div class="topicBoardCardActions">
+              <button class="cardIconBtn editBtn">✏️</button>
+              <button class="cardIconBtn deleteBtn">🗑️</button>
+            </div>
+          </div>
+
+          <div class="topicBoardCard">
+            <div class="topicBoardIcon">📚</div>
+            <div class="topicBoardInfo"><strong>Ingliz tili test</strong><span>30 ta savol · Ingliz tili / grammar</span></div>
+            <div class="topicBoardCardActions">
+              <button class="cardIconBtn editBtn">✏️</button>
+              <button class="cardIconBtn deleteBtn">🗑️</button>
+            </div>
+          </div>
+
+          <div class="topicBoardCard">
+            <div class="topicBoardIcon">📚</div>
+            <div class="topicBoardInfo"><strong>Matematika</strong><span>30 ta savol · Matematika / misollar</span></div>
+            <div class="topicBoardCardActions">
+              <button class="cardIconBtn editBtn">✏️</button>
+              <button class="cardIconBtn deleteBtn">🗑️</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="liveParticipantsPanel panel">
+      <div class="panelHead">
+        <div><span class="eyebrow">LIVE LEADERBOARD</span></div>
+      </div>
+      <div class="panelHeadActions" style="margin-top:12px;display:flex;gap:8px;">
+        <button class="bigBtn primaryBtn wideBtn">🧑 Ishtirokchi qo‘shish</button>
+        <button class="smallBtn resetAllStatsBtn">🔄</button>
+      </div>
+
+      <div class="participantsBox">
+        <div class="participant">
+          <div class="participantRank">1</div>
+          <div class="participantAvatarWrap"><img class="participantAvatar" src="https://i.pravatar.cc/80?img=12" alt=""></div>
+          <div class="participantInfo">
+            <div class="participantName">Aziz</div>
+            <div class="participantStats">🎮 6 · 🏆 5 · 83%</div>
+          </div>
+        </div>
+        <div class="participant">
+          <div class="participantRank">2</div>
+          <div class="participantAvatarWrap"><img class="participantAvatar" src="https://i.pravatar.cc/80?img=33" alt=""></div>
+          <div class="participantInfo">
+            <div class="participantName">Adiz</div>
+            <div class="participantStats">🎮 7 · 🏆 2 · 29%</div>
+          </div>
+        </div>
+        <div class="participant">
+          <div class="participantRank">3</div>
+          <div class="participantAvatarWrap"><img class="participantAvatar" src="https://i.pravatar.cc/80?img=47" alt=""></div>
+          <div class="participantInfo">
+            <div class="participantName">Rayxona</div>
+            <div class="participantStats">🎮 4 · 🏆 2 · 50%</div>
+          </div>
+        </div>
+        <div class="participant">
+          <div class="participantRank">4</div>
+          <div class="participantAvatarWrap"><img class="participantAvatar" src="https://i.pravatar.cc/80?img=5" alt=""></div>
+          <div class="participantInfo">
+            <div class="participantName">Dilnoza</div>
+            <div class="participantStats">🎮 5 · 🏆 1 · 20%</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="teamsSection">
+    <div class="sectionHead">
+      <div><span class="eyebrow">LIVE SCOREBOARD</span><h2>O‘yindagi jamoalar</h2></div>
+      <span class="sectionBadge">LIVE</span>
+    </div>
+    <div class="teams">
+      <div class="panel" style="padding:16px;"><strong>Jamoa A</strong><div style="margin-top:6px;color:var(--muted);font-size:12.5px;">320 ball</div></div>
+      <div class="panel" style="padding:16px;"><strong>Jamoa B</strong><div style="margin-top:6px;color:var(--muted);font-size:12.5px;">210 ball</div></div>
+      <div class="panel" style="padding:16px;"><strong>Jamoa C</strong><div style="margin-top:6px;color:var(--muted);font-size:12.5px;">150 ball</div></div>
+    </div>
+  </section>
+
+</body>
+</html>

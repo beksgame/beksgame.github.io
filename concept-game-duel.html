@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>Beks Game — O'yin konsepti: Duel ekrani</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1220; --panel:#131b30;
+    --line:rgba(255,255,255,.08); --text:#eef1f7; --muted:#8b93a8;
+    --blue:#3a78ff; --coral:#ff5f45; --green:#2dbe96; --purple:#d250be; --gold:#cdaa28;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Manrope',sans-serif;background:var(--ink);color:var(--text);min-width:1240px;height:100vh;display:flex;align-items:center;justify-content:center}
+
+  .arena{display:grid;grid-template-columns:1fr 220px 1fr;width:min(1400px,94vw);gap:0}
+  .side{padding:36px 44px;position:relative}
+  .side.left{border-right:1px solid var(--line)}
+  .side.right{border-left:1px solid var(--line)}
+
+  .pTop{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+  .pAvatar{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#20d9ff,#4f8cff 60%,#8c5cff);display:flex;align-items:center;justify-content:center;font-weight:900;font-family:'Sora',sans-serif;color:#04121f;font-size:17px}
+  .pName{font-family:'Sora',sans-serif;font-weight:800;font-size:16.5px}
+  .pStats{margin-left:auto;display:flex;gap:14px;font-size:13px;font-weight:800}
+  .pStats span{display:flex;align-items:center;gap:4px}
+  .ok{color:var(--green)} .bad{color:var(--coral)} .tm{color:var(--muted)}
+
+  .qText{font-family:'Sora',sans-serif;font-size:20px;font-weight:800;margin-bottom:18px;line-height:1.35;min-height:56px}
+  .qGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .qOpt{display:flex;align-items:center;gap:10px;padding:13px 14px;border-radius:8px;font-size:13.5px;font-weight:800;border:1px solid transparent}
+  .qLetter{width:22px;height:22px;border-radius:6px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:900;font-size:11px;color:#fff}
+  .qOpt--a{background:rgba(58,120,255,.14);border-color:rgba(58,120,255,.32)} .qOpt--a .qLetter{background:var(--blue)}
+  .qOpt--b{background:rgba(210,80,190,.14);border-color:rgba(210,80,190,.32)} .qOpt--b .qLetter{background:var(--purple)}
+  .qOpt--c{background:rgba(45,190,150,.14);border-color:rgba(45,190,150,.32)} .qOpt--c .qLetter{background:var(--green)}
+  .qOpt--d{background:rgba(205,170,40,.16);border-color:rgba(205,170,40,.34)} .qOpt--d .qLetter{background:var(--gold)}
+
+  .center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px}
+  .closeBtn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);font-size:14px;cursor:pointer}
+  .clogo{display:flex;align-items:center;gap:8px;font-family:'Sora',sans-serif;font-weight:800;font-size:13px}
+  .clogo span{width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,var(--blue),var(--purple))}
+  .roundTag{font-size:11.5px;font-weight:900;letter-spacing:1px;color:#a78bfa}
+  .vsProgress{width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.08);position:relative}
+  .vsProgress i{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:2px;background:var(--coral);transform:translate(-50%,-50%) rotate(45deg)}
+  .vsWord{font-family:'Sora',sans-serif;font-weight:800;font-size:13px;color:var(--muted);letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="arena">
+  <div class="side left">
+    <div class="pTop">
+      <div class="pAvatar">M</div>
+      <div class="pName">Mahliyo</div>
+      <div class="pStats"><span class="ok">✅ 3</span><span class="bad">✕ 1</span><span class="tm">⏱ 9</span></div>
+    </div>
+    <div class="qText">"Qaytmoq" fe'lining sinonimini toping</div>
+    <div class="qGrid">
+      <div class="qOpt qOpt--a"><span class="qLetter">A</span>Bosh</div>
+      <div class="qOpt qOpt--b"><span class="qLetter">B</span>Qaytib ketmoq</div>
+      <div class="qOpt qOpt--c"><span class="qLetter">C</span>Qancha</div>
+      <div class="qOpt qOpt--d"><span class="qLetter">D</span>Soat</div>
+    </div>
+  </div>
+
+  <div class="center">
+    <button class="closeBtn">✕</button>
+    <div class="clogo"><span></span>BEKS GAME</div>
+    <div class="roundTag">RAUND 7 / 21</div>
+    <div class="vsProgress"><i></i></div>
+    <div class="vsWord">VS</div>
+  </div>
+
+  <div class="side right">
+    <div class="pTop">
+      <div class="pAvatar">A</div>
+      <div class="pName">Aziz</div>
+      <div class="pStats"><span class="ok">✅ 2</span><span class="bad">✕ 2</span><span class="tm">⏱ 9</span></div>
+    </div>
+    <div class="qText">"Dori" so'zining inglizcha tarjimasi qaysi?</div>
+    <div class="qGrid">
+      <div class="qOpt qOpt--a"><span class="qLetter">A</span>Medicine</div>
+      <div class="qOpt qOpt--b"><span class="qLetter">B</span>Market</div>
+      <div class="qOpt qOpt--c"><span class="qLetter">C</span>Day</div>
+      <div class="qOpt qOpt--d"><span class="qLetter">D</span>Fly</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

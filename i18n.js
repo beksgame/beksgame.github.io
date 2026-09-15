@@ -28,6 +28,41 @@
   var DEFAULT_LANG = "uz";
   var SUPPORTED = ["uz", "en", "ru"];
 
+  /* Emoji bayroqlar (🇺🇿, 🇬🇧, 🇷🇺) ko'p Windows kompyuterlarida
+     rasm sifatida emas, oddiy harflar ("UZ" va h.k.) sifatida
+     chiqadi — chunki Windows shrift tizimida emoji bayroq
+     rasmlari yo'q. Shu sabab bu yerda har bir til uchun kichik,
+     har qanday qurilma/OS'da bir xil ko'rinadigan SVG bayroqcha
+     qo'shildi — hech qanday tashqi fayl yoki internetga bog'liq
+     emas, to'g'ridan-to'g'ri shu skript ichida.
+  */
+  var FLAG_SVG = {
+    uz:
+      '<svg width="18" height="13" viewBox="0 0 20 14" style="border-radius:2px;flex:0 0 auto;vertical-align:-2px">' +
+        '<rect width="20" height="14" fill="#fff"/>' +
+        '<rect width="20" height="4.2" fill="#0099B5"/>' +
+        '<rect y="4.2" width="20" height="0.7" fill="#CE1126"/>' +
+        '<rect y="9.1" width="20" height="0.7" fill="#CE1126"/>' +
+        '<rect y="9.8" width="20" height="4.2" fill="#1EB53A"/>' +
+        '<circle cx="3.3" cy="2.1" r="1.25" fill="#fff"/>' +
+        '<circle cx="3.85" cy="2.1" r="1" fill="#0099B5"/>' +
+      '</svg>',
+    en:
+      '<svg width="18" height="13" viewBox="0 0 20 14" style="border-radius:2px;flex:0 0 auto;vertical-align:-2px">' +
+        '<rect width="20" height="14" fill="#00247d"/>' +
+        '<path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2.6"/>' +
+        '<path d="M0,0 L20,14 M20,0 L0,14" stroke="#cf142b" stroke-width="1.1"/>' +
+        '<path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="4.4"/>' +
+        '<path d="M10,0 V14 M0,7 H20" stroke="#cf142b" stroke-width="2.6"/>' +
+      '</svg>',
+    ru:
+      '<svg width="18" height="13" viewBox="0 0 20 14" style="border-radius:2px;flex:0 0 auto;vertical-align:-2px">' +
+        '<rect width="20" height="14" fill="#fff"/>' +
+        '<rect y="4.67" width="20" height="4.67" fill="#0039A6"/>' +
+        '<rect y="9.33" width="20" height="4.67" fill="#D52B1E"/>' +
+      '</svg>'
+  };
+
   var LANG_META = {
     uz: { flag: "🇺🇿", short: "UZ", label: "O‘zbekcha" },
     en: { flag: "🇬🇧", short: "EN", label: "English" },
@@ -326,7 +361,7 @@
       opt.type = "button";
       opt.className = "beksLangOpt";
       opt.setAttribute("data-lang", code);
-      opt.textContent = LANG_META[code].flag + "  " + LANG_META[code].label;
+      opt.innerHTML = FLAG_SVG[code] + " <span>" + LANG_META[code].label + "</span>";
       opt.addEventListener("click", function () {
         setLang(code);
         switcherMenu.classList.remove("show");
@@ -348,7 +383,14 @@
     switcherRoot.appendChild(btn);
     switcherRoot.appendChild(switcherMenu);
 
-    (document.body || document.documentElement).appendChild(switcherRoot);
+    /* Agar sahifada desktop uchun tugmalar konteyneri (#authActionsBlock)
+       mavjud bo'lsa (hozircha faqat index.html'da), shu yerga joylashtiramiz —
+       shunda "Ro'yxatdan o'tish" tugmasi bilan bitta qatorda turadi.
+       Bo'lmasa (game.html, admin.html va h.k.), ILGARIGIDEK body'ga
+       qo'shiladi — hech narsa o'zgarmaydi. position:fixed bo'lgani uchun
+       ota-element farqi mobil ko'rinishga sira ta'sir qilmaydi. */
+    var preferredHost = document.getElementById("authActionsBlock");
+    (preferredHost || document.body || document.documentElement).appendChild(switcherRoot);
 
     updateSwitcherUI();
   }
@@ -357,7 +399,7 @@
     var btn = document.getElementById("beksLangBtn");
     if (btn) {
       var meta = LANG_META[currentLang];
-      btn.textContent = meta.flag + " " + meta.short + " ▾";
+      btn.innerHTML = FLAG_SVG[currentLang] + " <span>" + meta.short + "</span> ▾";
     }
     var opts = document.querySelectorAll(".beksLangOpt");
     for (var i = 0; i < opts.length; i++) {
@@ -376,7 +418,16 @@
   }
 
   function init() {
-    buildSwitcher();
+    /* Til/tungi rejim TUGMASI endi FAQAT index.html'da (ya'ni
+       #authActionsBlock mavjud bo'lgan sahifada) ko'rsatiladi.
+       game.html va admin.html'da bu tugma umuman chiqmaydi —
+       lekin tanlangan til/tema baribir to'g'ri qo'llanadi,
+       chunki applyTheme(...) yuqorida, shu funksiyadan
+       MUSTAQIL ravishda, sahifa yuklangan zahoti localStorage'
+       dan o'qib ishga tushadi. */
+    if (document.getElementById("authActionsBlock")) {
+      buildSwitcher();
+    }
     applyTranslations(document);
     updateThemeBtnUI();
   }

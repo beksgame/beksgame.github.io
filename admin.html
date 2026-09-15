@@ -3,14 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#08111f">
   <title>Beks Game — Boshqaruv paneli</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="game.css?v=3">
   <link rel="stylesheet" href="admin.css?v=3">
   <link rel="stylesheet" href="beks-theme.css?v=1">
-  <script src="i18n.js?v=3"></script>
+  <link rel="stylesheet" href="desktop-shape.css?v=1">
+  <link rel="stylesheet" href="admin-desktop-enhance.css?v=1">
+  <link rel="stylesheet" href="beks-fix.css?v=1">
+  <script src="i18n.js?v=4"></script>
 </head>
 <body>
 
@@ -50,6 +53,78 @@
          ADMIN PANEL
     ========================== -->
     <div id="adminPanel" class="hidden">
+
+      <!-- =========================
+           DESKTOP MENYU (chap tomon)
+           Faqat kompyuter ekranida (admin-desktop-enhance.css
+           ichida) ko'rinadi va ishlaydi. Mobilda oddiy holicha
+           (barcha kartalar ketma-ket, skroll bilan) qoladi —
+           bu div mobilda display:none bo'ladi.
+      ========================== -->
+      <div class="adminSidebarNav hidden" id="adminSidebarNav">
+        <div class="adminNavGroup">
+          <div class="adminNavLabel">UMUMIY</div>
+          <div class="adminNavItem active" data-target="adminDashboardCard">
+            <span class="adminNavIc"></span>Bosh ko'rinish
+          </div>
+        </div>
+        <div class="adminNavGroup">
+          <div class="adminNavLabel">SOZLAMALAR</div>
+          <div class="adminNavItem" data-target="adminLimitsCard">
+            <span class="adminNavIc"></span>Limitlar
+          </div>
+          <div class="adminNavItem" data-target="adminGameDefaultsCard">
+            <span class="adminNavIc"></span>O'yin standartlari
+          </div>
+          <div class="adminNavItem" data-target="adminAppearanceCard">
+            <span class="adminNavIc"></span>Ko'rinish (fon / matn)
+          </div>
+          <div class="adminNavItem" data-target="adminCategoriesCard">
+            <span class="adminNavIc"></span>Fanlar / kategoriyalash
+          </div>
+        </div>
+        <div class="adminNavGroup">
+          <div class="adminNavLabel">BOSHQARUV</div>
+          <div class="adminNavItem" data-target="adminMessagesCard">
+            <span class="adminNavIc"></span>Murojaatlar
+            <span class="adminNavBadge hidden" id="adminNavMsgBadge">0</span>
+          </div>
+          <div class="adminNavItem" data-target="adminUsersSection">
+            <span class="adminNavIc"></span>Foydalanuvchilar
+          </div>
+        </div>
+      </div>
+
+      <div class="adminPaneArea" id="adminPaneArea">
+
+      <!-- =========================
+           BOSH KO'RINISH (umumiy statistika)
+      ========================== -->
+      <div class="adminSettingsCard adminDashboardCard" id="adminDashboardCard">
+        <div class="adminSettingsHeader">
+          <span class="eyebrow">UMUMIY</span>
+          <h3>Bosh ko'rinish</h3>
+        </div>
+
+        <div class="adminDashStats" id="adminDashStats">
+          <div class="adminDashCard">
+            <b id="adminDashUsers">—</b>
+            <span>FOYDALANUVCHI</span>
+          </div>
+          <div class="adminDashCard">
+            <b id="adminDashGames">—</b>
+            <span>O'TKAZILGAN O'YIN</span>
+          </div>
+          <div class="adminDashCard">
+            <b id="adminDashRooms">—</b>
+            <span>FAOL XONA</span>
+          </div>
+          <div class="adminDashCard">
+            <b id="adminDashPending">—</b>
+            <span>YECHILMAGAN MUROJAAT</span>
+          </div>
+        </div>
+      </div>
 
       <!-- =========================
            LIMITLAR (bepul foydalanish chegaralari)
@@ -142,6 +217,58 @@
       </div>
 
       <!-- =========================
+           KO'RINISH: LIVE QUIZ ARENA FONI VA MATNLARI
+           game.html bosh sahifasining fon rasmi va sarlavha
+           matnlarini shu yerdan, kod yozmasdan o'zgartirish
+           mumkin. settings/app hujjatiga { arenaBackgroundUrl,
+           customTexts:{eyebrow,title,subtitle} } sifatida
+           yoziladi; game.js buni applySiteAppearance() orqali
+           o'qib qo'llaydi.
+      ========================== -->
+      <div class="adminSettingsCard" id="adminAppearanceCard">
+        <div class="adminSettingsHeader">
+          <span class="eyebrow">KO'RINISH</span>
+          <h3>🖼 Live Quiz Arena — fon va matnlar</h3>
+        </div>
+
+        <div class="adminSettingsGrid">
+          <label class="settingsField settingsFieldWide">
+            <span>Fon rasm manzili (URL) — bo'sh qoldirsangiz standart fon qoladi</span>
+            <input type="text" id="arenaBackgroundUrlInput" placeholder="https://.../rasm.jpg">
+          </label>
+        </div>
+
+        <div class="adminSettingsActions" style="margin-top:-4px;">
+          <button type="button" class="smallBtn" id="clearArenaBackgroundBtn">🗑 Fonni olib tashlash</button>
+        </div>
+
+        <div class="adminSettingsGrid" style="margin-top:14px;">
+          <label class="settingsField settingsFieldWide">
+            <span>Kichik sarlavha (eyebrow) — masalan "LIVE QUIZ ARENA"</span>
+            <input type="text" id="heroEyebrowInput" placeholder="LIVE QUIZ ARENA">
+          </label>
+
+          <label class="settingsField settingsFieldWide">
+            <span>Asosiy sarlavha (H1)</span>
+            <input type="text" id="heroTitleInput" placeholder="Bilimingizni sinang.">
+          </label>
+
+          <label class="settingsField settingsFieldWide">
+            <span>Tavsif matni</span>
+            <input type="text" id="heroSubtitleInput" placeholder="Jamoani tanlang, savolni oching va eng yuqori natijani qo‘lga kiriting.">
+          </label>
+        </div>
+
+        <p class="settingsHint" style="margin:10px 0 0;font-size:11.5px;color:var(--muted);">
+          Matn maydonlarini bo'sh qoldirsangiz, o'sha joyda standart (o'zgartirilmagan) matn ko'rsatiladi.
+        </p>
+
+        <div class="adminSettingsActions">
+          <button type="button" class="bigBtn primaryBtn" id="saveAppearanceBtn">💾 Ko'rinishni saqlash</button>
+        </div>
+      </div>
+
+      <!-- =========================
            FANLAR (YO'NALISHLAR) VA KATEGORIYALASH
 
            Foydalanuvchi avval shu yerda belgilangan
@@ -206,6 +333,7 @@
         </div>
       </div>
 
+      <div id="adminUsersSection">
       <div class="adminTopRow">
         <div>
           <span class="eyebrow" data-i18n="admin.eyebrow">ADMIN</span>
@@ -221,12 +349,53 @@
       <div id="usersList" class="usersList">
         <div class="usersLoading">Yuklanmoqda...</div>
       </div>
+      </div><!-- /#adminUsersSection -->
+
+      </div><!-- /.adminPaneArea -->
 
     </div>
 
   </div>
 
   <div class="adminToast" id="adminToast"></div>
+
+  <!-- =========================
+       DESKTOP MENYU SKRIPTI
+       admin.js'dan MUSTAQIL, kichik skript — faqat yangi
+       .adminNavItem tugmalarini bosilganda tegishli
+       .adminSettingsCard (yoki #adminUsersSection) ni
+       ko'rsatib, qolganlarini yashiradi. admin.js'ning o'zi
+       bu kartalarning ko'rinishini boshqarmaydi (faqat
+       ichidagi ma'lumotni to'ldiradi), shuning uchun bu yerda
+       hech qanday ziddiyat yo'q.
+  ========================== -->
+  <script>
+    (function () {
+      var navItems = document.querySelectorAll(".adminNavItem");
+      if (!navItems.length) return;
+
+      function showPane(targetId) {
+        document.querySelectorAll(".adminSettingsCard, #adminUsersSection").forEach(function (el) {
+          el.classList.remove("adminPaneShow");
+        });
+        var target = document.getElementById(targetId);
+        if (target) target.classList.add("adminPaneShow");
+
+        navItems.forEach(function (it) {
+          it.classList.toggle("active", it.getAttribute("data-target") === targetId);
+        });
+      }
+
+      navItems.forEach(function (item) {
+        item.addEventListener("click", function () {
+          showPane(item.getAttribute("data-target"));
+        });
+      });
+
+      /* Boshlang'ich holat: birinchi band (Limitlar) ochiq */
+      showPane(navItems[0].getAttribute("data-target"));
+    })();
+  </script>
 
   <script type="module" src="admin.js"></script>
 
