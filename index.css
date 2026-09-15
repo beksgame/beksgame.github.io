@@ -93,6 +93,11 @@ body{
   transform:translateY(-2px);
 }
 
+.gameModeBtn.is-active{
+  box-shadow:0 12px 26px rgba(79,140,255,.28);
+  filter:brightness(1.04);
+}
+
 .gameModeGuide{
   margin:8px 2px 0;
   color:var(--muted);
