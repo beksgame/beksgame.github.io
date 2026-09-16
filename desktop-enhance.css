@@ -167,6 +167,7 @@
   .landingHeroCopy.room-mode .landingKicker{ color:#2a7dff; }
   .landingHeroCopy.duel-mode .landingKicker{ color:#d250be; }
   .landingHeroCopy.play-mode .landingKicker{ color:#1fa87e; }
+  .landingHeroCopy.quiz-mode .landingKicker{ color:#c8971f; }
   .landingHeadline{
     margin:0;
     font-size:46px;line-height:1.05;letter-spacing:-1px;
@@ -178,6 +179,7 @@
   }
   .landingHeroCopy.duel-mode .landingHeadlineAccent{ color:#d250be; }
   .landingHeroCopy.play-mode .landingHeadlineAccent{ color:#1fa87e; }
+  .landingHeroCopy.quiz-mode .landingHeadlineAccent{ color:#c8971f; }
   .landingSub{
     margin:16px 0 0;max-width:440px;
     font-size:18px;line-height:1.5;font-weight:800;

@@ -8,24 +8,52 @@
   <meta name="google-site-verification" content="9HWR05-wlStINyTsfoS5W8u0CfdDJ_ACr75yQri7FDw" />
 
   <title>Beks Game — O‘yin bilan tez o‘rganing</title>
-  <meta name="description" content="Beks Game — bilim va o‘quv mavzularini o‘yin shaklida mashq qiling. Jonli xona, Birga bir (Duel) va O‘yin boshlash rejimlarida do‘stlaringiz bilan yoki yakka tartibda bilimingizni sinang.">
+  <meta name="description" content="Beks Game — bilim va o‘quv mavzularini o‘yin orqali mashq qiling: masofadan real vaqtda bellashing, katta ekranda birga o‘ynang, ro‘yxatdan o‘tib o‘z savollaringizni kategoriyalar bilan yuklang.">
   <meta name="keywords" content="Beks Game, ta'lim o'yini, jonli viktorina, quiz, o'zbek tilida o'quv o'yini, savol-javob o'yini">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://beksgame.github.io/">
+
+  <!-- Google AI Overview / Rich Results uchun tuzilgan ma'lumot -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Game",
+    "name": "Beks Game",
+    "url": "https://beksgame.github.io/",
+    "image": "https://beksgame.github.io/logo.svg",
+    "inLanguage": "uz",
+    "description": "Beks Game — bilim va o'quv mavzularini o'yin orqali mashq qilish platformasi. To'rtta asosiy imkoniyat mavjud: 1) Jonli xona — do'stlaringiz bilan istalgan masofadan telefon orqali xona kodi bilan ulanib, real vaqtda bellashasiz; 2) Birga bir (Duel) — bitta katta ekranda (kompyuter yoki proyektor) ikki kishi navbat bilan bellashadi; 3) O'yin boshlash — yakka (solo) mashq qilasiz yoki bir nechta ishtirokchi qo'shib, ular orasida jamoaviy reyting shakllantirib musobaqalashasiz; 4) Ro'yxatdan o'tib tizimga kirgan foydalanuvchilar o'z quiz-viktorina savollarini Excel fayl orqali yuklab, ularni kategoriya va fanlar bo'yicha tartiblab saqlashi hamda keyingi o'yinlarda qayta ishlatishi mumkin.",
+    "genre": "Ta'lim / Viktorina",
+    "playMode": ["SinglePlayer", "MultiPlayer", "CoOp"],
+    "applicationCategory": "Game",
+    "operatingSystem": "Web browser",
+    "featureList": [
+      "Masofadan turib real vaqtda jonli xonada bellashish",
+      "Bitta katta ekranda (Duel) birga o'ynash",
+      "Yakka yoki jamoaviy reyting bilan musobaqalashish",
+      "Ro'yxatdan o'tgan foydalanuvchilar uchun o'z savollarini kategoriyalar bilan yuklash va saqlash"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "UZS"
+    }
+  }
+  </script>
 
   <!-- Open Graph (Facebook, Telegram, va h.k. uchun ulashish ko'rinishi) -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Beks Game">
   <meta property="og:title" content="Beks Game — O‘yin bilan tez o‘rganing">
-  <meta property="og:description" content="Bilim va o‘quv mavzularini o‘yin shaklida mashq qiling — Jonli xona, Birga bir va O‘yin boshlash rejimlari bilan.">
+  <meta property="og:description" content="Do‘stlaringiz bilan istalgan masofadan turib jonli bellashing, bitta katta ekranda birga o‘ynang, yoki ro‘yxatdan o‘tib o‘z savol-viktorinalaringizni kategoriyalar bilan yuklang va saqlang.">
   <meta property="og:url" content="https://beksgame.github.io/">
-  <meta property="og:image" content="https://beksgame.github.io/logo.svg">
+  <meta property="og:image" content="https://beksgame.github.io/logo.svg?v=2026-09-16">
   <meta property="og:locale" content="uz_UZ">
 
   <!-- Twitter/X card -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Beks Game — O‘yin bilan tez o‘rganing">
-  <meta name="twitter:description" content="Bilim va o‘quv mavzularini o‘yin shaklida mashq qiling.">
+  <meta name="twitter:description" content="Masofadan real vaqtda bellashing, katta ekranda birga o‘ynang, yoki ro‘yxatdan o‘tib o‘z savollaringizni kategoriyalar bilan yuklab saqlang.">
   <meta name="twitter:image" content="https://beksgame.github.io/logo.svg?v=2026-09-15">
 
   <link rel="icon" type="image/svg+xml" href="logo.svg?v=2026-09-15">
@@ -421,6 +449,12 @@
           title: 'Zerikmay <span class="landingHeadlineAccent">o‘rganasiz</span>',
           sub: 'Yakka mashq yoki guruhli o‘yin orqali reyting qurib, vaqtni qiziqarli o‘tkazasiz.',
           className: 'play-mode'
+        },
+        {
+          kicker: 'Ro‘yxatdan o‘tish',
+          title: 'O‘z savollaringizni <span class="landingHeadlineAccent">tuzing</span>',
+          sub: 'Ro‘yxatdan o‘tib tizimga kirsangiz, o‘z quiz-savollaringizni Excel orqali yuklab, kategoriya va fanlar bo‘yicha saqlaysiz.',
+          className: 'quiz-mode'
         }
       ];
 
@@ -440,7 +474,7 @@
         if (heroText) heroText.textContent = mode.sub;
         if (heroHeadline) heroHeadline.innerHTML = mode.title;
         if (heroCopy) {
-          heroCopy.classList.remove('room-mode', 'duel-mode', 'play-mode');
+          heroCopy.classList.remove('room-mode', 'duel-mode', 'play-mode', 'quiz-mode');
           heroCopy.classList.add(mode.className);
         }
 
@@ -460,7 +494,7 @@
         });
 
         window.setInterval(() => {
-          setMode((currentIndex + 1) % buttons.length);
+          setMode((currentIndex + 1) % modeMeta.length);
         }, 6000);
       }
     })();
