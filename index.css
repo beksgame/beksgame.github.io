@@ -39,10 +39,24 @@ body{
 
 /* .authWrap olib tashlandi — endi header (.appHeader) ishlatiladi */
 
+/* ---------- DESKTOP LANDING WRAPPER (mobil/asosiy holat) ----------
+   body { display:flex; align-items:center; } bo'lgani uchun, agar bu
+   konteynerga aniq width berilmasa, u "shrink-to-fit" tarzida
+   o'lchanadi va ichidagi width:min(420px,100%) kabi elementlar
+   markazdan chetga siljib qolishi mumkin. Shuning uchun bu yerda
+   ANIQ width:100% beriladi — desktop-enhance.css buni faqat katta
+   ekranda (min-width:1180px) grid bilan qayta belgilaydi. */
+.landingDesktop{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+
 /* ---------- O'YINLAR BLOKI (Jonli xona / Duel / Play) ---------- */
 
 .gamesWrap{
   width:min(420px,100%);
+  margin:0 auto;
 }
 
 .gamesCard{
@@ -190,6 +204,7 @@ body{
 
 .authActionsWrap{
   width:min(420px,100%);
+  margin:0 auto;
 }
 
 .authActionsCard{
