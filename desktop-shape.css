@@ -16,12 +16,12 @@
    o'chirilmaydi, shuning uchun game.js/admin.js/i18n.js
    ishlashiga SIRA ta'sir qilmaydi.
 
-   Shart: (hover:hover) and (pointer:fine) and (min-width:1180px)
+   Shart: faqat (min-width:1180px) — touch/sichqonchaga bog'liq emas
    — faqat kompyuter/katta ekranda. Mobil/planshet mutlaqo
    o'zgarishsiz qoladi.
 ========================================================== */
 
-@media (hover:hover) and (pointer:fine) and (min-width:1180px){
+@media (min-width:1180px){
 
   /* ---- 1) Umumiy dizayn o'zgaruvchilari ----
      Bu ikkita qatorning o'zi ko'plab panel/karta/taxta

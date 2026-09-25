@@ -10,12 +10,14 @@
    Dizayn manbasi: concept-admin-v2-sidebar.html,
    concept-game-question.html, concept-game-duel.html.
 
-   IKKITA REJIM:
-   - "pointer:fine" (kompyuter, sichqoncha)  -> ixcham, list
-     ko'rinish, kartalar kichikroq, rasm/ikon shart emas.
-   - "pointer:coarse" (telefon, planshet,
-      katta touch ekranlar)                 -> yorqin, katta
-     tugmalar (rang uslubi bir xil qoladi).
+   IKKITA REJIM — FAQAT EKRAN KENGLIGIGA QARAB (touch/sichqoncha
+   bo'lishidan qat'i nazar, chunki katta touch monitorlar ham
+   "kompyuter" hisoblanishi kerak):
+   - min-width:1180px  -> ixcham, list ko'rinish, kartalar
+     kichikroq, rasm/ikon shart emas (kompyuter / katta ekran,
+     hatto touch bo'lsa ham).
+   - max-width:1179px  -> yorqin, katta tugmalar (telefon,
+     planshet), rang uslubi bir xil qoladi.
 ========================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap');
@@ -247,7 +249,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* KOMPYUTER (sichqoncha) — ixcham RO'YXAT ko'rinishi, rasm shart emas */
-@media (hover:hover) and (pointer:fine){
+@media (min-width:1180px){
   .topicBoard{
     display:flex !important;
     flex-direction:column;
@@ -277,7 +279,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* TOUCH (telefon / planshet / katta touch ekran) — kattaroq, rangli kartalar */
-@media (pointer:coarse){
+@media (max-width:1179px){
   .topicBoard{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)) !important; }
   .topicBoardCard{ min-height:104px !important; padding:14px !important; }
   .topicBoardIcon{ width:44px !important; height:44px !important; min-width:44px !important; font-size:22px !important; }
@@ -332,14 +334,14 @@ input:focus,select:focus,textarea:focus{
 .answerOption.wrong{ background:rgba(255,95,69,.20) !important; border-color:var(--red) !important; box-shadow:0 0 0 2px var(--red) inset !important; }
 
 /* Touch ekranlarda javob tugmalari kattaroq (barmoq bilan bosish qulay) */
-@media (pointer:coarse){
+@media (max-width:1179px){
   .answerOption,.qOptionBtn,.duelAnswerBtn,.roomAnswerButtons .qOptionBtn{
     min-height:78px !important;
     font-size:16px !important;
   }
 }
 /* Kompyuterda (sichqoncha) — ixchamroq, zich */
-@media (hover:hover) and (pointer:fine){
+@media (min-width:1180px){
   .answerOption{ min-height:58px !important; padding:8px 12px !important; }
   .qOptionBtn,.duelAnswerBtn,.roomAnswerButtons .qOptionBtn{ min-height:56px !important; }
 }
@@ -391,7 +393,7 @@ input:focus,select:focus,textarea:focus{
    (planshet / katta touch monitor / telefon)
 ========================================================= */
 
-@media (pointer:coarse){
+@media (max-width:1179px){
   .bigBtn,.roomBtn,.duelBtn,.wideBtn,.gameModeBtn,.authActionBtn,
   .miniModalBtn,.playBtn,.primaryPlayBtn,.secondaryPlayBtn,
   .adminToggleBtn,.topBtn{
@@ -402,7 +404,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* Kompyuterda tugmalar ixchamroq va zichroq turadi */
-@media (hover:hover) and (pointer:fine){
+@media (min-width:1180px){
   .bigBtn,.roomBtn,.duelBtn,.wideBtn,.gameModeBtn,.authActionBtn,
   .miniModalBtn,.playBtn,.primaryPlayBtn,.secondaryPlayBtn{
     min-height:42px !important;
@@ -486,7 +488,7 @@ input:focus,select:focus,textarea:focus{
   }
 }
 
-@media (pointer:coarse) and (max-width:1179px){
+@media (max-width:1179px){
   .beksLangSwitch{ bottom:14px !important; right:14px !important; }
 }
 
@@ -513,7 +515,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* Kompyuter — ixcham RO'YXAT, lekin action tugmalar sig'adigan balandlikda */
-@media (hover:hover) and (pointer:fine){
+@media (min-width:1180px){
   .topicBoardCard{
     min-height:48px !important;
     padding:8px 10px 8px 14px !important;
@@ -528,7 +530,7 @@ input:focus,select:focus,textarea:focus{
    Planshet/katta touch  -> rangli KARTALAR (grid).
 ========================================================= */
 
-@media (pointer:coarse) and (max-width:640px){
+@media (max-width:640px){
   .topicBoard{
     display:flex !important;
     flex-direction:column !important;
@@ -548,9 +550,15 @@ input:focus,select:focus,textarea:focus{
   .topicBoardInfo strong{ font-size:14.5px !important; }
   .topicBoardInfo span,.topicBoardInfo small{ font-size:11.5px !important; }
   .cardIconBtn{ width:32px !important; height:32px !important; min-height:32px !important; font-size:13px !important; }
+
+  /* Ro'yxat (list) ko'rinishida qator o'zi bosiladigan, shuning
+     uchun "O'YINNI BOSHLASH" ustma-ust chizuvchi banner shart
+     emas — u mavzu nomi / soni / tahrir-o'chirish tugmalarini
+     qoplab qolayotgan edi. Butunlay o'chiriladi. */
+  .topicStartOverlay{ display:none !important; }
 }
 
-@media (pointer:coarse) and (min-width:641px){
+@media (min-width:641px) and (max-width:1179px){
   .topicBoard{ grid-template-columns:repeat(auto-fill,minmax(160px,1fr)) !important; }
   .topicBoardCard{ min-height:108px !important; padding:14px !important; flex-direction:column !important; align-items:flex-start !important; }
   .topicBoardCardActions{ margin-left:0 !important; align-self:flex-end !important; }

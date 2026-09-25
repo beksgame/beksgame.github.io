@@ -17,7 +17,7 @@
       joylashtiriladi. id/class nomlari, onclick/JS ulanishlari
       TEGILMAYDI.
 
-   Shart: (hover:hover) and (pointer:fine) and (min-width:1180px)
+   Shart: faqat (min-width:1180px) — touch/sichqonchaga bog'liq emas
    — ya'ni sichqonchali, kamida 1180px kengliqdagi ekran.
    Bundan tashqari, ":has(#liveRoomApp:not(.hidden))" orqali —
    agar jonli xona/duel/o'yin ekrani FAOL bo'lsa, bu qatlam
@@ -34,7 +34,7 @@
 
 /* ---------- 2) FAQAT KATTA EKRAN / SICHQONCHA ---------- */
 
-@media (hover:hover) and (pointer:fine) and (min-width:1180px){
+@media (min-width:1180px){
 
   body:not(:has(#liveRoomApp:not(.hidden))){
     display:block;

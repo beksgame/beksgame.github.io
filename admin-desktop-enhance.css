@@ -15,7 +15,7 @@
      bu yerdagi ko'rinish almashinuvi ularga sira ta'sir qilmaydi.
 ========================================================== */
 
-@media (hover:hover) and (pointer:fine) and (min-width:1180px){
+@media (min-width:1180px){
 
   .pageWrap{
     width:min(1320px,calc(100% - 48px));

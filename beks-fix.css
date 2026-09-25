@@ -91,7 +91,7 @@
    Faqat katta ekranda ishlaydi; mobil/planshetda ular
    avvalgidek vertikal ustun-ustun (gap bilan) qolaveradi,
    chunki u yerda "yopishib qolish" muammosi yo'q. */
-@media (hover: hover) and (pointer: fine) and (min-width: 1180px) {
+@media (min-width: 1180px) {
 
   /* -- "Savollar maydoni" ekrani: taxta + jonli reyting -- */
   .gameStage {
@@ -158,7 +158,7 @@
    turadi, orasida chap menyuning o'ng chegarasi — BITTA
    INGICHKA CHIZIQ — qoladi, xuddi yuqoridagi 2-bandda
    tuzatilgan bloklar kabi. */
-@media (hover: hover) and (pointer: fine) and (min-width: 1180px) {
+@media (min-width: 1180px) {
   #adminPanel {
     column-gap: 0 !important;
   }

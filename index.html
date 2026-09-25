@@ -68,8 +68,9 @@
 
   <!-- =========================
        DESKTOP LANDING WRAPPER
-       Faqat kompyuter/katta ekranda (desktop-enhance.css
-       ichida, pointer:fine va min-width:1180px sharti bilan)
+       Faqat katta ekranda (desktop-enhance.css
+       ichida, faqat min-width:1180px kenglik sharti bilan —
+       touch/sichqonchaga bog'liq emas)
        ishlaydigan qo'shimcha joylashuv o'ramasi. Mobilda bu
        div oddiy shaffof konteyner bo'lib qoladi — hech narsa
        o'zgarmaydi. Ichidagi barcha mavjud elementlar (id/class)
@@ -428,7 +429,7 @@
 
   <script>
     (function () {
-      const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 1180px)').matches;
+      const isDesktop = window.matchMedia('(min-width: 1180px)').matches;
       if (!isDesktop) return;
 
       const modeMeta = [
