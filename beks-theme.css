@@ -13,10 +13,10 @@
    IKKITA REJIM — FAQAT EKRAN KENGLIGIGA QARAB (touch/sichqoncha
    bo'lishidan qat'i nazar, chunki katta touch monitorlar ham
    "kompyuter" hisoblanishi kerak):
-   - min-width:1180px  -> ixcham, list ko'rinish, kartalar
+   - min-width:1024px  -> ixcham, list ko'rinish, kartalar
      kichikroq, rasm/ikon shart emas (kompyuter / katta ekran,
      hatto touch bo'lsa ham).
-   - max-width:1179px  -> yorqin, katta tugmalar (telefon,
+   - max-width:1023px  -> yorqin, katta tugmalar (telefon,
      planshet), rang uslubi bir xil qoladi.
 ========================================================== */
 
@@ -249,7 +249,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* KOMPYUTER (sichqoncha) — ixcham RO'YXAT ko'rinishi, rasm shart emas */
-@media (min-width:1180px){
+@media (min-width:1024px){
   .topicBoard{
     display:flex !important;
     flex-direction:column;
@@ -279,7 +279,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* TOUCH (telefon / planshet / katta touch ekran) — kattaroq, rangli kartalar */
-@media (max-width:1179px){
+@media (max-width:1023px){
   .topicBoard{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)) !important; }
   .topicBoardCard{ min-height:104px !important; padding:14px !important; }
   .topicBoardIcon{ width:44px !important; height:44px !important; min-width:44px !important; font-size:22px !important; }
@@ -334,14 +334,14 @@ input:focus,select:focus,textarea:focus{
 .answerOption.wrong{ background:rgba(255,95,69,.20) !important; border-color:var(--red) !important; box-shadow:0 0 0 2px var(--red) inset !important; }
 
 /* Touch ekranlarda javob tugmalari kattaroq (barmoq bilan bosish qulay) */
-@media (max-width:1179px){
+@media (max-width:1023px){
   .answerOption,.qOptionBtn,.duelAnswerBtn,.roomAnswerButtons .qOptionBtn{
     min-height:78px !important;
     font-size:16px !important;
   }
 }
 /* Kompyuterda (sichqoncha) — ixchamroq, zich */
-@media (min-width:1180px){
+@media (min-width:1024px){
   .answerOption{ min-height:58px !important; padding:8px 12px !important; }
   .qOptionBtn,.duelAnswerBtn,.roomAnswerButtons .qOptionBtn{ min-height:56px !important; }
 }
@@ -393,7 +393,7 @@ input:focus,select:focus,textarea:focus{
    (planshet / katta touch monitor / telefon)
 ========================================================= */
 
-@media (max-width:1179px){
+@media (max-width:1023px){
   .bigBtn,.roomBtn,.duelBtn,.wideBtn,.gameModeBtn,.authActionBtn,
   .miniModalBtn,.playBtn,.primaryPlayBtn,.secondaryPlayBtn,
   .adminToggleBtn,.topBtn{
@@ -404,7 +404,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* Kompyuterda tugmalar ixchamroq va zichroq turadi */
-@media (min-width:1180px){
+@media (min-width:1024px){
   .bigBtn,.roomBtn,.duelBtn,.wideBtn,.gameModeBtn,.authActionBtn,
   .miniModalBtn,.playBtn,.primaryPlayBtn,.secondaryPlayBtn{
     min-height:42px !important;
@@ -474,13 +474,13 @@ input:focus,select:focus,textarea:focus{
    tugmalar pastki-o'ng burchakka tushib qoladi.
 --------------------------------------------------------- */
 
-@media (min-width:1180px){
+@media (min-width:1024px){
   .app,.appHeader{
     width:min(1440px, calc(100% - 280px)) !important;
   }
 }
 
-@media (max-width:1179px){
+@media (max-width:1023px){
   .beksLangSwitch{
     top:auto !important;
     bottom:16px !important;
@@ -488,7 +488,7 @@ input:focus,select:focus,textarea:focus{
   }
 }
 
-@media (max-width:1179px){
+@media (max-width:1023px){
   .beksLangSwitch{ bottom:14px !important; right:14px !important; }
 }
 
@@ -515,7 +515,7 @@ input:focus,select:focus,textarea:focus{
 }
 
 /* Kompyuter — ixcham RO'YXAT, lekin action tugmalar sig'adigan balandlikda */
-@media (min-width:1180px){
+@media (min-width:1024px){
   .topicBoardCard{
     min-height:48px !important;
     padding:8px 10px 8px 14px !important;
@@ -558,7 +558,7 @@ input:focus,select:focus,textarea:focus{
   .topicStartOverlay{ display:none !important; }
 }
 
-@media (min-width:641px) and (max-width:1179px){
+@media (min-width:641px) and (max-width:1023px){
   .topicBoard{ grid-template-columns:repeat(auto-fill,minmax(160px,1fr)) !important; }
   .topicBoardCard{ min-height:108px !important; padding:14px !important; flex-direction:column !important; align-items:flex-start !important; }
   .topicBoardCardActions{ margin-left:0 !important; align-self:flex-end !important; }

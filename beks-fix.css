@@ -59,7 +59,7 @@
    to'qnashmasligi uchun, o'sha tugmacha pastki-o'ng
    burchakka (header qatoridan butunlay pastga) ko'chirildi —
    quyidagi qoidaga qarang. */
-@media (min-width: 1180px) {
+@media (min-width: 1024px) {
   .app,
   .appHeader,
   .pageWrap {
@@ -74,7 +74,7 @@
    yuqoridagi o'zgarishdan keyin bu endi header tugmalari
    bilan to'qnashib qolar edi). Shu bilan header endi hech
    qanday joy zahira qilmasdan to'liq (100%) kengaya oladi. */
-@media (min-width: 1180px) {
+@media (min-width: 1024px) {
   .beksLangSwitch {
     top: auto !important;
     bottom: 16px !important;
@@ -91,7 +91,7 @@
    Faqat katta ekranda ishlaydi; mobil/planshetda ular
    avvalgidek vertikal ustun-ustun (gap bilan) qolaveradi,
    chunki u yerda "yopishib qolish" muammosi yo'q. */
-@media (min-width: 1180px) {
+@media (min-width: 1024px) {
 
   /* -- "Savollar maydoni" ekrani: taxta + jonli reyting -- */
   .gameStage {
@@ -158,7 +158,7 @@
    turadi, orasida chap menyuning o'ng chegarasi — BITTA
    INGICHKA CHIZIQ — qoladi, xuddi yuqoridagi 2-bandda
    tuzatilgan bloklar kabi. */
-@media (min-width: 1180px) {
+@media (min-width: 1024px) {
   #adminPanel {
     column-gap: 0 !important;
   }
@@ -210,7 +210,7 @@
       birlashtirildi, balandligi ham 620px — Ishtirokchilar
       ro'yxati bilan bir xil.
 ========================================================== */
-@media (min-width: 1180px) {
+@media (min-width: 1024px) {
 
   /* ---- a) Karta grid: 5 ustun, kontentga mos balandlik ----
      Avval barcha kartalarga QATTIQ (145px) balandlik

@@ -45,7 +45,7 @@ body{
    o'lchanadi va ichidagi width:min(420px,100%) kabi elementlar
    markazdan chetga siljib qolishi mumkin. Shuning uchun bu yerda
    ANIQ width:100% beriladi — desktop-enhance.css buni faqat katta
-   ekranda (min-width:1180px) grid bilan qayta belgilaydi. */
+   ekranda (min-width:1024px) grid bilan qayta belgilaydi. */
 .landingDesktop{
   width:100%;
   max-width:100%;
