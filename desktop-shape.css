@@ -21,7 +21,7 @@
    o'zgarishsiz qoladi.
 ========================================================== */
 
-@media (min-width:1024px){
+@media (min-width:1024px), (min-width:768px) and (min-height:1200px){
 
   /* ---- 1) Umumiy dizayn o'zgaruvchilari ----
      Bu ikkita qatorning o'zi ko'plab panel/karta/taxta

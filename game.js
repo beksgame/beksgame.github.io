@@ -315,6 +315,7 @@ let currentTurnIndex = 0;
 let currentQuestionActive = false;
 let gameFinalized = false;
 let confettiFrame = null;
+let confettiCanvasId = "confetti";
 let winnerTimer = null;
 let currentTopicQuestionIndex = 0;
 let currentTopicQuestions = [];
@@ -5736,10 +5737,29 @@ function showDuelResult(winnerSide, a, b) {
   }
 
   playWinSound();
+
+  /*
+   * G'olib e'lon qilinganda (durrang bo'lmasa) konfeti
+   * yog'iladi — natija oynasining orqasida, matn ustiga
+   * chiqmaydigan alohida canvas'da.
+   */
+  if (winnerSide) {
+    launchConfetti("duelConfetti");
+
+    clearTimeout(duelConfettiTimer);
+
+    duelConfettiTimer = setTimeout(stopConfetti, 12000);
+  }
 }
+
+let duelConfettiTimer = null;
 
 function closeDuelResultModal(viaContinue = false) {
   const modal = $("duelResultModal");
+
+  clearTimeout(duelConfettiTimer);
+
+  stopConfetti();
 
   if (modal) {
     modal.style.display = "none";
@@ -6997,16 +7017,39 @@ function continueGameWithNewTopic() {
 
 window.continueGameWithNewTopic = continueGameWithNewTopic;
 
+/*
+ * G'olib oynasini (winnerModal) qo'lda yopish — "Davom etish"
+ * tugmasi. Avtomatik 10 soniyalik taymerni ham bekor qiladi,
+ * shunda afterGameModalClosed() faqat bir marta ishlaydi.
+ */
+function closeWinnerModalNow() {
+  const modal = $("winnerModal");
+
+  if (!modal || modal.style.display === "none") return;
+
+  clearTimeout(winnerTimer);
+
+  modal.style.display = "none";
+
+  stopConfetti();
+
+  afterGameModalClosed();
+}
+
+window.closeWinnerModalNow = closeWinnerModalNow;
+
 function playWinSound() {
   winnerSound?.play().catch(() => {});
 }
 
-function launchConfetti() {
-  const canvas = $("confetti");
+function launchConfetti(canvasId = "confetti") {
+  const canvas = $(canvasId);
 
   if (!canvas) return;
 
   stopConfetti();
+
+  confettiCanvasId = canvasId;
 
   canvas.width = innerWidth;
 
@@ -7059,9 +7102,11 @@ function stopConfetti() {
 
   confettiFrame = null;
 
-  const c = $("confetti");
+  const c = $(confettiCanvasId) || $("confetti");
 
   c?.getContext("2d")?.clearRect(0, 0, c.width, c.height);
+
+  confettiCanvasId = "confetti";
 }
 
 /* ================= RESET / SHUFFLE ================= */
@@ -7614,6 +7659,7 @@ function renderRoomTopicPickerList(filterText = "") {
 
       return `
         <div class="roomTopicPickerRow" data-idx="${i}">
+          <div class="topicBoardIcon rtpIcon">📚</div>
           <div class="roomTopicPickerRowInfo">
             <strong class="rtpName">${escapeHtml(topic.title || "")}</strong>
             <span class="rtpCount">${total} ta savol</span>
