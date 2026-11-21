@@ -4089,6 +4089,8 @@ async function hostAdvanceRoom(fromIndex) {
   const nextIndex = fromIndex + 1;
   const isDone = nextIndex >= roomData.totalQuestions;
 
+  if (isDone) bumpGlobalGames();
+
   try {
     await updateDoc(
       doc(db, "rooms", roomCode),
@@ -5685,6 +5687,8 @@ function finishDuel() {
     updateTeamScoreUI(teamB);
   }
 
+  bumpGlobalGames();
+
   showDuelResult(winnerSide, a, b);
 }
 
@@ -6691,6 +6695,19 @@ async function updateParticipantsStats(sortedTeams) {
   renderParticipants();
 }
 
+/*
+ * UMUMIY STATISTIKA (index.html'dagi "O'TKAZILGAN O'YIN" raqami):
+ * stats/global hujjatidagi "games" hisoblagichini 1 ga oshiradi.
+ * Xatolik o'yin oqimiga hech qachon xalaqit bermaydi.
+ */
+async function bumpGlobalGames() {
+  try {
+    await setDoc(doc(db, "stats", "global"), { games: increment(1) }, { merge: true });
+  } catch (e) {
+    console.warn("Global statistika yangilanmadi:", e);
+  }
+}
+
 async function declareWinner() {
   if (gameFinalized) {
     return;
@@ -6701,6 +6718,8 @@ async function declareWinner() {
   gameInProgress = false;
 
   clearInterval(timer);
+
+  bumpGlobalGames();
 
   /*
    * ISHTIROKCHISIZ (SOLO) YAKUN

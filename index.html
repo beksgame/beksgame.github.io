@@ -444,6 +444,32 @@
     </div>
   </div>
 
+  <script type="module">
+    /* Bosh sahifadagi "O'TKAZILGAN O'YIN" va "FOYDALANUVCHI" raqamlari:
+       stats/global hujjatidan (hamma o'qiy oladi) olinadi. */
+    import { db } from "./firebase.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    function fmt(n) {
+      n = Number(n) || 0;
+      return n.toLocaleString("en-US").replace(/,/g, " ");
+    }
+
+    (async function () {
+      const g = document.getElementById("landingStatGames");
+      const u = document.getElementById("landingStatUsers");
+      if (!g && !u) return;
+      try {
+        const snap = await getDoc(doc(db, "stats", "global"));
+        const d = snap.exists() ? snap.data() : {};
+        if (g) g.textContent = fmt(d.games);
+        if (u) u.textContent = fmt(d.users);
+      } catch (e) {
+        console.warn("Statistika o'qilmadi:", e);
+      }
+    })();
+  </script>
+
   <script>
     /* :has() ga bog'liq bo'lmagan (eski brauzer/TV/interaktiv doska uchun ham
        ishlaydigan) belgi: jonli xona ochiq bo'lsa body'ga beksLiveActive qo'shiladi,
@@ -541,6 +567,7 @@
     doc,
     getDoc,
     setDoc,
+    increment,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
   import { 
@@ -669,6 +696,12 @@
         );
       } catch (e) {
         console.warn("users hujjatini yaratishda xatolik:", e);
+      }
+
+      try {
+        await setDoc(doc(db, "stats", "global"), { users: increment(1) }, { merge: true });
+      } catch (e) {
+        console.warn("Global statistika (users) yangilanmadi:", e);
       }
 
       // UID ni localStorage ga saqlaymiz
