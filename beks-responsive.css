@@ -225,3 +225,34 @@
   .roomTopicPickerRowInfo .rtpOwner{ color:var(--muted) !important; font-size:10.5px; }
   .roomTopicPickerRowArrow{ top:12px; right:10px; font-size:11px; }
 }
+
+/* ---------- 5) TELEFON: mavzular ro'yxati ekranning PASTIGACHA ----------
+   Avval ro'yxatga max-height:50vh qo'yilgan edi (game.css, <=560px),
+   shu sabab ro'yxat ekran yarmida tugab, pastida bo'sh joy qolardi. */
+@media (max-width:720px){
+  .roomTopicPickerBox{
+    display:flex !important;
+    flex-direction:column !important;
+    height:100vh !important;
+    height:100dvh !important;
+    max-height:none !important;
+  }
+
+  .roomTopicPickerLayout{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+  }
+
+  .roomPickerSidebarCol{ flex:0 0 auto !important; }
+
+  .roomTopicPickerList{
+    flex:1 1 0 !important;
+    min-height:0 !important;
+    max-height:none !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+}

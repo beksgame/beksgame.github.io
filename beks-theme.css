@@ -666,3 +666,30 @@ input:focus,select:focus,textarea:focus{
 .duelArena{ background:var(--bg) !important; border:1px solid var(--line) !important; }
 
 [data-theme="dark"] .duelArena{ background:var(--bg) !important; }
+
+/* ==========================================================
+   INDEX (bosh sahifa) — telefon/planshetda til va tungi rejim
+   tugmalari PASTDA emas, YUQORI-O'NG burchakda turadi.
+   (Boshqa sahifalar — game/admin — o'zgarmaydi.)
+========================================================== */
+@media (max-width:1023px) and (max-height:1199px){
+  body.beksIndexPage .beksLangSwitch{
+    top:10px !important;
+    bottom:auto !important;
+    right:10px !important;
+    left:auto !important;
+  }
+}
+
+/* ==========================================================
+   INDEX: "Jonli xona", "Birga bir", "O'yin boshlash" tugmalari
+   matni BIR XIL — oq rangda.
+========================================================== */
+.gameModeBtn,
+.roomModeBtn,
+.duelModeBtn,
+.playModeBtn,
+[data-theme="dark"] .gameModeBtn,
+[data-theme="dark"] .roomModeBtn{
+  color:#fff !important;
+}
