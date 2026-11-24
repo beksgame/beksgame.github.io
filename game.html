@@ -29,10 +29,10 @@
   <meta name="theme-color" content="#08111f">
   <title>Beks Game</title>
   <link rel="stylesheet" href="game.css?v=3">
-  <link rel="stylesheet" href="beks-theme.css?v=4">
+  <link rel="stylesheet" href="beks-theme.css?v=7">
   <link rel="stylesheet" href="desktop-shape.css?v=2">
   <link rel="stylesheet" href="beks-fix.css?v=2">
-  <link rel="stylesheet" href="beks-responsive.css?v=3">
+  <link rel="stylesheet" href="beks-responsive.css?v=6">
   <script src="i18n.js?v=4"></script>
 </head>
 
@@ -217,7 +217,7 @@
 
       <div class="modalActions">
         <button class="bigBtn secondaryBtn" onclick="closeTopicIntroModal()">Yopish</button>
-        <button class="bigBtn duelBtn" id="introDuelBtn">⚔ Duel</button>
+        <button class="bigBtn duelBtn" id="introDuelBtn">⚔ Birga bir</button>
         <button class="bigBtn roomBtn" id="introRoomBtn">📱 Xona ochish</button>
         <button class="bigBtn primaryBtn" id="introPlayBtn">▶ Play</button>
       </div>
@@ -423,6 +423,10 @@
 
             <div class="toolRow">
               <input type="file" id="userTopicExcelInput" accept=".xlsx,.xls">
+            </div>
+
+            <div class="toolRow">
+              <input type="url" id="qcZipUrl" placeholder="🖼 Rasmli paket: zip havolasi (ixtiyoriy, Excel o‘rniga)">
             </div>
 
             <div class="toolRow qcActionsRow">
@@ -658,8 +662,8 @@
     <div class="modal-box duelResultBox">
       <div class="modalHeader">
         <div>
-          <span class="eyebrow">DUEL YAKUNI</span>
-          <h2>⚔ Duel natijasi</h2>
+          <span class="eyebrow">BIRGA BIR YAKUNI</span>
+          <h2>⚔ Birga bir natijasi</h2>
         </div>
         <button class="iconBtn" onclick="closeDuelResultModal()">×</button>
       </div>
@@ -678,6 +682,7 @@
   ========================== -->
   <div id="winnerModal">
     <div class="winnerCard">
+      <button type="button" class="winnerCloseX" onclick="closeWinnerModalNow()" aria-label="Yopish" title="Yopish">×</button>
       <span class="eyebrow">GAME COMPLETE</span>
       <div id="winnerText"></div>
       <div id="restWinners"></div>
@@ -722,6 +727,7 @@
     orqali kirgan mehmonlar) uchun sahifaning birinchi
     marta tayyor bo'lishini tezlashtiradi.
   -->
+  <script src="imagepack.js?v=1"></script>
   <script type="module" src="game.js"></script>
 
 </body>

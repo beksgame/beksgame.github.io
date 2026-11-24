@@ -171,7 +171,7 @@
   .landingHeadline{
     margin:0;
     font-size:46px;line-height:1.05;letter-spacing:-1px;
-    font-weight:950;color:#111827;
+    font-weight:950;color:var(--text);
     max-width:480px;
   }
   .landingHeadlineAccent{
@@ -183,7 +183,7 @@
   .landingSub{
     margin:16px 0 0;max-width:440px;
     font-size:18px;line-height:1.5;font-weight:800;
-    color:#111827 !important;
+    color:var(--text) !important;
     letter-spacing:-.02em;
   }
 

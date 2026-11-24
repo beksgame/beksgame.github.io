@@ -256,3 +256,271 @@
     padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* ==========================================================
+   6) DUEL OYNASI — vertikal kengaytirish + rasmli savol
+   - Oyna balandligi deyarli butun ekran (tepa/pastdagi bo'sh joy yo'q)
+   - Rasm har bir o'yinchi tomonining YUQORISIDA (sarlavha tagida)
+   - Rasm qolgan bo'sh joyni egallaydi, savol va variantlar skrollsiz sig'adi
+========================================================== */
+#duelModal .duelArena,
+[data-theme="dark"] #duelModal .duelArena{
+  height:min(97vh,1100px) !important;
+  max-height:97vh !important;
+  height:min(97dvh,1100px) !important;
+  max-height:97dvh !important;
+}
+
+#duelModal .duelSide,
+[data-theme="dark"] #duelModal .duelSide{
+  overflow:hidden !important;
+  min-height:0;
+}
+
+/* Rasmli tomon: yuqoridan boshlanadi, markazlashmaydi */
+#duelModal .duelSide.hasImg{
+  justify-content:flex-start !important;
+  padding-top:14px !important;
+  padding-bottom:14px !important;
+}
+#duelModal .duelSide.hasImg .duelSideHeader{ margin-bottom:10px !important; flex:0 0 auto; }
+
+#duelModal .duelSide.hasImg > .qImageWrap{
+  flex:1 1 0;
+  min-height:90px;
+  margin:0 0 10px;
+}
+#duelModal .duelSide.hasImg > .qImageWrap .qImage{
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:none;
+  object-fit:contain;
+}
+
+/* "Rasmda nima tasvirlangan?" — kichik yozuv */
+#duelModal .duelSide.hasImg .duelQText,
+[data-theme="dark"] #duelModal .duelSide.hasImg .duelQText{
+  font-size:clamp(15px,1.5vw,21px) !important;
+  font-weight:800 !important;
+  line-height:1.25 !important;
+  margin:0 0 10px !important;
+  flex:0 0 auto;
+}
+
+#duelModal .duelSide.hasImg .duelAnswerOptions{ flex:0 0 auto; gap:8px 10px !important; }
+#duelModal .duelSide.hasImg .duelAnswerBtn{
+  min-height:56px !important;
+  padding:8px 12px !important;
+  font-size:clamp(14px,1.3vw,17px) !important;
+}
+
+/* Telefon / tor ekran: ikki tomon ustma-ust */
+@media (max-width:820px){
+  #duelModal .duelArena,
+  [data-theme="dark"] #duelModal .duelArena{
+    width:100vw !important;
+    height:100vh !important;
+    height:100dvh !important;
+    max-height:none !important;
+    border-radius:0 !important;
+  }
+  #duelModal .duelSide{ flex:1 1 0 !important; padding:8px 12px !important; }
+  #duelModal .duelSide.hasImg{ padding-top:8px !important; padding-bottom:8px !important; }
+  #duelModal .duelSide.hasImg .duelSideHeader{ margin-bottom:6px !important; }
+  #duelModal .duelSide.hasImg > .qImageWrap{ min-height:50px; margin-bottom:6px; }
+  #duelModal .duelSide.hasImg .duelQText{ font-size:13px !important; margin-bottom:6px !important; }
+  #duelModal .duelSide.hasImg .duelAnswerBtn{ min-height:38px !important; font-size:13px !important; padding:4px 8px !important; }
+  #duelModal .duelSide.hasImg .duelAnswerOptions{ gap:6px !important; }
+}
+
+/* Yotiq telefon (past balandlik): ikki tomon yonma-yon, ixcham */
+@media (max-height:460px) and (min-width:560px){
+  #duelModal .duelCenter{ width:120px !important; padding:10px 8px !important; }
+  #duelModal .duelSide.hasImg .duelPlayerBadge img{ width:26px !important; height:26px !important; }
+  #duelModal .duelSide.hasImg .duelPlayerBadge span{ font-size:13px !important; }
+  #duelModal .duelSide.hasImg .duelPlayerScore{ font-size:12px !important; }
+}
+
+/* ==========================================================
+   7) TELEFON: modallar EKRAN MARKAZIDA (avval pastga yopishgan edi)
+   game.css'dagi ".modal{align-items:flex-end}" (bottom-sheet) bekor
+   qilinadi — barcha oynalar (o'yin boshlash, mavzu tanlash, xona
+   sozlamalari, profil, yakun...) vertikal markazda chiqadi.
+========================================================== */
+@media (max-width:720px){
+  .modal,
+  [data-theme="dark"] .modal{
+    align-items:center !important;
+    justify-content:center !important;
+    padding:12px !important;
+  }
+  .modal > .modal-box,
+  [data-theme="dark"] .modal > .modal-box{
+    margin:auto !important;
+    border-radius:16px !important;
+    max-height:90vh !important;
+    max-height:90dvh !important;
+  }
+  /* To'liq ekranli oynalar o'zgarmaydi (mavzu tanlash, duel) */
+  #roomTopicPickerModal > .modal-box,
+  #duelModal{
+    max-height:none !important;
+  }
+}
+
+/* ==========================================================
+   8) NAVBATDAGI ISHTIROKCHI NOMI — och fonda ham o'qilsin
+   (avval oq (#fff) edi — och rejimda ko'rinmasdi)
+========================================================== */
+.qParticipantCard.isCurrentTurn .qParticipantName{
+  color:var(--text) !important;
+}
+[data-theme="dark"] .qParticipantCard.isCurrentTurn .qParticipantName{
+  color:#fff !important;
+}
+
+/* ==========================================================
+   9) G'OLIB OYNASI — "×" yopish tugmasi
+========================================================== */
+#winnerModal .winnerCard{ position:relative; }
+#winnerModal .winnerCloseX{
+  position:absolute;
+  top:10px;
+  right:12px;
+  z-index:5;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.14);
+  color:#fff;
+  font-size:24px;
+  line-height:1;
+  font-weight:700;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+}
+#winnerModal .winnerCloseX:hover{ background:rgba(255,255,255,.28); }
+
+/* ==========================================================
+   10) ADMIN PANEL — markazlashtirish, ikki chetdan joy qoldirish
+========================================================== */
+.pageWrap{
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+.adminDashboardCard{
+  margin-left:auto;
+  margin-right:auto;
+}
+
+@media (min-width:1024px), (min-width:768px) and (min-height:1200px){
+  .pageWrap{
+    width:min(1240px,calc(100% - 96px)) !important;
+    max-width:1240px !important;
+  }
+  #adminPanel .adminDashboardCard{ max-width:none; }
+}
+
+@media (min-width:1700px){
+  .pageWrap{ width:min(1320px,calc(100% - 160px)) !important; max-width:1320px !important; }
+}
+
+/* Admin: sarlavha (header) ham kontent bilan bir xil kenglikda va markazda */
+@media (min-width:1024px), (min-width:768px) and (min-height:1200px){
+  body.adminPage .appHeader{
+    width:min(1240px,calc(100% - 96px)) !important;
+    max-width:1240px !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+}
+@media (min-width:1700px){
+  body.adminPage .appHeader{ width:min(1320px,calc(100% - 160px)) !important; max-width:1320px !important; }
+}
+
+/* ==========================================================
+   11) TELEFON: mavzular ro'yxatida MAVZU NOMI to'liq ko'rinadi
+   Avval nom, savollar soni va muallif bitta qatorga sig'dirilgani
+   uchun nom 1 harfgacha qisilib qolardi. Endi nom o'z qatorida,
+   uzun bo'lsa qatorlarga o'raladi va karta balandligi o'sadi.
+========================================================== */
+@media (max-width:720px){
+  .roomTopicPickerRow{
+    height:auto !important;
+    min-height:64px;
+    align-items:flex-start !important;
+    padding:10px 12px !important;
+  }
+  .roomTopicPickerRowInfo{
+    display:flex !important;
+    flex-direction:row !important;
+    flex-wrap:wrap !important;
+    align-items:baseline !important;
+    gap:2px 10px !important;
+    min-width:0;
+    flex:1 1 0;
+  }
+  .roomTopicPickerRowInfo .rtpName{
+    flex:0 0 100% !important;
+    width:100%;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.25;
+    font-size:14.5px;
+  }
+  .roomTopicPickerRowInfo .rtpCount,
+  .roomTopicPickerRowInfo .rtpOwner{
+    flex:0 1 auto;
+    max-width:100%;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    overflow-wrap:anywhere;
+    font-size:11.5px;
+  }
+  .roomTopicPickerRowArrow{ align-self:center; }
+
+  /* Asosiy mavzular taxtasi (login bilan kirgandagi kartalar) */
+  .topicBoardCard{
+    height:auto !important;
+    min-height:70px;
+    align-items:flex-start !important;
+  }
+  .topicBoard .topicBoardInfo,
+  .topicBoardCard .topicBoardInfo{ min-width:0; flex:1 1 0; }
+  .topicBoardCard .topicBoardInfo strong{
+    display:block !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    -webkit-line-clamp:unset !important;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    line-height:1.25 !important;
+    font-size:14.5px !important;
+  }
+  .topicBoardCard .topicBoardInfo span,
+  .topicBoardCard .topicBoardInfo small{
+    white-space:normal !important;
+    overflow-wrap:anywhere;
+  }
+}
+
+/* ==========================================================
+   12) JAVOBDAN KEYINGI NATIJA YOZUVI ("To'g'ri" / "Xato") —
+   avval 26–46 px edi, endi kichik va ixcham
+========================================================== */
+#modal #aText,
+[data-theme="dark"] #modal #aText{
+  margin:10px auto 0 !important;
+  max-width:none !important;
+  font-size:clamp(14px,1.4vw,17px) !important;
+  font-weight:800 !important;
+  line-height:1.3 !important;
+}

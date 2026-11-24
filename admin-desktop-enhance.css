@@ -15,7 +15,7 @@
      bu yerdagi ko'rinish almashinuvi ularga sira ta'sir qilmaydi.
 ========================================================== */
 
-@media (min-width:1024px){
+@media (min-width:1024px), (min-width:768px) and (min-height:1200px){
 
   .pageWrap{
     width:min(1320px,calc(100% - 48px));

@@ -1887,14 +1887,73 @@ async function syncSharedTopics(topicsToSync) {
 }
 
 async function deleteSharedTopic(topicId) {
-  if (!db || !topicId) return;
+  if (!db || !topicId) return true;
+
+  /*
+   * Ilgari xato "yutib yuborilar" edi — umumiy (indeksda
+   * ko'rinadigan) nusxa o'chmay qolsa, foydalanuvchi bilmasdi.
+   * Endi 2 marta urinib ko'ramiz va muvaffaqiyatsiz bo'lsa
+   * aniq xabar beramiz.
+   */
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await deleteDoc(doc(db, "sharedTopics", topicId));
+
+      return true;
+    } catch (e) {
+      console.warn("sharedTopics delete (urinish " + attempt + "):", e);
+
+      if (attempt === 2) {
+        const denied = String(e?.code || "").includes("permission-denied");
+
+        alert(
+          denied
+            ? "⚠️ Mavzu sizning ro'yxatingizdan o'chdi, lekin umumiy (bosh sahifadagi) ro'yxatdan o'chirishga ruxsat yo'q. Administratorga murojaat qiling."
+            : "⚠️ Mavzu sizning ro'yxatingizdan o'chdi, lekin umumiy ro'yxatdan o'chmadi (internet xatosi). Qayta urinib ko'ring.",
+        );
+
+        return false;
+      }
+    }
+  }
+
+  return false;
+}
+
+/*
+ * YETIM NUSXALARNI TOZALASH: "sharedTopics"da shu foydalanuvchiga
+ * (ownerId) tegishli, lekin uning shaxsiy ro'yxatida endi yo'q
+ * mavzular — avvalgi o'chirishlar (yoki eski qurilmadagi eski kesh)
+ * tufayli qolib ketgan nusxalar. Faqat server bilan muvaffaqiyatli
+ * sinxronlangan ro'yxatda ishlaydi.
+ */
+async function pruneOrphanSharedTopics() {
+  if (!db || !currentUserUid || !topicsLoadedFromServer) return;
 
   try {
-    await deleteDoc(doc(db, "sharedTopics", topicId));
+    const snap = await getDocs(
+      query(collection(db, "sharedTopics"), where("ownerId", "==", currentUserUid)),
+    );
+
+    const mine = new Set(userTopics.map((t) => t.id));
+
+    for (const d of snap.docs) {
+      const id = d.data()?.id || d.id;
+
+      if (!mine.has(id) && !mine.has(d.id)) {
+        try {
+          await deleteDoc(doc(db, "sharedTopics", d.id));
+        } catch (e) {
+          console.warn("Yetim mavzuni o'chirib bo'lmadi:", d.id, e);
+        }
+      }
+    }
   } catch (e) {
-    console.warn("sharedTopics delete:", e);
+    console.warn("pruneOrphanSharedTopics:", e);
   }
 }
+
+let topicsLoadedFromServer = false;
 
 async function loadTopicsSafe() {
   try {
@@ -1914,12 +1973,21 @@ async function loadTopicsSafe() {
   try {
     const snap = await getDocs(colRef);
 
+    topicsLoadedFromServer = true;
+
     if (!snap.empty) {
       userTopics = snap.docs.map((d) => ({
         id: d.id,
         ...d.data(),
       }));
     } else {
+      /*
+       * Server ro'yxati BO'SH — haqiqat shu. Eski qurilmadagi
+       * localStorage nusxasiga ishonmaymiz (aks holda o'chirilgan
+       * mavzular qayta "tiriladi" va indeksga qayta chiqib ketadi).
+       */
+      userTopics = [];
+
       /*
        * YANGI KOLLEKSIYADA HALI HECH NARSA YO'Q —
        * ESKI "users/{uid}.topics" MASSIV MAYDONIDAN
@@ -2212,6 +2280,35 @@ function applyExcelFileToTopic(topic, file) {
 }
 
 /*
+ * RASMLI PAKET: zip havolasidagi rasmlardan savollar yasaydi.
+ * Savol — rasm, to'g'ri javob — fayl nomi (olma.jpg -> "Olma"),
+ * qolgan 3 ta variant — shu zip'dagi boshqa rasmlar nomlari.
+ */
+async function applyZipPackToTopic(topic, zipUrl) {
+  if (!window.BeksImagePack) {
+    throw new Error("Rasmli paket moduli yuklanmadi. Sahifani yangilang.");
+  }
+
+  const pack = await BeksImagePack.loadPack(zipUrl);
+
+  const items = BeksImagePack.buildQuestions(zipUrl, pack.files);
+
+  if (items.length < 4) {
+    throw new Error(
+      "Zip ichida kamida 4 ta turli nomli rasm bo'lishi kerak (topildi: " + items.length + ").",
+    );
+  }
+
+  topic.questions = { 0: [], 1: [], 2: [], 3: [], 4: [] };
+
+  items.forEach((item, i) => {
+    topic.questions[i % 5].push(item);
+  });
+
+  return items.length;
+}
+
+/*
  * "Saqlash" tugmasi — yagona
  * kirish nuqtasi. Rejimga qarab
  * yangi karta yaratadi yoki eski
@@ -2223,6 +2320,12 @@ async function saveQuestionCard() {
   const saveBtn = $("qcSaveBtn");
 
   const file = $("userTopicExcelInput")?.files?.[0];
+
+  const zipUrl = $("qcZipUrl")?.value?.trim() || "";
+
+  if (file && zipUrl) {
+    return alert("Excel fayl va zip havolasidan faqat BITTASINI tanlang.");
+  }
 
   const titleInput = $("newUserTopicTitle");
 
@@ -2327,8 +2430,10 @@ async function saveQuestionCard() {
       return alert("Tanlangan savol kartasi topilmadi!");
     }
 
-    if (!file) {
-      return alert("Excel fayl tanlanmadi! Eski kartani almashtirish uchun fayl kerak.");
+    if (!file && !zipUrl) {
+      return alert(
+        "Excel fayl yoki rasmli paket (zip havolasi) kiritilmadi! Eski kartani almashtirish uchun biri kerak.",
+      );
     }
 
     const perm = await getMyPermissions();
@@ -2347,6 +2452,16 @@ async function saveQuestionCard() {
   try {
     if (file) {
       await applyExcelFileToTopic(topic, file);
+    } else if (zipUrl) {
+      try {
+        await applyZipPackToTopic(topic, zipUrl);
+      } catch (zipErr) {
+        console.warn("Rasmli paket xatosi:", zipErr);
+
+        alert("❌ " + (zipErr?.message || "Rasmli paketni o'qib bo'lmadi."));
+
+        return;
+      }
     }
 
     questions = questionsObjectToArray(topic.questions);
@@ -2380,8 +2495,12 @@ async function saveQuestionCard() {
 
     if (fileInput) fileInput.value = "";
 
+    if ($("qcZipUrl")) $("qcZipUrl").value = "";
+
     if (saved) {
-      alert(file ? "✅ Savol kartasi va savollar saqlandi!" : "✅ Savol kartasi saqlandi!");
+      alert(
+        file || zipUrl ? "✅ Savol kartasi va savollar saqlandi!" : "✅ Savol kartasi saqlandi!",
+      );
     }
   } catch (err) {
     console.warn("Savol kartasini saqlashda xatolik:", err);
@@ -3257,7 +3376,7 @@ function confirmStartDuel() {
 
     playerB = createGuestDuelTeam("Ishtirokchi 2");
   } else {
-    alert("Duel uchun 2 ta ishtirokchi tanlang (yoki hech kimni tanlamang)!");
+    alert("«Birga bir» uchun 2 ta ishtirokchi tanlang (yoki hech kimni tanlamang)!");
 
     return;
   }
@@ -3493,6 +3612,7 @@ async function confirmOpenRoom() {
         q: qText,
         options,
         correct: correctAnswer,
+        img: String(item.img || ""),
       };
     })
     .filter((q) => q.q && q.correct && q.options.length >= 2);
@@ -4245,6 +4365,7 @@ async function swapRoomTopic(topic) {
         q: qText,
         options,
         correct: correctAnswer,
+        img: String(item.img || ""),
       };
     })
     .filter((q) => q.q && q.correct && q.options.length >= 2);
@@ -4653,7 +4774,9 @@ function renderTeacherMonitorView(box, idx) {
       <span class="roomAnsweredCount">${answeredCount}/${roomPlayers.length} javob berdi</span>
     </div>
 
-    <div class="roomQuestionText">${escapeHtml(q.q || "")}</div>
+    <div class="roomQuestionText${q.img ? ' withImg' : ''}">${escapeHtml(q.q || "")}</div>
+
+    ${window.BeksImagePack ? BeksImagePack.imageHtml(q.img) : ""}
 
     <div class="roomAnswerButtons" id="roomAnswerButtons">
       ${(q.options || [])
@@ -4701,7 +4824,9 @@ function renderHostWaitingView(box, idx) {
       <span class="roomAnsweredCount">✅ ${hostPlayerData.correctCount || 0} · ❌ ${hostPlayerData.wrongCount || 0}</span>
     </div>
 
-    <div class="roomQuestionText">${escapeHtml(q.q || "")}</div>
+    <div class="roomQuestionText${q.img ? ' withImg' : ''}">${escapeHtml(q.q || "")}</div>
+
+    ${window.BeksImagePack ? BeksImagePack.imageHtml(q.img) : ""}
 
     <div class="roomAnswerButtons" id="roomAnswerButtons">
       ${(q.options || [])
@@ -4822,12 +4947,13 @@ function showRoomWinnerModal(ranked) {
   playWinSound();
   launchConfetti();
 
+  /*
+   * Avtomatik yopilish OLIB TASHLANDI: statistika "×" yoki
+   * "Davom etish" bosilmaguncha ekranda turadi.
+   */
   clearTimeout(winnerTimer);
 
-  winnerTimer = setTimeout(() => {
-    modal.style.display = "none";
-    stopConfetti();
-  }, 10000);
+  winnerCloseMode = "room";
 }
 
 /* =========================================================
@@ -5026,7 +5152,9 @@ function renderRoomQuestionView(box, idxParam) {
       <span class="roomAnsweredCount">✅ ${hostPlayerData.correctCount || 0} · ❌ ${hostPlayerData.wrongCount || 0}</span>
     </div>
 
-    <div class="roomQuestionText">${escapeHtml(q.q || "")}</div>
+    <div class="roomQuestionText${q.img ? ' withImg' : ''}">${escapeHtml(q.q || "")}</div>
+
+    ${window.BeksImagePack ? BeksImagePack.imageHtml(q.img) : ""}
 
     <div class="roomAnswerButtons" id="roomAnswerButtons">
       ${(q.options || [])
@@ -5264,10 +5392,12 @@ function startDuel(topic, playerA, playerB) {
     });
   });
 
+  window.BeksImagePack?.prefetch(pool.map((i) => i.img));
+
   if (pool.length < 2) {
     hideFlowShield();
 
-    alert("Duel uchun mavzuda kamida 2 ta savol bo‘lishi kerak!");
+    alert("«Birga bir» uchun mavzuda kamida 2 ta savol bo‘lishi kerak!");
 
     return;
   }
@@ -5395,6 +5525,15 @@ function renderDuelSide(side, item) {
   if (!qBox || !optBox) return;
 
   qBox.textContent = item.q ?? item.question ?? "";
+
+  /*
+   * Rasmli savol: rasm shu tomonning yuqorisida (sarlavha tagida)
+   * ko'rsatiladi. Har bir o'yinchi o'z savolini oladi, shuning
+   * uchun rasm ham har tomonda alohida.
+   */
+  window.BeksImagePack?.setBefore(qBox, item.img || "");
+
+  qBox.closest(".duelSide")?.classList.toggle("hasImg", !!item.img);
 
   const correct = duelRound[side].correct;
 
@@ -5550,6 +5689,11 @@ function clearDuelSideUI(side) {
 
   if (qBox) qBox.textContent = "Yakunlandi";
   if (optBox) optBox.innerHTML = "";
+
+  if (qBox) {
+    window.BeksImagePack?.setBefore(qBox, "");
+    qBox.closest(".duelSide")?.classList.remove("hasImg");
+  }
 }
 
 function updateDuelStatsUI() {
@@ -5881,6 +6025,8 @@ function startTopicGame(topic) {
    * tasodifiy tartibda beriladi.
    */
   currentTopicQuestions = shuffleArray(currentTopicQuestions);
+
+  window.BeksImagePack?.prefetch(currentTopicQuestions.map((i) => i.img));
 
   /*
    * Bonus rejimi (admin panelidan yoqilgan bo'lsa)
@@ -6325,9 +6471,21 @@ function openQ(cell, item, score) {
     $("qText").textContent = questionText;
   }
 
+  /* Rasmli savol bo'lsa — rasm matn tepasida ko'rsatiladi */
+  window.BeksImagePack?.setBefore($("qText"), item.img || "");
+
+  /* Rasmli savolda oyna kengayadi va ixcham joylashadi (CSS: .hasImageQ) */
+  $("modal")?.classList.toggle("hasImageQ", !!item.img);
+
   $("aText")?.classList.add("hidden");
 
-  renderAnswerOptions(buildAnswerOptions(item.a ?? item.answer), item.a ?? item.answer);
+  /*
+   * Savol obyekti (item) ham uzatiladi — shunda Excel'dagi
+   * "Wrong Answer 1-3" va rasmli paketdagi tayyor variantlar
+   * ishlatiladi (ilgari item uzatilmagani uchun e'tiborga
+   * olinmasdi).
+   */
+  renderAnswerOptions(buildAnswerOptions(item.a ?? item.answer, item), item.a ?? item.answer);
 
   updateTurnIndicator();
 
@@ -6503,7 +6661,7 @@ function handleTimeExpired() {
   const a = $("aText");
 
   if (a) {
-    a.textContent = "⏰ Vaqt tugadi! Ball berilmadi";
+    a.textContent = "❌ Xato";
 
     a.classList.remove("hidden");
   }
@@ -6516,11 +6674,10 @@ function showAnswerResult(isCorrect, points, team) {
 
   if (!a) return;
 
-  a.textContent = team
-    ? isCorrect
-      ? `✅ To‘g‘ri! ${points > 0 ? "+" + points + " ball — " : ""}${team.name}`
-      : `❌ Xato! Ball berilmadi — ${team.name}`
-    : `${isCorrect ? "✅ To‘g‘ri!" : "❌ Xato!"}`;
+  /* Qisqa natija: "Ball berilmadi" / "Vaqt tugadi" kabi gaplar olib tashlandi */
+  a.textContent = isCorrect
+    ? `✅ To‘g‘ri${team && points > 0 ? " · +" + points + " ball" : ""}`
+    : "❌ Xato";
 
   a.classList.remove("hidden");
 }
@@ -6786,15 +6943,10 @@ function showSoloResultModal() {
   playWinSound();
   launchConfetti();
 
+  /* Statistika foydalanuvchi yopmaguncha turadi (avtomatik yopilmaydi) */
   clearTimeout(winnerTimer);
 
-  winnerTimer = setTimeout(() => {
-    modal.style.display = "none";
-
-    stopConfetti();
-
-    afterGameModalClosed();
-  }, 10000);
+  winnerCloseMode = "game";
 }
 
 function showWinnerModal(sorted) {
@@ -6879,15 +7031,10 @@ function showWinnerModal(sorted) {
   playWinSound();
   launchConfetti();
 
+  /* Statistika foydalanuvchi yopmaguncha turadi (avtomatik yopilmaydi) */
   clearTimeout(winnerTimer);
 
-  winnerTimer = setTimeout(() => {
-    modal.style.display = "none";
-
-    stopConfetti();
-
-    afterGameModalClosed();
-  }, 10000);
+  winnerCloseMode = "game";
 }
 
 /*
@@ -7041,6 +7188,8 @@ window.continueGameWithNewTopic = continueGameWithNewTopic;
  * tugmasi. Avtomatik 10 soniyalik taymerni ham bekor qiladi,
  * shunda afterGameModalClosed() faqat bir marta ishlaydi.
  */
+let winnerCloseMode = "game";
+
 function closeWinnerModalNow() {
   const modal = $("winnerModal");
 
@@ -7051,6 +7200,9 @@ function closeWinnerModalNow() {
   modal.style.display = "none";
 
   stopConfetti();
+
+  /* Jonli xona (host) g'olibi — faqat yopiladi, board tegilmaydi */
+  if (winnerCloseMode === "room") return;
 
   afterGameModalClosed();
 }
@@ -7501,7 +7653,7 @@ function openRoomTopicPicker() {
   if (titleEl) {
     titleEl.textContent =
       roomPickerTargetMode === "duel"
-        ? "⚔️ Duel uchun mavzu tanlang"
+        ? "⚔️ Birga bir uchun mavzu tanlang"
         : roomPickerTargetMode === "play"
           ? "🎯 O‘yin uchun mavzu tanlang"
           : "📱 Xona uchun mavzu tanlang";
@@ -8562,9 +8714,10 @@ onAuthStateChanged(auth, async (user) => {
      * "sharedTopics" kolleksiyasiga
      * fonda ko'chirib qo'yamiz —
      * UI'ni kutdirmaslik uchun
-     * await qilinmaydi.
+     * await qilinmaydi. Avval yetim (o'chirilgan, lekin
+     * umumiy ro'yxatda qolib ketgan) nusxalar tozalanadi.
      */
-    syncSharedTopics();
+    pruneOrphanSharedTopics().finally(() => syncSharedTopics());
 
     /*
      * Tashlab ketilgan (host tomonidan yopilmagan)
