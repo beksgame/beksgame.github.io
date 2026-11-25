@@ -51,9 +51,17 @@
   /* GitHub "blob" havolasini to'g'ridan-to'g'ri (raw) havolaga aylantiradi */
   function normalizeUrl(url) {
     url = String(url || "").trim();
-    var m = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)$/i);
+    /* github.com/u/r/blob/<shox>/<yo'l>  ->  raw.githubusercontent.com/u/r/<shox>/<yo'l> */
+    var m = url.match(/^https?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/i);
     if (m) {
-      return "https://raw.githubusercontent.com/" + m[1] + "/" + m[2] + "/" + m[3] + "/" + m[4];
+      return "https://raw.githubusercontent.com/" + m[1] + "/" + m[2] + "/" + m[3].replace(/\?.*$/, "");
+    }
+    /* github.com/u/r/raw/<shox>/<yo'l> (va "Download raw file" havolasi):
+       bu havola CORS ruxsatisiz yo'naltiradi (302) va brauzer uni bloklaydi,
+       shuning uchun to'g'ridan-to'g'ri raw.githubusercontent.com ga o'tkazamiz */
+    m = url.match(/^https?:\/\/(?:www\.)?github\.com\/([^/]+)\/([^/]+)\/raw\/(.+)$/i);
+    if (m) {
+      return "https://raw.githubusercontent.com/" + m[1] + "/" + m[2] + "/" + m[3].replace(/\?.*$/, "");
     }
     return url;
   }
@@ -85,7 +93,14 @@
     if (!zipUrl) return Promise.reject(new Error("Zip havolasi bo'sh."));
 
     if (!packCache[zipUrl]) {
-      packCache[zipUrl] = Promise.all([loadJsZip(), fetch(zipUrl)])
+      var fetching = fetch(zipUrl).catch(function () {
+        throw new Error(
+          "Zip havolasiga ulanib bo'lmadi. Havola GitHub'dagi faylning raw.githubusercontent.com " +
+            "manzili (yoki saytingizning o'z manzili) bo'lishi va fayl ochiq (public) repoda turishi kerak.",
+        );
+      });
+
+      packCache[zipUrl] = Promise.all([loadJsZip(), fetching])
         .then(function (r) {
           var res = r[1];
           if (!res.ok) throw new Error("Zip yuklanmadi (" + res.status + "). Havolani tekshiring.");
@@ -272,7 +287,51 @@
      Variantlar: shu zip'dagi boshqa rasmlar nomlaridan 3 tasi */
   var DEFAULT_QUESTION = "Rasmda nima tasvirlangan?";
 
-  function buildQuestions(zipUrl, files, questionText) {
+  /* Savol matni viktorina tiliga qarab */
+  var QUESTION_BY_LANG = {
+    ko: "이것은 무엇입니까?",
+    en: "What is this?",
+    ru: "Что это?",
+    uz: "Rasmda nima tasvirlangan?",
+  };
+
+  /* Javob nomlaridagi yozuv turiga qarab til: Hangul -> ko, Kirill -> ru, Lotin -> en */
+  function detectLang(labels) {
+    var hangul = 0, cyr = 0, latin = 0;
+    (labels || []).forEach(function (l) {
+      String(l || "").split("").forEach(function (ch) {
+        if (/[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/.test(ch)) hangul++;
+        else if (/[\u0400-\u04FF]/.test(ch)) cyr++;
+        else if (/[A-Za-z]/.test(ch)) latin++;
+      });
+    });
+    if (hangul >= cyr && hangul >= latin && hangul > 0) return "ko";
+    if (cyr >= latin && cyr > 0) return "ru";
+    return latin > 0 ? "en" : "uz";
+  }
+
+  /*
+   * Allaqachon SAQLANGAN rasmli savollar uchun: matn eski standart
+   * ("Rasmda nima tasvirlangan?") bo'lsa va javoblar koreys/rus yozuvida
+   * bo'lsa, savol shu tilda ko'rsatiladi (qayta saqlash shart emas).
+   */
+  function localizeQuestion(item) {
+    item = item || {};
+    var q = String(item.q != null ? item.q : item.question != null ? item.question : "").trim();
+    if (!item.img) return q;
+    if (q && q !== DEFAULT_QUESTION) return q;
+    var labels = [item.a != null ? item.a : item.answer].concat(item.wrongAnswers || []);
+    var lang = detectLang(labels);
+    if (lang === "ko" || lang === "ru") return QUESTION_BY_LANG[lang];
+    return q || DEFAULT_QUESTION;
+  }
+
+  function questionTextFor(labels, lang) {
+    if (!lang || lang === "auto") lang = detectLang(labels);
+    return QUESTION_BY_LANG[lang] || DEFAULT_QUESTION;
+  }
+
+  function buildQuestions(zipUrl, files, lang) {
     var labels = [];
     var seenLabels = {};
     var items = [];
@@ -284,6 +343,8 @@
       labels.push(f.label);
       items.push(f);
     });
+
+    var questionText = questionTextFor(labels, lang);
 
     return items.map(function (f) {
       var others = labels.filter(function (l) {
@@ -297,7 +358,7 @@
         others[j] = t;
       }
       return {
-        q: questionText || DEFAULT_QUESTION,
+        q: questionText,
         a: f.label,
         wrongAnswers: others.slice(0, 3),
         img: makeRef(zipUrl, f.file),
@@ -316,5 +377,8 @@
     setBefore: setBefore,
     buildQuestions: buildQuestions,
     DEFAULT_QUESTION: DEFAULT_QUESTION,
+    detectLang: detectLang,
+    questionTextFor: questionTextFor,
+    localizeQuestion: localizeQuestion,
   };
 })();

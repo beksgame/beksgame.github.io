@@ -1864,7 +1864,7 @@ async function syncSharedTopics(topicsToSync) {
   try {
     const batch = writeBatch(db);
 
-    const ownerName = auth.currentUser?.displayName || "Noma'lum";
+    const ownerName = ownerNameNow();
 
     list.forEach((t) => {
       if (!t.id) return;
@@ -1883,6 +1883,40 @@ async function syncSharedTopics(topicsToSync) {
     await batch.commit();
   } catch (e) {
     console.warn("sharedTopics sync:", e);
+  }
+}
+
+/*
+ * SAVOL KARTASI EGASI NOMI: displayName bo'sh bo'lsa "Noma'lum"
+ * chiqib qolardi. Endi zanjir: displayName -> users/{uid}.displayName
+ * -> e-pochta nomi -> "Noma'lum".
+ */
+let ownerProfileName = "";
+
+function ownerNameNow() {
+  const u = auth.currentUser;
+
+  return (
+    String(u?.displayName || "").trim() ||
+    ownerProfileName ||
+    (u?.email ? String(u.email).split("@")[0] : "") ||
+    "Noma'lum"
+  );
+}
+
+async function loadOwnerProfileName() {
+  try {
+    if (!db || !currentUserUid) return;
+
+    const snap = await getDoc(doc(db, "users", currentUserUid));
+
+    const d = snap.exists() ? snap.data() : {};
+
+    const n = String(d.displayName || d.name || "").trim();
+
+    if (n) ownerProfileName = n;
+  } catch (e) {
+    console.warn("Profil nomini o'qib bo'lmadi:", e);
   }
 }
 
@@ -2284,14 +2318,14 @@ function applyExcelFileToTopic(topic, file) {
  * Savol — rasm, to'g'ri javob — fayl nomi (olma.jpg -> "Olma"),
  * qolgan 3 ta variant — shu zip'dagi boshqa rasmlar nomlari.
  */
-async function applyZipPackToTopic(topic, zipUrl) {
+async function applyZipPackToTopic(topic, zipUrl, lang = "auto") {
   if (!window.BeksImagePack) {
     throw new Error("Rasmli paket moduli yuklanmadi. Sahifani yangilang.");
   }
 
   const pack = await BeksImagePack.loadPack(zipUrl);
 
-  const items = BeksImagePack.buildQuestions(zipUrl, pack.files);
+  const items = BeksImagePack.buildQuestions(zipUrl, pack.files, lang);
 
   if (items.length < 4) {
     throw new Error(
@@ -2454,7 +2488,7 @@ async function saveQuestionCard() {
       await applyExcelFileToTopic(topic, file);
     } else if (zipUrl) {
       try {
-        await applyZipPackToTopic(topic, zipUrl);
+        await applyZipPackToTopic(topic, zipUrl, $("qcZipLang")?.value || "auto");
       } catch (zipErr) {
         console.warn("Rasmli paket xatosi:", zipErr);
 
@@ -3604,7 +3638,7 @@ async function confirmOpenRoom() {
     .map((item) => {
       const correctAnswer = String(item.a ?? item.answer ?? "").trim();
 
-      const qText = String(item.q ?? item.question ?? "").trim();
+      const qText = itemQuestionText(item).trim();
 
       const options = buildAnswerOptions(correctAnswer, item);
 
@@ -4357,7 +4391,7 @@ async function swapRoomTopic(topic) {
     .map((item) => {
       const correctAnswer = String(item.a ?? item.answer ?? "").trim();
 
-      const qText = String(item.q ?? item.question ?? "").trim();
+      const qText = itemQuestionText(item).trim();
 
       const options = buildAnswerOptions(correctAnswer, item);
 
@@ -5524,7 +5558,7 @@ function renderDuelSide(side, item) {
 
   if (!qBox || !optBox) return;
 
-  qBox.textContent = item.q ?? item.question ?? "";
+  qBox.textContent = itemQuestionText(item);
 
   /*
    * Rasmli savol: rasm shu tomonning yuqorisida (sarlavha tagida)
@@ -5534,6 +5568,8 @@ function renderDuelSide(side, item) {
   window.BeksImagePack?.setBefore(qBox, item.img || "");
 
   qBox.closest(".duelSide")?.classList.toggle("hasImg", !!item.img);
+
+  qBox.closest(".duelSide")?.querySelector(":scope > .duelRevealWord")?.remove();
 
   const correct = duelRound[side].correct;
 
@@ -5656,7 +5692,28 @@ function resolveDuelSide(side, isCorrect, timedOut) {
 
   updateDuelStatsUI();
 
-  setTimeout(() => advanceDuelSide(side), 1000);
+  /* To'g'ri javob so'zi katta shriftda (o'qib ulgurish uchun biroz uzoqroq) */
+  showDuelRevealWord(side, duelRound[side].correct);
+
+  setTimeout(() => advanceDuelSide(side), 1300);
+}
+
+function showDuelRevealWord(side, text) {
+  const optBox = $(side === "a" ? "duelAAnswers" : "duelBAnswers");
+
+  if (!optBox || !optBox.parentNode) return;
+
+  let el = optBox.parentNode.querySelector(":scope > .duelRevealWord");
+
+  if (!el) {
+    el = document.createElement("div");
+
+    el.className = "duelRevealWord";
+
+    optBox.parentNode.insertBefore(el, optBox.nextSibling);
+  }
+
+  el.textContent = String(text ?? "").trim();
 }
 
 function advanceDuelSide(side) {
@@ -5691,6 +5748,8 @@ function clearDuelSideUI(side) {
   if (optBox) optBox.innerHTML = "";
 
   if (qBox) {
+    qBox.closest(".duelSide")?.querySelector(":scope > .duelRevealWord")?.remove();
+
     window.BeksImagePack?.setBefore(qBox, "");
     qBox.closest(".duelSide")?.classList.remove("hasImg");
   }
@@ -6388,6 +6447,15 @@ function updateTurnIndicator() {
   el.innerHTML = cardsHtml;
 }
 
+/* Savol matni (rasmli savolda — viktorina tiliga moslangan) */
+function itemQuestionText(item) {
+  if (window.BeksImagePack && item?.img) {
+    return BeksImagePack.localizeQuestion(item);
+  }
+
+  return String(item?.q ?? item?.question ?? "");
+}
+
 function openQ(cell, item, score) {
   if (!item) {
     return;
@@ -6422,7 +6490,7 @@ function openQ(cell, item, score) {
 
   gameInProgress = true;
 
-  let questionText = String(item.q ?? item.question ?? "");
+  let questionText = itemQuestionText(item);
 
   /*
    * ESKI TIZIM O'CHIRILDI: ilgari savol matni
@@ -6478,6 +6546,8 @@ function openQ(cell, item, score) {
   $("modal")?.classList.toggle("hasImageQ", !!item.img);
 
   $("aText")?.classList.add("hidden");
+
+  setRevealWord("");
 
   /*
    * Savol obyekti (item) ham uzatiladi — shunda Excel'dagi
@@ -6664,9 +6734,45 @@ function handleTimeExpired() {
     a.textContent = "❌ Xato";
 
     a.classList.remove("hidden");
+
+    setRevealWord(currentCorrectText());
   }
 
   setTimeout(() => finishCurrentQuestionAndAdvance(), 2000);
+}
+
+/*
+ * TO'G'RI JAVOB — katta shriftda (hamma rejimda). Savol modalida
+ * variantlar tagida chiqadi, yangi savol ochilganda yashiriladi.
+ */
+function setRevealWord(text) {
+  let el = $("revealWord");
+
+  if (!el) {
+    const anchor = $("aText");
+
+    if (!anchor || !anchor.parentNode) return;
+
+    el = document.createElement("div");
+
+    el.id = "revealWord";
+
+    el.className = "revealWord hidden";
+
+    anchor.parentNode.insertBefore(el, anchor);
+  }
+
+  const t = String(text ?? "").trim();
+
+  el.textContent = t;
+
+  el.classList.toggle("hidden", !t);
+}
+
+function currentCorrectText() {
+  const it = currentQuestionItem;
+
+  return String(it?.a ?? it?.answer ?? "").trim();
 }
 
 function showAnswerResult(isCorrect, points, team) {
@@ -6680,6 +6786,8 @@ function showAnswerResult(isCorrect, points, team) {
     : "❌ Xato";
 
   a.classList.remove("hidden");
+
+  setRevealWord(currentCorrectText());
 }
 
 function finishCurrentQuestionAndAdvance() {
@@ -6740,9 +6848,11 @@ function showAnswer() {
   const a = $("aText");
 
   if (a) {
-    a.textContent = `💡 To‘g‘ri javob: ${correct}`;
+    a.textContent = "💡 To‘g‘ri javob";
 
     a.classList.remove("hidden");
+
+    setRevealWord(correct);
   }
 }
 
@@ -7620,7 +7730,7 @@ function getRoomPickerTopics() {
    * qolmasin deb, joriy hisob egasining ismini
    * to'g'ridan-to'g'ri shu yerda qo'yamiz.
    */
-  const myName = auth.currentUser?.displayName || "Siz";
+  const myName = ownerNameNow();
 
   const own = rawOwn.map((t) => ({
     ...t,
@@ -8717,7 +8827,9 @@ onAuthStateChanged(auth, async (user) => {
      * await qilinmaydi. Avval yetim (o'chirilgan, lekin
      * umumiy ro'yxatda qolib ketgan) nusxalar tozalanadi.
      */
-    pruneOrphanSharedTopics().finally(() => syncSharedTopics());
+    loadOwnerProfileName()
+      .then(() => pruneOrphanSharedTopics())
+      .finally(() => syncSharedTopics());
 
     /*
      * Tashlab ketilgan (host tomonidan yopilmagan)
