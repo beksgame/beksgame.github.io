@@ -890,3 +890,15 @@ input:focus,select:focus,textarea:focus{
 /* Eyebrow (kichik sarlavha) — och rejimda kontrast yetarli bo'lsin */
 :root:not([data-theme="dark"]) .eyebrow{ color:#d63f27 !important; }
 :root:not([data-theme="dark"]) .questionTop .eyebrow{ color:var(--purple) !important; }
+
+/* ==========================================================
+   INDEX: "Gap tuzish" kartasi (sentence.html'ga havola)
+========================================================== */
+a.sentenceModeBtn,
+.sentenceModeBtn{
+  background:var(--gold) !important;
+  color:#fff !important;
+  text-decoration:none;
+  box-sizing:border-box;
+}
+.sentenceModeBtn:hover{ filter:brightness(1.06); }

@@ -1,0 +1,443 @@
+/* ==========================================================
+   GAP TUZISH (sentence.html) — uslublar
+   Ranglar beks-theme.css'dagi o'zgaruvchilardan (och/qorong'i rejim)
+========================================================== */
+.hidden{ display:none !important; }
+
+html,body.sentencePage{
+  margin:0;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Manrope","Segoe UI",Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;
+}
+body.sentencePage{ min-height:100vh; min-height:100dvh; }
+
+.sgKo,
+.sgChip,
+.sgSlot,
+.sgOverlayBox .sgKoLine{
+  font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo","Nanum Gothic","Manrope",sans-serif;
+}
+
+/* ---------- SOZLAMALAR ---------- */
+.sgSetup{
+  min-height:100vh;
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:calc(56px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px));
+  box-sizing:border-box;
+}
+.sgCard{
+  width:min(560px,100%);
+  background:var(--panel);
+  border:1px solid var(--line2);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:26px 24px 22px;
+  box-sizing:border-box;
+}
+.sgBack{
+  display:inline-block;
+  margin-bottom:10px;
+  color:var(--muted);
+  font-weight:800;
+  font-size:13px;
+  text-decoration:none;
+}
+.sgBack:hover{ color:var(--text); }
+.sgTitle{ margin:0 0 6px; font-size:clamp(26px,5vw,34px); font-family:"Sora","Manrope",sans-serif; }
+.sgLead{ margin:0 0 18px; color:var(--muted); font-size:14px; line-height:1.55; font-weight:600; }
+.sgLead b{ color:var(--text); }
+
+.sgModeTabs{ display:flex; gap:8px; margin-bottom:14px; }
+.sgTab{
+  flex:1;
+  min-height:46px;
+  border:1.5px solid var(--line2);
+  background:var(--panel2);
+  color:var(--text);
+  font:inherit;
+  font-weight:900;
+  font-size:15px;
+  border-radius:10px;
+  cursor:pointer;
+}
+.sgTab.is-active{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+}
+
+.sgRow{ margin-bottom:12px; min-width:0; }
+.sgRow label{ display:block; margin-bottom:5px; font-size:12px; font-weight:800; color:var(--muted); letter-spacing:.02em; }
+.sgRow input[type="text"],
+.sgRow select,
+.sgDetails textarea{
+  width:100%;
+  box-sizing:border-box;
+  min-height:44px;
+  padding:9px 12px;
+  background:var(--panel2);
+  color:var(--text);
+  font:inherit;
+  font-size:15px;
+}
+.sgDetails textarea{ min-height:110px; resize:vertical; font-family:"Noto Sans KR","Manrope",sans-serif; }
+.sgGrid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.sgDetails{
+  margin:4px 0 12px;
+  padding:10px 12px;
+  border:1px dashed var(--line2);
+  border-radius:10px;
+  background:var(--panel2);
+}
+.sgDetails summary{ cursor:pointer; font-weight:800; font-size:14px; }
+.sgHint{ margin:8px 0; color:var(--muted); font-size:12.5px; line-height:1.5; font-weight:600; }
+.sgHint code{ background:var(--line); padding:1px 5px; border-radius:4px; font-size:12px; }
+.sgCheck{ display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; font-weight:700; }
+
+.sgError{ margin:0 0 10px; color:var(--red); font-weight:800; font-size:13px; }
+
+.sgStart{
+  width:100%;
+  min-height:54px;
+  border:none;
+  border-radius:12px;
+  background:var(--green);
+  color:#fff;
+  font:inherit;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 10px 22px rgba(31,168,126,.28);
+}
+.sgStart:hover{ filter:brightness(1.05); }
+.sgBestLine{ margin-top:12px; text-align:center; color:var(--muted); font-size:13px; font-weight:700; min-height:18px; }
+
+/* ---------- O'YIN EKRANI ---------- */
+.sgGame{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  height:100dvh;
+  padding:calc(8px + env(safe-area-inset-top,0px)) 10px calc(10px + env(safe-area-inset-bottom,0px));
+  box-sizing:border-box;
+  gap:8px;
+  position:relative;
+}
+
+.sgBar{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  padding:8px 12px;
+  background:var(--panel);
+  border:1px solid var(--line2);
+  border-radius:12px;
+  box-shadow:var(--shadowSmall);
+}
+.sgBarLeft,.sgBarRight{ display:flex; align-items:center; gap:8px; }
+.sgRound{
+  font-weight:900;
+  font-size:15px;
+  padding:5px 10px;
+  border-radius:8px;
+  background:var(--pal1-bg);
+  color:var(--pal1-fg);
+  white-space:nowrap;
+}
+.sgTimer{
+  font-weight:900;
+  font-size:17px;
+  padding:5px 10px;
+  border-radius:8px;
+  background:var(--pal5-bg);
+  color:var(--pal5-fg);
+  min-width:70px;
+  text-align:center;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.sgTimer.low{ background:var(--pal3-bg); color:var(--pal3-fg); }
+.sgIconBtn{
+  width:36px;
+  height:36px;
+  border-radius:8px;
+  border:1px solid var(--line2);
+  background:var(--panel2);
+  color:var(--text);
+  font-size:15px;
+  cursor:pointer;
+}
+.sgHintBox{ min-width:0; text-align:center; }
+.sgHintLabel{ display:block; font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.sgHintText{ font-size:clamp(14px,2.2vw,22px); font-weight:800; line-height:1.25; overflow-wrap:anywhere; }
+
+.sgArenas{
+  flex:1 1 0;
+  min-height:0;
+  display:flex;
+  gap:10px;
+}
+.sgArenas.duo{ flex-direction:row; }
+@media (max-aspect-ratio:1/1){
+  .sgArenas.duo{ flex-direction:column; }
+}
+
+.lane{
+  flex:1 1 0;
+  min-width:0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:8px;
+  background:var(--panel);
+  border:1px solid var(--line2);
+  border-radius:12px;
+  box-sizing:border-box;
+}
+.lane.lane0.duoLane{ border-color:rgba(58,120,255,.45); }
+.lane.lane1.duoLane{ border-color:rgba(210,80,190,.45); }
+
+.laneHead{ display:flex; justify-content:space-between; align-items:center; gap:8px; font-weight:900; font-size:14px; }
+.laneName{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.laneStat{ display:flex; gap:10px; align-items:center; font-size:13px; white-space:nowrap; }
+.laneWins{ color:var(--pal5-fg); }
+
+.field{
+  position:relative;
+  flex:1 1 0;
+  min-height:110px;
+  overflow:hidden;
+  border-radius:10px;
+  background:
+    linear-gradient(180deg,rgba(58,120,255,.07),transparent 40%),
+    var(--panel2);
+  border:1px solid var(--line);
+  touch-action:manipulation;
+}
+
+.sgChip{
+  position:absolute;
+  left:0;
+  top:0;
+  padding:9px 15px;
+  min-height:44px;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  font-size:clamp(17px,2.2vw,26px);
+  font-weight:900;
+  white-space:nowrap;
+  border-radius:12px;
+  background:var(--panel);
+  border:2px solid var(--blue);
+  color:var(--text);
+  box-shadow:var(--shadowSmall);
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:manipulation;
+  will-change:transform;
+}
+.sgChip.c0{ border-color:var(--pal1-fg); }
+.sgChip.c1{ border-color:var(--pal2-fg); }
+.sgChip.c2{ border-color:var(--pal3-fg); }
+.sgChip.c3{ border-color:var(--pal5-fg); }
+.sgChip.c4{ border-color:var(--pal6-fg); }
+.sgChip.bad{ background:rgba(255,95,69,.28); animation:sgShake .28s; }
+@keyframes sgShake{
+  0%,100%{ margin-left:0; }
+  25%{ margin-left:-6px; }
+  75%{ margin-left:6px; }
+}
+
+.freezeMsg{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,95,69,.22);
+  color:var(--red);
+  font-size:22px;
+  font-weight:900;
+  z-index:5;
+  pointer-events:none;
+}
+.lane.frozen .freezeMsg{ display:flex; }
+
+.penaltyPop{
+  position:absolute;
+  right:10px;
+  top:8px;
+  z-index:6;
+  font-weight:900;
+  color:var(--red);
+  animation:sgFloat .9s forwards;
+  pointer-events:none;
+}
+@keyframes sgFloat{ from{ opacity:1; transform:translateY(0); } to{ opacity:0; transform:translateY(-22px); } }
+
+.tray{
+  flex:0 0 auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  padding:6px;
+  min-height:52px;
+  align-content:flex-start;
+  border-radius:10px;
+  background:var(--panel2);
+  border:1px solid var(--line);
+}
+.sgSlot{
+  min-width:44px;
+  height:38px;
+  padding:0 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:9px;
+  border:2px dashed var(--line2);
+  font-size:clamp(15px,1.9vw,21px);
+  font-weight:900;
+  box-sizing:border-box;
+}
+.sgSlot.filled{
+  border-style:solid;
+  border-color:var(--green);
+  background:rgba(31,168,126,.14);
+  color:var(--text);
+  animation:sgPop .22s;
+}
+.sgSlot.next{ border-color:var(--blue); }
+@keyframes sgPop{ from{ transform:scale(.7); } to{ transform:scale(1); } }
+
+/* ---------- OVERLAY (sanoq / raund natijasi) ---------- */
+.sgOverlay{
+  position:absolute;
+  inset:0;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(12,18,32,.55);
+  backdrop-filter:blur(3px);
+}
+.sgOverlayBox{
+  width:min(560px,100%);
+  max-height:90%;
+  overflow:auto;
+  padding:22px 20px;
+  text-align:center;
+  background:var(--panel);
+  color:var(--text);
+  border-radius:16px;
+  border:1px solid var(--line2);
+  box-shadow:var(--shadow);
+}
+.sgCount{ font-size:clamp(70px,16vw,140px); font-weight:900; line-height:1; color:var(--blue); animation:sgPop .35s; }
+.sgOverlayTitle{ font-size:clamp(20px,3.4vw,28px); font-weight:900; margin:0 0 8px; }
+.sgKoLine{ font-size:clamp(22px,4vw,34px); font-weight:900; margin:10px 0 4px; overflow-wrap:anywhere; }
+.sgUzLine{ color:var(--muted); font-weight:700; margin:0 0 12px; }
+.sgMeta{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; font-weight:800; font-size:14px; margin-top:6px; }
+.sgNextBtn{ margin-top:14px; }
+
+/* ---------- YAKUNIY OYNA ---------- */
+.sgModal{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(1,5,12,.78);
+}
+.sgModal canvas{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.sgModalBox{
+  position:relative;
+  z-index:2;
+  width:min(520px,100%);
+  max-height:94vh;
+  overflow:auto;
+  box-sizing:border-box;
+  padding:28px 22px 20px;
+  text-align:center;
+  background:var(--panel);
+  color:var(--text);
+  border-radius:18px;
+  border:1px solid var(--line2);
+  box-shadow:var(--shadow);
+}
+.sgModalX{
+  position:absolute;
+  top:10px;
+  right:12px;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid var(--line2);
+  background:var(--panel2);
+  color:var(--text);
+  font-size:24px;
+  line-height:1;
+  cursor:pointer;
+}
+.sgCrown{ font-size:54px; line-height:1; }
+.sgWinTitle{ margin:6px 0 2px; font-size:clamp(24px,5vw,34px); font-weight:900; font-family:"Sora","Manrope",sans-serif; }
+.sgWinName{ font-size:clamp(28px,7vw,44px); font-weight:900; color:var(--gold); margin:2px 0 10px; overflow-wrap:anywhere; }
+.sgStars{ font-size:34px; letter-spacing:4px; margin:4px 0 8px; }
+.sgStatTable{ width:100%; border-collapse:collapse; margin:12px 0 4px; font-size:14px; font-weight:700; }
+.sgStatTable th,.sgStatTable td{ padding:7px 6px; border-bottom:1px solid var(--line); }
+.sgStatTable th{ color:var(--muted); font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:900; }
+.sgStatTable td:first-child,.sgStatTable th:first-child{ text-align:left; }
+.sgStatTable tr.win td{ color:var(--green); }
+.sgBigScore{ font-size:clamp(40px,10vw,60px); font-weight:900; color:var(--blue); line-height:1.1; }
+.sgNewRecord{ display:inline-block; margin:6px 0; padding:4px 12px; border-radius:20px; background:rgba(184,144,31,.18); color:var(--gold); font-weight:900; }
+
+.sgModalActions{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:16px; }
+.sgBtn{
+  min-height:44px;
+  padding:0 16px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  border:1.5px solid var(--line2);
+  background:var(--panel2);
+  color:var(--text);
+  font:inherit;
+  font-weight:900;
+  font-size:14px;
+  text-decoration:none;
+  cursor:pointer;
+}
+.sgBtnPrimary{ background:var(--green); border-color:var(--green); color:#fff; }
+
+/* ---------- TELEFON ---------- */
+@media (max-width:720px){
+  .sgBar{
+    grid-template-columns:auto minmax(0,1fr);
+    grid-template-areas:"left right" "hint hint";
+    padding-right:12px;
+  }
+  .sgBarLeft{ grid-area:left; }
+  .sgBarRight{ grid-area:right; justify-self:end; }
+  .sgHintBox{ grid-area:hint; }
+  .sgGrid2{ grid-template-columns:1fr; }
+  .lane{ padding:6px; }
+}
+@media (max-height:460px){
+  .sgBar{ grid-template-columns:auto minmax(0,1fr) auto; grid-template-areas:none; }
+  .sgBarLeft,.sgBarRight,.sgHintBox{ grid-area:auto; }
+}

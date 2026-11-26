@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gap tuzish — Beks Game</title>
+  <meta name="description" content="Beks Game — Gap tuzish: tepadan tushayotgan koreys so'zlaridan to'g'ri tartibda gap tuzing. Yakka yoki ikki kishi bellashuvi, tezlik g'olibni aniqlaydi.">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg?v=2026-10-21">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@500;700;900&display=swap">
+  <link rel="stylesheet" href="beks-theme.css?v=10">
+  <link rel="stylesheet" href="sentence.css?v=1">
+  <script src="i18n.js?v=4"></script>
+</head>
+<body class="sentencePage">
+
+  <!-- ============ SOZLAMALAR ============ -->
+  <main class="sgSetup" id="setupScreen">
+    <div class="sgCard">
+      <a class="sgBack" href="index.html">← Bosh sahifa</a>
+
+      <h1 class="sgTitle">📝 Gap tuzish</h1>
+      <p class="sgLead">
+        Koreys so'zlari tepadan tushib keladi. Ularni <b>to'g'ri tartibda</b> bosib,
+        o'zbekcha tarjimaga mos gap tuzing. Qancha tez tuzsangiz — shuncha ko'p ball.
+      </p>
+
+      <div class="sgModeTabs" role="tablist">
+        <button type="button" class="sgTab is-active" data-mode="solo">👤 Yakka</button>
+        <button type="button" class="sgTab" data-mode="duo">👥 Ikki kishi</button>
+      </div>
+
+      <div class="sgRow" id="nameRow1">
+        <label for="name1" id="name1Label">Ismingiz (ixtiyoriy)</label>
+        <input type="text" id="name1" maxlength="20" placeholder="Ism" autocomplete="off">
+      </div>
+      <div class="sgRow hidden" id="nameRow2">
+        <label for="name2">2-o'yinchi (ixtiyoriy)</label>
+        <input type="text" id="name2" maxlength="20" placeholder="Ism" autocomplete="off">
+      </div>
+
+      <div class="sgGrid2">
+        <div class="sgRow">
+          <label for="levelSel">Qiyinlik</label>
+          <select id="levelSel">
+            <option value="mix">Aralash</option>
+            <option value="easy">Oson (3–4 so'z)</option>
+            <option value="medium">O'rta (5 so'z)</option>
+            <option value="hard">Qiyin (6+ so'z)</option>
+          </select>
+        </div>
+        <div class="sgRow">
+          <label for="roundsSel">Raundlar</label>
+          <select id="roundsSel">
+            <option value="3">3 ta gap</option>
+            <option value="5" selected>5 ta gap</option>
+            <option value="7">7 ta gap</option>
+            <option value="10">10 ta gap</option>
+          </select>
+        </div>
+      </div>
+
+      <details class="sgDetails">
+        <summary>➕ O'z jumlalaringizni qo'shish</summary>
+        <p class="sgHint">
+          Har bir qatorga bittadan: <code>koreyscha gap | o'zbekcha tarjima</code>
+          (kamida 3 ta so'z, so'zlar bo'shliq bilan ajratilgan). Brauzeringizda saqlanadi.
+        </p>
+        <textarea id="customText" rows="5" placeholder="저는 사과를 먹습니다 | Men olma yeyman"></textarea>
+        <label class="sgCheck"><input type="checkbox" id="onlyCustom"> Faqat o'zim kiritgan jumlalardan o'ynash</label>
+        <p class="sgHint" id="customInfo"></p>
+      </details>
+
+      <p class="sgError hidden" id="setupError"></p>
+
+      <button type="button" class="sgStart" id="startBtn">▶ O'yinni boshlash</button>
+
+      <div class="sgBestLine" id="bestLine"></div>
+    </div>
+  </main>
+
+  <!-- ============ O'YIN ============ -->
+  <main class="sgGame hidden" id="gameScreen">
+    <header class="sgBar">
+      <div class="sgBarLeft">
+        <span class="sgRound" id="roundInfo">1/5</span>
+        <button type="button" class="sgIconBtn" id="soundBtn" title="Ovoz" aria-label="Ovoz">🔊</button>
+      </div>
+      <div class="sgHintBox">
+        <span class="sgHintLabel">Tarjima</span>
+        <div class="sgHintText" id="hintUz"></div>
+      </div>
+      <div class="sgBarRight">
+        <span class="sgTimer" id="timerInfo">⏱ —</span>
+        <button type="button" class="sgIconBtn" id="quitBtn" title="Chiqish" aria-label="Chiqish">✕</button>
+      </div>
+    </header>
+
+    <div class="sgArenas" id="arenas"></div>
+
+    <div class="sgOverlay hidden" id="overlay">
+      <div class="sgOverlayBox" id="overlayBox"></div>
+    </div>
+  </main>
+
+  <!-- ============ YAKUNIY NATIJA ============ -->
+  <div class="sgModal hidden" id="finalModal">
+    <canvas id="confetti"></canvas>
+    <div class="sgModalBox">
+      <button type="button" class="sgModalX" id="finalClose" aria-label="Yopish" title="Yopish">×</button>
+      <div id="finalBody"></div>
+      <div class="sgModalActions">
+        <button type="button" class="sgBtn sgBtnPrimary" id="againBtn">🔁 Qayta o'ynash</button>
+        <button type="button" class="sgBtn" id="setupBtn">⚙️ Sozlamalar</button>
+        <a class="sgBtn" href="index.html">🏠 Bosh sahifa</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="sentences-data.js?v=1"></script>
+  <script src="sentence.js?v=1"></script>
+</body>
+</html>

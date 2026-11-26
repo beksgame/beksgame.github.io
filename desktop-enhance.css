@@ -314,7 +314,7 @@
     backdrop-filter:none;
     padding:0;
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(4,minmax(0,1fr));
     gap:16px;
   }
   #gamesWrap .gamesCardTitle{
@@ -339,6 +339,7 @@
   #gamesWrap .gameModeBlock.room-mode{ border-color:rgba(42,125,255,.28); }
   #gamesWrap .gameModeBlock.duel-mode{ border-color:rgba(210,80,190,.28); }
   #gamesWrap .gameModeBlock.play-mode{ border-color:rgba(31,168,126,.28); }
+  #gamesWrap .gameModeBlock.sentenceBlock{ border-color:rgba(184,144,31,.35); }
   #gamesWrap .gameModeBtn{
     display:inline-block;
     width:auto;
@@ -386,4 +387,8 @@
     font-size:11px;font-weight:800;letter-spacing:.2px;
     color:var(--muted);
   }
+}
+/* 4 ta o'yin kartasi: o'rtacha ekranlarda 2x2 */
+@media (min-width:1024px) and (max-width:1279px){
+  #gamesWrap .gamesCard{ grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
